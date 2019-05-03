@@ -1,4 +1,4 @@
-# content-service
+# authoring-server
 Java EE OLI Content Service Maven project
 
 This includes:
