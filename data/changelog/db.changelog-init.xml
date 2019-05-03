@@ -1,0 +1,286 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+    <changeSet author="rgachuhi@cmu.edu" id="init-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="asset"/>
+            </not>
+        </preConditions>
+        <createTable tableName="asset" >
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime"/>
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="usecase" type="VARCHAR(50)"/>
+            <column name="content_package_guid" type="VARCHAR(255)"/>
+            <column name="file_guid" type="VARCHAR(255)"/>
+            <column name="resource_guid" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="asset"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="content_package"/>
+            </not>
+        </preConditions>
+        <createTable tableName="content_package">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="build_status" type="VARCHAR(255)"/>
+            <column name="date_created" type="datetime"/>
+            <column name="date_updated" type="datetime"/>
+            <column name="description" type="LONGTEXT"/>
+            <column name="package_json" type="JSON"/>
+            <column name="errors" type="JSON"/>
+            <column name="expiration" type="datetime"/>
+            <column name="id" type="VARCHAR(50)"/>
+            <column name="language" type="VARCHAR(15)"/>
+            <column name="metadata" type="JSON"/>
+            <column name="more_link" type="VARCHAR(225)"/>
+            <column name="options" type="JSON"/>
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="source_location" type="VARCHAR(255)"/>
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(125)"/>
+            <column name="version" type="VARCHAR(25)"/>
+            <column name="visible" type="BIT(1)"/>
+            <column name="volume_location" type="VARCHAR(255)"/>
+            <column name="web_content_volume" type="VARCHAR(255)"/>
+            <column name="file_guid" type="VARCHAR(255)"/>
+            <column name="icon_guid" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="content_package"/>
+        <addUniqueConstraint columnNames="id, version" constraintName="uk_id_version" tableName="content_package"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="edge"/>
+            </not>
+        </preConditions>
+        <createTable tableName="edge">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="broken" type="BIT(1)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime"/>
+            <column name="date_updated" type="datetime"/>
+            <column name="destinationId" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="purpose" type="VARCHAR(255)"/>
+            <column name="relationship" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="sourceId" type="VARCHAR(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="content_package_guid" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="edge"/>
+
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="file_node"/>
+            </not>
+        </preConditions>
+        <createTable tableName="file_node">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime"/>
+            <column name="date_updated" type="datetime"/>
+            <column name="file_size" type="BIGINT"/>
+            <column name="mime_type" type="VARCHAR(75)"/>
+            <column name="pathFrom" type="VARCHAR(500)"/>
+            <column name="pathTo" type="VARCHAR(500)"/>
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="volume_location" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="file_node"/>
+        <createIndex indexName="volume_location_idx" tableName="file_node">
+            <column name="volume_location"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="resource"/>
+            </not>
+        </preConditions>
+        <createTable tableName="resource">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="build_status" type="VARCHAR(255)"/>
+            <column name="date_created" type="datetime"/>
+            <column name="date_updated" type="datetime"/>
+            <column name="errors" type="JSON"/>
+            <column name="id" type="VARCHAR(255)"/>
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="short_title" type="VARCHAR(30)"/>
+            <column name="title" type="VARCHAR(255)"/>
+            <column name="type" type="VARCHAR(50)"/>
+            <column name="content_package_guid" type="VARCHAR(255)"/>
+            <column name="file_guid" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="resource"/>
+        <createIndex indexName="resource_id_idx" tableName="resource">
+            <column name="id"/>
+        </createIndex>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="web_content"/>
+            </not>
+        </preConditions>
+        <createTable tableName="web_content">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="date_created" type="datetime"/>
+            <column name="date_updated" type="datetime"/>
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="type" type="VARCHAR(125)"/>
+            <column name="content_package_guid" type="VARCHAR(255)"/>
+            <column name="file_guid" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="web_content"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_asset_file_guid_file_node_guid" foreignKeyTableName="asset"/>
+            </not>
+        </preConditions>
+        <dropAllForeignKeyConstraints baseTableName="asset"/>
+        <createIndex indexName="fk_asset_file_guid_file_node_guid" tableName="asset">
+            <column name="file_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="file_guid" baseTableName="asset" constraintName="fk_asset_file_guid_file_node_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="file_node"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-8">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_edge_content_package_guid_content_package_guid" foreignKeyTableName="edge"/>
+            </not>
+        </preConditions>
+        <dropAllForeignKeyConstraints baseTableName="edge"/>
+        <createIndex indexName="fk_edge_content_package_guid_content_package_guid" tableName="edge">
+            <column name="content_package_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="content_package_guid" baseTableName="edge" constraintName="fk_edge_content_package_guid_content_package_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="content_package"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-9">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_resource_content_package_guid" foreignKeyTableName="resource"/>
+            </not>
+        </preConditions>
+        <dropAllForeignKeyConstraints baseTableName="resource"/>
+        <createIndex indexName="fk_resource_content_package_guid" tableName="resource">
+            <column name="content_package_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="content_package_guid" baseTableName="resource" constraintName="fk_resource_content_package_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="content_package"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-10">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_asset_content_package_guid" foreignKeyTableName="asset"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_asset_content_package_guid" tableName="asset">
+            <column name="content_package_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="content_package_guid" baseTableName="asset" constraintName="fk_asset_content_package_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="content_package"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-11">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_content_package_file_guid" foreignKeyTableName="content_package"/>
+            </not>
+        </preConditions>
+        <dropAllForeignKeyConstraints baseTableName="content_package"/>
+        <createIndex indexName="fk_content_package_file_guid" tableName="content_package">
+            <column name="file_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="file_guid" baseTableName="content_package" constraintName="fk_content_package_file_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="file_node"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_content_package_icon_guid_web_content_guid" foreignKeyTableName="content_package"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_content_package_icon_guid_web_content_guid" tableName="content_package">
+            <column name="icon_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="icon_guid" baseTableName="content_package" constraintName="fk_content_package_icon_guid_web_content_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="web_content"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-13">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_web_content_file_guid_file_node_guid" foreignKeyTableName="web_content"/>
+            </not>
+        </preConditions>
+        <dropAllForeignKeyConstraints baseTableName="web_content"/>
+        <createIndex indexName="fk_web_content_file_guid_file_node_guid" tableName="web_content">
+            <column name="file_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="file_guid" baseTableName="web_content" constraintName="fk_web_content_file_guid_file_node_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="file_node"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-14">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_web_content_content_package_guid_content_package_guid" foreignKeyTableName="web_content"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_web_content_content_package_guid_content_package_guid" tableName="web_content">
+            <column name="content_package_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="content_package_guid" baseTableName="web_content" constraintName="fk_web_content_content_package_guid_content_package_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="content_package"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-15">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_asset_resource_guid_resource_guid" foreignKeyTableName="asset"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_asset_resource_guid_resource_guid" tableName="asset">
+            <column name="resource_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="resource_guid" baseTableName="asset" constraintName="fk_asset_resource_guid_resource_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="resource"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="init-16">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_resource_file_guid_file_node_guid" foreignKeyTableName="resource"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_resource_file_guid_file_node_guid" tableName="resource">
+            <column name="file_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="file_guid" baseTableName="resource" constraintName="fk_resource_file_guid_file_node_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="file_node"/>
+    </changeSet>
+</databaseChangeLog>

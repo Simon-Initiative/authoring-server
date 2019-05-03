@@ -1,0 +1,71 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" 
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+    xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <!-- Analytics dataset table -->
+    <changeSet author="zacharybluedorn@cmu.edu" id="0.25.0-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataset" />
+            </not>
+        </preConditions>
+        <createTable tableName="dataset">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="package_guid" type="VARCHAR(32)"/>
+            <column name="dataset_blob_guid" type="VARCHAR(32)"/>
+            <column name="dataset_status" type="VARCHAR(64)"/>
+            <column name="date_created" type="datetime"/>
+            <column name="date_completed" type="datetime"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="dataset"/>
+
+        <addForeignKeyConstraint baseColumnNames="package_guid" baseTableName="dataset" constraintName="fk_dataset_content_package_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="content_package"/>
+        <createIndex indexName="fk_dataset_content_package_guid" tableName="dataset">
+            <column name="package_guid"/>
+        </createIndex>
+
+        <addForeignKeyConstraint baseColumnNames="dataset_blob_guid" baseTableName="dataset" constraintName="fk_dataset_dataset_blob_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="dataset_blob"/>
+        <createIndex indexName="fk_dataset_dataset_blob_guid" tableName="dataset">
+            <column name="dataset_blob_guid"/>
+        </createIndex>
+    </changeSet>
+
+    <!-- Dataset blob table -->
+    <changeSet author="zacharybluedorn@cmu.edu" id="0.25.0-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="dataset_blob" />
+            </not>
+        </preConditions>
+        <createTable tableName="dataset_blob">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="json_payload" type="JSON"/>
+            <column name="date_created" type="datetime"/>
+            <column name="date_updated" type="datetime"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="dataset_blob"/>
+    </changeSet>
+
+    <!-- FK reference from content package to active dataset -->
+    <changeSet author="zacharybluedorn@cmu.edu" id="0.25.0-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="content_package" columnName="active_dataset_guid"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="content_package">
+            <column name="active_dataset_guid" type="VARCHAR(32)"/>
+        </addColumn>
+        <addForeignKeyConstraint baseColumnNames="active_dataset_guid" baseTableName="content_package" constraintName="fk_content_package_dataset_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="dataset"/>
+        <createIndex indexName="fk_content_package_dataset_guid" tableName="content_package">
+            <column name="active_dataset_guid"/>
+        </createIndex>
+    </changeSet>
+
+</databaseChangeLog>

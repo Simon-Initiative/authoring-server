@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE organization PUBLIC "-//Carnegie Mellon University//DTD Content Organization Simple 2.2//EN" "http://oli.web.cmu.edu/dtd/oli_content_organization_simple_2_2.dtd">
+<organization id="exp-theme-proof-2.0_default" version="1.0">
+	<title>Theme Proof</title>
+	<description>Empty project template for authoring OLI content packages.</description>
+	<audience>This organization is intended as an example for OLI content authors.</audience>
+	<sequences>
+		<sequence id="Theme-Start" category="content">
+			<title>Theme Proof</title>
+			<module id="assessment">
+				<title>Assessment Tests</title>
+				<section id="test_cases">
+					<title>Beta 1</title>
+					<item>
+						<resourceref idref="hints_testing"/>
+					</item>
+				</section>
+			</module>
+			<module id="intro">
+				<title>Some Examples</title>
+				<section id="created">
+					<title>Created Examples</title>
+					<item>
+						<resourceref idref="text_content_1"/>
+					</item>
+					<item>
+						<resourceref idref="text_content_1"/>
+					</item>
+					<item>
+						<resourceref idref="core_purpose_types"/>
+					</item>
+					<item>
+						<resourceref idref="other_purpose_types"/>
+					</item>
+					<item>
+						<resourceref idref="complex_composite"/>
+					</item>
+					<item>
+						<resourceref idref="youtube"/>
+					</item>
+					<item>
+						<resourceref idref="threeWidget"/>
+					</item>
+					<item>
+						<resourceref idref="allformulas-sort-uniq"/>
+					</item>
+				</section>
+				<section id="actual">
+					<title>Actual (Representative) Course Pages</title>
+
+					<item>
+						<resourceref idref="_u2_m06_couples02"/>
+					</item>
+					<item>
+						<resourceref idref="_u2_m07_loads01"/>
+					</item>
+					<item>
+						<resourceref idref="dig7"/>
+					</item>
+					<item>
+						<resourceref idref="_u4_m04_behavior_of_proportion2"/>
+					</item>
+					<item>
+						<resourceref idref="lecture_5"/>
+					</item>
+					<item>
+						<resourceref idref="_u5_m2_01"/>
+					</item>
+					<item purpose="learnbydoing">
+						<resourceref idref="_u5_m2_ex1"/>
+					</item>
+				</section>
+			</module>
+		</sequence>
+	</sequences>
+</organization>

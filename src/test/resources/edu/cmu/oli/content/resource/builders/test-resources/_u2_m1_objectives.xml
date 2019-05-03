@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE objectives PUBLIC "-//Carnegie Mellon University//DTD Learning Objectives 2.0//EN" "http://oli.web.cmu.edu/dtd/oli_learning_objectives_2_0.dtd">
+<?xml-stylesheet type="text/css" href="http://oli.web.cmu.edu/authoring/oxy-author/oli_inline_assessment_1_1.css"?>
+<objectives id="_u2_m1_objectives">
+    <title>Couples</title>
+    <objective id="recognize_forces_rotation" category="domain_specific">Recognize that at least two forces are necessary to cause only a
+        rotation of a body, and utilize the concept of a couple and its symbol to
+        represent combinations of forces that produce zero net force (only a tendency to
+        rotate). </objective>
+    <objective id="determine_moment_couple" category="domain_specific">Determine the moment of the couple from the forces producing it or
+        balancing it, and recognize that a set of forces that can be represented as couples
+        produces the same net moment about all points regardless of
+        where they are applied. </objective>
+    <objective id="recognize_multi-force_interaction" category="domain_specific">Recognize circumstances in which a multi-force interaction between
+        two bodies can be represented as a couple, and determine the moment of the couple
+        from what the couple interaction is balancing. </objective>
+
+</objectives>

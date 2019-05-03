@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE workbook_page PUBLIC "-//Carnegie Mellon University//DTD Workbook Page MathML 3.8//EN" "http://oli.web.cmu.edu/dtd/oli_workbook_page_mathml_3_8.dtd">
+<workbook_page id="kinetics2_productB">
+	<head>
+		<title>Enzyme Kinetics</title>
+		<short_title>Kinetics</short_title>
+
+		<objectives>
+			<objective id="obj29">Give the general reaction for an enzyme catalyzed reaction.</objective>
+			<objective id="obj30">Describe what primarily happens before, and after, the formation
+				of the ES complex.</objective>
+			<objective id="obj31">Graphical representation: Be able to graph the relationship,
+				between each of the following, for an enzyme catalyzed reaction: 1) velocity and
+				substrate concentration; 2) velocity and enzyme concentration; 3) velocity and pH;
+				4) velocity and temperature. </objective>
+			<objective id="obj32">Effect of inhibitors: Be able to explain, and graphically
+				illustrate, the effect of each inhibitor type on a velocity vs substrate
+				concentration graph: a) non-competitive and b) competitive. </objective>
+			<objective id="obj33">Be able to define activation energy and the effect an enzyme has
+				upon it.</objective>
+		</objectives>
+	</head>
+	<body>
+		<section>
+			<title>The Rate of Product Formation.</title>
+			<body>
+				<p>In the last section, the action of an enzyme was described as taking place in two
+					parts. The first part involves the binding of substrate to enzyme in a
+					reversible equilibrium as modeled in the way of ligand binding. The second part
+					involves the conversion of the [ES] complex to product and the release of the
+					product from the enzyme. This step represents the catalysis step in the enzyme
+					catalyzed reaction. These parts are illustrated in the overall reaction below:</p>
+				<p>
+					<formula>E + S &lt;=&gt; [ES] -&gt; P + E </formula>
+				</p>
+				<p>The rate, or velocity (v), of the reaction is usually determined by measuring the
+					amount of product (P) produced/unit time:</p>
+				<p>
+					<formula>v=dP/dt</formula>
+				</p>
+				<p>The dependence of the reaction velocity on the kinetics of substrate binding,
+					substrate release, and conversion to product is difficult to calculate under all
+					conditions. However, if <em>steady-state</em> conditions are assumed then a very
+					simple relationship can be found. Steady-state conditions imply that during the
+					measurement the concentrations of the various species, e.g. [ES] ,do not change.
+					Under steady-state conditions the following equation describes the relationship
+					between the measured rate (v) of the reaction and the initial concentration of substrate
+					(S) and the concentration of the enzyme. This equation is the Michaelis
+					Menton-Briggs Haldane equation.</p>
+
+				<formula>
+					<m:math display="block">
+						<m:mrow>
+							<m:mi>v</m:mi>
+							<m:mo stretchy="false">(</m:mo>
+							<m:msub>
+								<m:mi>E</m:mi>
+								<m:mi>t</m:mi>
+							</m:msub>
+							<m:mo>,</m:mo>
+							<m:mo stretchy="false">[</m:mo>
+							<m:mi>S</m:mi>
+							<m:mo stretchy="false">]</m:mo>
+							<m:mo stretchy="false">)</m:mo>
+							<m:mo>=</m:mo>
+							<m:msub>
+								<m:mi>k</m:mi>
+								<m:mi mathvariant="italic">CAT</m:mi>
+							</m:msub>
+							<m:msub>
+								<m:mi>E</m:mi>
+								<m:mi>t</m:mi>
+							</m:msub>
+							<m:mfrac>
+								<m:mrow>
+									<m:mo stretchy="false">[</m:mo>
+									<m:mi>S</m:mi>
+									<m:mo stretchy="false">]</m:mo>
+								</m:mrow>
+								<m:mrow>
+									<m:msub>
+										<m:mi>K</m:mi>
+										<m:mi>M</m:mi>
+									</m:msub>
+									<m:mo>+</m:mo>
+									<m:mo stretchy="false">[</m:mo>
+									<m:mi>S</m:mi>
+									<m:mo stretchy="false">]</m:mo>
+								</m:mrow>
+							</m:mfrac>
+							<m:mo>=</m:mo>
+							<m:msub>
+								<m:mi>V</m:mi>
+								<m:mi mathvariant="italic">MAX</m:mi>
+							</m:msub>
+							<m:mfrac>
+								<m:mrow>
+									<m:mo stretchy="false">[</m:mo>
+									<m:mi>S</m:mi>
+									<m:mo stretchy="false">]</m:mo>
+								</m:mrow>
+								<m:mrow>
+									<m:msub>
+										<m:mi>K</m:mi>
+										<m:mi>M</m:mi>
+									</m:msub>
+									<m:mo>+</m:mo>
+									<m:mo stretchy="false">[</m:mo>
+									<m:mi>S</m:mi>
+									<m:mo stretchy="false">]</m:mo>
+								</m:mrow>
+							</m:mfrac>
+						</m:mrow>
+					</m:math>
+				</formula>
+
+				<p> In this equation, k<sub>cat</sub> is the rate at which the [ES] complex decays
+					to product. V<sub>max</sub> is k<sub>cat</sub> multiplied by the <em>total</em>
+					amount of enzyme, E<sub>t</sub>. It is therefore the maximum velocity at which
+					the reaction can occur under a fixed enzyme concentration. K<sub>m</sub> is also
+					a constant that reflects the affinity of the enzyme for the substrate and is an
+					approximation of the dissociation equilibrium constant. Both k<sub>cat</sub> and
+						K<sub>m</sub> depend on the particular enzyme and substrate.</p>
+				<!--<p>
+					<em>Based on your understanding of dissociation and the concept of equilibrium,
+						would you expect a high affinity of enzyme for substrate to be reflected by
+						a high or low K<sub>m</sub> value? </em>
+				</p>-->
+				<p> This equation can also be represented graphically by the hyperbolic curve
+					illustrated below. This curve can be dissected into two parts: a region at the
+					beginning where the velocity of the reaction increases proportionately with the
+					amount of substrate present initially in the reaction, and the later region of
+					the curve, at high substrate concentration, where the rate of the reaction is
+					independent of the substrate concentration. This latter region defines
+					saturation of the enzyme by substrate and the velocity approaches the value of
+						V<sub>max</sub>.</p>
+				<image src="../../../webcontent/amino_acids/mm_ekin.jpg">
+					<caption>Effect of substrate concentration on enzyme velocity.</caption>
+				</image>
+				<!--<p>
+					<em> If the K<sub>M</sub> were equal to the substrate concentration, what would
+					the velocity of the enzyme catalyzed reaction be?</em> [Hint: substitute
+					K<sub>m</sub> for [S] in the above equation.] </p>
+					<p>
+					<em>Over what substrate concentration (region of the curve) would you expect a
+					cell to operate in order to have control over the rate (velocity) of an
+					enzyme in the cell?</em>
+					</p>-->
+				<wb:inline idref="kinetics_response" purpose="didigetthis"/>
+				<p>Enzyme catalysis is affected by many factors including substrate and
+					enzyme concentrations, pH, temperature, and the presence of inhibitors.
+					The learn-by-doing on this page will explore the effect of substrate
+					concentration.  The following page will explore the effect of enzyme
+					concentration, pH, temperature, and inhibitors on the velocity of the
+					enzyme catalyzed reaction.
+				</p>
+			</body>
+		</section>
+		<section>
+			<title/>
+			<body>
+				<p/>
+			</body>
+		</section>
+
+		<section>
+			<title>Enzyme Catalysis</title>
+			<body>
+				<p>This simulation will demonstrate the effect of substrate on the reaction
+				velocity.</p>
+				<!--
+				<activity idref="catalysis_lbd" purpose="learnbydoing"/>
+				-->
+				
+				<activity idref="p-l-productB-lbd" purpose="learnbydoing">
+					<image src="../../../webcontent/poster_frames/catalysis.jpg" alt="Enzyme Catalysis" height="120" width="133" />
+				</activity>
+				<!--This is the mini-tutor version-->
+				<wb:inline idref="enzymeKinetics_digit" purpose="didigetthis"/>
+			</body>
+		</section>
+		<wb:inline idref="inline_digit_Enzymes_2" purpose="didigetthis"/>
+	</body>
+</workbook_page>

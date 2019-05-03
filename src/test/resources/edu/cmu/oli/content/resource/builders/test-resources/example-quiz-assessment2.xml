@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE assessment PUBLIC "-//Carnegie Mellon University//DTD Assessment 2.4//EN" "http://oli.cmu.edu/dtd/oli_assessment_2_4.dtd">
+<assessment xmlns:cmd="http://oli.web.cmu.edu/content/metadata/2.1/" id="pre_quiz" max_attempts="1">
+  <title>Pre Quiz (Ungraded)</title>
+  <fill_in_the_blank id="q2_prequiz">
+    <body>
+      <p>
+        1
+        2
+        3</p>
+      <p>4
+        5
+        6</p>
+      <codeblock syntax="xml">7
+        8
+        9</codeblock>
+      <codeblock syntax="xml">
+        10
+        11
+        12</codeblock>
+    </body>
+    <input id="i1" shuffle="false">
+      <choice value="high_correlation">high
+        
+        
+        correlation</choice>
+      <choice value="medium_correlation">medium correlation</choice>
+      <choice value="low_correlation">low
+        correlation</choice>
+      <choice value="no_correlation">no
+correlation</choice>
+    </input>
+    <input id="i2" shuffle="false">
+      <choice value="strong_relationship">strong relationship</choice>
+      <choice value="moderate_relationship">moderate relationship</choice>
+      <choice value="weak_relationship">weak relationship</choice>
+      <choice value="no_relationship">no relationship</choice>
+    </input>
+    <input id="i3" shuffle="false">
+      <choice value="high">high</choice>
+      <choice value="low">low</choice>
+    </input>
+    <input id="i4" shuffle="false">
+      <choice value="high">
+      high</choice>
+      <choice value="low">low</choice>
+    </input>
+    <part id="p1">
+      <response input="i1" match="high_correlation" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+      <response input="i1" match="medium_correlation" score="10">
+        <feedback>Correct.</feedback>
+      </response>
+      <response input="i1" match="low_correlation" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+      <response input="i1" match="no_correlation" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+    </part>
+    <part id="p2">
+      <response input="i2" match="strong_relationship" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+      <response input="i2" match="moderate_relationship" score="10">
+        <feedback>Correct.</feedback>
+      </response>
+      <response input="i2" match="weak_relationship" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+      <response input="i2" match="no_relationship" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+    </part>
+    <part id="p3">
+      <response input="i3" match="high" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+      <response input="i3" match="low" score="10">
+        <feedback>Correct.</feedback>
+      </response>
+    </part>
+    <part id="p4">
+      <response input="i4" match="high" score="10">
+        <feedback>Correct.</feedback>
+      </response>
+      <response input="i4" match="low" score="0">
+        <feedback>Incorrect.</feedback>
+      </response>
+    </part>
+  </fill_in_the_blank>
+</assessment>

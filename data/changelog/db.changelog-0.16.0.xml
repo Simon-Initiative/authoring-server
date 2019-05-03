@@ -1,0 +1,60 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<!--
+  ~ The MIT License (MIT)
+  ~
+  ~ Copyright (c) 2018. Carnegie Mellon University
+  ~
+  ~ Permission is hereby granted, free of charge, to any person obtaining a copy
+  ~ of this software and associated documentation files (the "Software"), to deal
+  ~ in the Software without restriction, including without limitation the rights
+  ~ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  ~ copies of the Software, and to permit persons to whom the Software is
+  ~ furnished to do so, subject to the following conditions:
+  ~
+  ~ The above copyright notice and this permission notice shall be included in all
+  ~ copies or substantial portions of the Software.
+  ~
+  ~ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  ~ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  ~ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  ~ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  ~ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  ~ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+  ~ SOFTWARE.
+  -->
+
+<databaseChangeLog xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="rgachuhi@cmu.edu" id="0.16.0-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="content_package" columnName="editable"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="content_package">
+            <column name="editable" type="BIT(1)" defaultValue="1">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.16.0-2">
+        <preConditions onFail="MARK_RAN" onError="CONTINUE">
+            <sqlCheck expectedResult="YES">
+                SELECT is_Nullable
+                FROM INFORMATION_SCHEMA.COLUMNS
+                WHERE table_name='content_package'
+                AND column_name='visible'
+            </sqlCheck>
+        </preConditions>
+        <addDefaultValue tableName="content_package" columnName="visible" defaultValueBoolean="TRUE"/>
+        <sql>
+            UPDATE `content_db`.`content_package` SET `visible`=TRUE WHERE `visible` is NULL;
+        </sql>
+        <addNotNullConstraint columnDataType="BIT(1)" columnName="visible" tableName="content_package"/>
+    </changeSet>
+
+</databaseChangeLog>

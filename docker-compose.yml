@@ -1,0 +1,29 @@
+version: '3.1'
+services:
+  content:
+    build: .
+    image: oli/content-service
+    container_name: content-service
+    env_file: service.envs
+    environment:
+      - MYSQL_ADDRESS=mysql-content
+    ports:
+      - "8110:8080"
+      - "9110:9990"
+    volumes:
+      - /oli_content/course_content_xml:/oli/course_content_xml
+      - /oli/service_config:/oli/service_config
+    networks:
+      - content-tier
+    depends_on:
+      - mysql-content
+  mysql-content:
+    image: mysql
+    env_file: service.envs
+    ports:
+      - "33382:3306"
+    networks:
+      - content-tier
+networks:
+  content-tier:
+    driver: bridge

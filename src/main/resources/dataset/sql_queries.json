@@ -1,0 +1,9 @@
+{
+  "createDataset": {
+    "byPart": "dataset/create-by-part.sql",
+    "byResource": "dataset/create-by-resource.sql",
+    "bySkill": "dataset/create-by-skill.sql"
+  },
+  "findPackages": "dataset/find-packages.sql",
+  "findSections": "dataset/find-sections.sql"
+}

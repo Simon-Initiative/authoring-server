@@ -1,0 +1,57 @@
+<?xml version="1.1" encoding="utf-8"?>
+<!DOCTYPE workbook_page
+  PUBLIC "-//Carnegie Mellon University//DTD Workbook Page MathML 3.8//EN" "http://oli.web.cmu.edu/dtd/oli_workbook_page_mathml_3_8.dtd">
+<workbook_page xmlns:theme="http://oli.web.cmu.edu/presentation/"
+               xmlns:wb="http://oli.web.cmu.edu/activity/workbook/"
+               xmlns:pref="http://oli.web.cmu.edu/preferences/"
+               id="sent_meta_completeness">
+   <head>
+      <title>Completeness</title>
+   </head>
+   <body>
+      <p>The results we have obtained so far can be used to prove one of the most significant connections between the syntactic notion of proofs or derivations, and the semantic notion of a tautology or logical truth. That connection was established in 1918 by Hilbert and his collaborator Bernays, as well as in 1921, quite independently, by Emil Post. So, what exactly is this connection?</p>
+      <p>When discussing the <em>validity</em> of our proof rules, we argued that any formula obtained from premises by a proof is as a matter of fact a logical consequence of the premises: if <m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#966;</m:mi>
+         </m:math> can be proved outright, without premises, then it is a tautology. So, the existence of a syntactic configuration (a proof) guarantees a semantic fact. This is called the <term>soundness</term> of the derivation system.</p>
+      <p>Now we want to establish the converse of this mathematical fact&#8212;that if a formula must also be a tautology&#8212;now, stop for a moment and think about why this must be the case.</p>
+
+      <p><m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+         <m:mrow>
+            <m:mo fence="true" class="openparen">(</m:mo>
+            <m:msub>
+               <m:mi>&#968;</m:mi>
+               <m:mi>1</m:mi>
+            </m:msub>
+            <m:mo class="breakbefore" lspace="thickmathspace" rspace="thickmathspace">&#38;</m:mo>
+            <m:mrow>
+               <m:mo fence="true" class="openparen">(</m:mo>
+               <m:mi>...</m:mi>
+               <m:mo class="breakbefore" lspace="thickmathspace" rspace="thickmathspace">&#38;</m:mo>
+               <m:msub>
+                  <m:mi>&#968;</m:mi>
+                  <m:mi mathvariant="italic">n</m:mi>
+               </m:msub>
+               <m:mo fence="true" class="closeparen">)</m:mo>
+            </m:mrow>
+            <m:mo fence="true" class="closeparen">)</m:mo>
+         </m:mrow>
+      </m:math></p>
+      <p>The connection between <term>logical truth</term> and <term>provability</term> can be generalized to a connection between <term>logical consequence</term> and <term>derivability</term> as follows, where <m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#915;</m:mi>
+         </m:math> is a set or collection of formulae:</p>
+      <formula style="block">&#8216;<m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#966;</m:mi>
+         </m:math> is a logical consequence of <m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#915;</m:mi>
+         </m:math>&#8217; if and only if &#8216;<m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#966;</m:mi>
+         </m:math> is derivable from <m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#915;</m:mi>
+         </m:math>&#8217;</formula>
+      <p>That can be done very easily as long as the set <m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#915;</m:mi>
+         </m:math> of formulae is finite. (Recall the notion of <em style="italic">conditional analogue</em> and use the above considerations; formulate the necessary steps for yourself.) In case <m:math xmlns:m="http://www.w3.org/1998/Math/MathML">
+            <m:mi>&#915;</m:mi>
+         </m:math> is infinite, the considerations are more complex; for a detailed proof of this general form of the theorem, we suggest looking as section 1.5 of Dirk van Dalen's book, <em style="bold">Logic and Structure</em> (Fourth edition), Springer, 2004.</p>
+   </body>
+</workbook_page>

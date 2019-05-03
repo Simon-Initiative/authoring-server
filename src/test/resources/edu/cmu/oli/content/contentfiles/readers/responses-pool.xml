@@ -1,0 +1,94 @@
+<?xml version="1.0"?>
+<!--<!DOCTYPE pool PUBLIC "-//Carnegie Mellon University//DTD Assessment Pool 2.0//EN" "http://oli.web.cmu.edu/dtd/oli_assessment_2_0.dtd">-->
+<!DOCTYPE pool PUBLIC "-//Carnegie Mellon University//DTD Assessment Pool MathML 2.0//EN" "http://oli.web.cmu.edu/dtd/oli_assessment_2_0.dtd">
+<pool id="a2_HS-AA-structures-pool">
+      <title>Pool: HS-AA-structures-pool</title>
+      <multiple_choice id="a2_HS-AA-structures-pool_aa-01" select="single">
+            <!--LO:biochem_aa_proteins_aa_structure_LO -->
+            
+            <body>The following amino acid when included in a protein is characterized as<image
+                        src="../../webcontent/quiz_images/phe.jpg"/></body>
+            <input>
+                  <choice value="Res1"> polar charged</choice>
+                  <choice value="Res2"> polar neutral</choice>
+                  <choice value="Res3"> non-polar hydrophobic</choice>
+            </input>
+            <responses>
+                  <response match="Res1" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+                  <response match="Res2" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+                  <response match="Res3" score="10">
+                        <feedback> Correct.</feedback>
+                  </response>
+            </responses>
+      </multiple_choice>
+      <multiple_choice id="a2_HS-AA-structures-pool_aa-02" select="single">
+            <!--LO:biochem_aa_proteins_aa_structure_LO -->
+            
+            <body>The following amino acid when found in a protein is characterized as<image
+                        src="../../webcontent/quiz_images/glu.jpg"/></body>
+            <input shuffle="no">
+                  <choice value="Res1"> polar charged</choice>
+                  <choice value="Res2"> polar neutral</choice>
+                  <choice value="Res3"> non-polar hydrophobic</choice>
+            </input>
+            <responses>
+                  <response match="Res1" score="10">
+                        <feedback> Correct.</feedback>
+                  </response>
+                  <response match="Res2" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+                  <response match="Res3" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+            </responses>
+      </multiple_choice>
+      <multiple_choice id="a2_HS-AA-structures-pool_aa-03" select="single">
+            <!--LO:biochem_aa_proteins_aa_structure_LO -->
+            
+            <body>The following amino acid when found in a protein is characterized as<image
+                        src="../../webcontent/quiz_images/cys.jpg"/></body>
+            <input shuffle="no">
+                  <choice value="Res1"> polar charged</choice>
+                  <choice value="Res2"> polar neutral</choice>
+                  <choice value="Res3"> non-polar hydrophobic</choice>
+            </input>
+            <responses>
+                  <response match="Res1" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+                  <response match="Res2" score="10">
+                        <feedback> Correct.</feedback>
+                  </response>
+                  <response match="Res3" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+            </responses>
+      </multiple_choice>
+      <multiple_choice id="a2_HS-AA-structures-pool_aa-04" select="single">
+            <!--LO:biochem_aa_proteins_aa_structure_LO -->
+            
+            <body>The following amino acid when found in a protein is characterized as<image
+                        src="../../webcontent/quiz_images/Ala-charged.jpg"/></body>
+            <input shuffle="no">
+                  <choice value="Res1"> polar charged</choice>
+                  <choice value="Res2"> polar neutral</choice>
+                  <choice value="Res3"> non-polar hydrophobic</choice>
+            </input>
+            <responses>
+                  <response match="Res1" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+                  <response match="Res2" score="0">
+                        <feedback> Incorrect.</feedback>
+                  </response>
+                  <response match="Res3" score="10">
+                        <feedback> Correct.</feedback>
+                  </response>
+            </responses>
+      </multiple_choice>
+</pool>

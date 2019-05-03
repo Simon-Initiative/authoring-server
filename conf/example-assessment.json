@@ -1,0 +1,1098 @@
+{
+  "assessment": {
+    "@id": "learn-2cdf2d2ed542",
+    "#array": [
+      {
+        "title": {
+          "#text": "Learn by Doing Operations (Addition \u0026 Subtraction)"
+        }
+      },
+      {
+        "page": {
+          "@id": "i440c548fde34c33a97ea41fde1ce458",
+          "#array": [
+            {
+              "title": {
+                "#text": "Learn by Doing Operations (Addition \u0026 Subtraction)"
+              }
+            },
+            {
+              "content": {
+                "@available": "always",
+                "p": {
+                  "@id": "b6a5ad09d57a49a2bfc62f570c7182a7",
+                  "#array": [
+                    {
+                      "#text": " Consider the following matrices "
+                    },
+                    {
+                      "em": {
+                        "@style": "emphasis",
+                        "#text": "E\u003d"
+                      }
+                    },
+                    {
+                      "#math": "\u003cm:math xmlns:m\u003d\"http://www.w3.org/1998/Math/MathML\" display\u003d\"inline\" overflow\u003d\"scroll\"\u003e\u003cm:mrow\u003e\u003cm:mo\u003e[\u003c/m:mo\u003e\u003cm:mtable\u003e\u003cm:mtr\u003e\u003cm:mtd\u003e\u003cm:mn\u003e4\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e-2\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e6\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003c/m:mtr\u003e\u003cm:mtr\u003e\u003cm:mtd\u003e\u003cm:mn\u003e5\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e3\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e-8\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003c/m:mtr\u003e\u003c/m:mtable\u003e\u003cm:mo\u003e]\u003c/m:mo\u003e\u003c/m:mrow\u003e\u003c/m:math\u003e"
+                    },
+                    {
+                      "em": {
+                        "@style": "emphasis",
+                        "#text": "F\u003d"
+                      }
+                    },
+                    {
+                      "#math": "\u003cm:math xmlns:m\u003d\"http://www.w3.org/1998/Math/MathML\" display\u003d\"inline\" overflow\u003d\"scroll\"\u003e\u003cm:mrow\u003e\u003cm:mo\u003e[\u003c/m:mo\u003e\u003cm:mtable\u003e\u003cm:mtr\u003e\u003cm:mtd\u003e\u003cm:mn\u003e2\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e-7\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e12\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003c/m:mtr\u003e\u003cm:mtr\u003e\u003cm:mtd\u003e\u003cm:mn\u003e-10\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e4\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003cm:mtd\u003e\u003cm:mn\u003e8\u003c/m:mn\u003e\u003c/m:mtd\u003e\u003c/m:mtr\u003e\u003c/m:mtable\u003e\u003cm:mo\u003e]\u003c/m:mo\u003e\u003c/m:mrow\u003e\u003c/m:math\u003e"
+                    },
+                    {
+                      "#text": " to answer the questions below. "
+                    }
+                  ]
+                }
+              }
+            },
+            {
+              "question": {
+                "@id": "learn2cdf2d2ed542_1a",
+                "#array": [
+                  {
+                    "body": {
+                      "#array": [
+                        {
+                          "p": {
+                            "@id": "bd407c8f363d468aa4c453826065c361",
+                            "#array": [
+                              {
+                                "#text": " Obtain "
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "e"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "11"
+                                  }
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "+ f"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "11\u003d"
+                                  }
+                                }
+                              },
+                              {
+                                "input_ref": {
+                                  "@input": "ia0dfc93521441b19ba6ba3287bf8273"
+                                }
+                              },
+                              {
+                                "#text": " FillInTheBlank "
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "p": {
+                            "@id": "ae685f2e1b344244b769d63c7c1c508b",
+                            "#array": [
+                              {
+                                "#text": " Obtain "
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "e"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "12"
+                                  }
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "+ f"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "12\u003ds"
+                                  }
+                                }
+                              },
+                              {
+                                "input_ref": {
+                                  "@input": "i922dacd4089a45cba20e5f2682fd6d0f"
+                                }
+                              },
+                              {
+                                "#text": " FillInTheBlank "
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "p": {
+                            "@id": "f995746fa05343fd8ad99b0b195d97db",
+                            "#array": [
+                              {
+                                "#text": " Obtain "
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "e"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "13"
+                                  }
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "+ f"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "13\u003d"
+                                  }
+                                }
+                              },
+                              {
+                                "input_ref": {
+                                  "@input": "i894a935bb6447f78f8939d8b512b3d1"
+                                }
+                              },
+                              {
+                                "#text": " FillInTheBlank "
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "p": {
+                            "@id": "c2b4ce6445b04366a6fd7cbe0db455d0",
+                            "#array": [
+                              {
+                                "#text": " Obtain "
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "e"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "21"
+                                  }
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "+ f"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "21\u003d"
+                                  }
+                                }
+                              },
+                              {
+                                "input_ref": {
+                                  "@input": "i922dacd4089a45cba20e5f2682fd6d0f"
+                                }
+                              },
+                              {
+                                "#text": " FillInTheBlank "
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "p": {
+                            "@id": "c609adafde514f84978283b44f94b194",
+                            "#array": [
+                              {
+                                "#text": " Obtain "
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "e"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "22"
+                                  }
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "+ f"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "22\u003d"
+                                  }
+                                }
+                              },
+                              {
+                                "input_ref": {
+                                  "@input": "f83e861ea8e84d129c86b4683774f48d"
+                                }
+                              },
+                              {
+                                "#text": " FillInTheBlank FillInTheBlank "
+                              }
+                            ]
+                          }
+                        },
+                        {
+                          "p": {
+                            "@id": "i76978cc745d4495824e927553d6c5f3",
+                            "#array": [
+                              {
+                                "#text": " Obtain "
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "e"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "23"
+                                  }
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "#text": "+ f"
+                                }
+                              },
+                              {
+                                "em": {
+                                  "@style": "bold",
+                                  "sub": {
+                                    "#text": "23\u003d"
+                                  }
+                                }
+                              },
+                              {
+                                "input_ref": {
+                                  "@input": "c0c569e3a72c4f998e2bfb5824740d84"
+                                }
+                              },
+                              {
+                                "#text": " FillInTheBlank FillInTheBlank "
+                              }
+                            ]
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fill_in_the_blank": {
+                      "@shuffle": "true",
+                      "@id": "ia0dfc93521441b19ba6ba3287bf8273",
+                      "@name": "",
+                      "#array": [
+                        {
+                          "choice": {
+                            "@value": "v307b57bd3898406087e48f0f98d4a791",
+                            "@color": "",
+                            "p": {
+                              "@id": "eacf89456e5e4dc1abe63982a69eea48",
+                              "#text": "6"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v9bd69afb49ab45619fd4d8f4819ec796",
+                            "@color": "",
+                            "p": {
+                              "@id": "b468403e78fc4fb5b9ab83674a60cbcd",
+                              "#text": "-9"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v3d6ab67dd14645c19f05b71f8e918194",
+                            "@color": "",
+                            "p": {
+                              "@id": "i5d089957087463e9e4bea45f8eb337d",
+                              "#text": "7"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v9d043d84831a4dfc9cffb5812c9c3bee",
+                            "@color": "",
+                            "p": {
+                              "@id": "bbe3c670510848f99498dca794b02493",
+                              "#text": "0"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fill_in_the_blank": {
+                      "@shuffle": "true",
+                      "@id": "ic65d6959e774880bcd517eb8768b606",
+                      "@name": "",
+                      "#array": [
+                        {
+                          "choice": {
+                            "@value": "dead747617b84d7aa40a8d34ab5648cb",
+                            "@color": "",
+                            "p": {
+                              "@id": "iec90a9c23ef4100a5ef3184e57c82fc",
+                              "#text": "-9"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v0fa4810ef6fb451aa1b0f36b0c02da21",
+                            "@color": "",
+                            "p": {
+                              "@id": "i99079a8ce4f40f7b744902e94322c0f",
+                              "#text": "-7"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v63105257491848f9bc8b9f38424fc189",
+                            "@color": "",
+                            "p": {
+                              "@id": "b43506362f824e6ea21c7b062c3b297b",
+                              "#text": "18"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v9df966cbabc94d4ea1f3254f0cb60ab7",
+                            "@color": "",
+                            "p": {
+                              "@id": "i69246a7e8184d9cbb1655d5bd425f20",
+                              "#text": "5"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fill_in_the_blank": {
+                      "@shuffle": "true",
+                      "@id": "i894a935bb6447f78f8939d8b512b3d1",
+                      "@name": "",
+                      "#array": [
+                        {
+                          "choice": {
+                            "@value": "v8a1f6a55dc254df59c5d33e9994d2689",
+                            "@color": "",
+                            "p": {
+                              "@id": "cc8a32ef89f54ea3ad556476abc53796",
+                              "#text": "18"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v3a85e61196eb4bb2a583de131e9460dc",
+                            "@color": "",
+                            "p": {
+                              "@id": "cf018e321bce49e9baa32a2b8b49f5c4",
+                              "#text": "16"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v6dafd52f046b4b1383903d70dc8dd6ff",
+                            "@color": "",
+                            "p": {
+                              "@id": "adf67f546b5240c3a2153aedde492e59",
+                              "#text": "5"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "a236a9a8a73d4ab6b395f6f2decf5c64",
+                            "@color": "",
+                            "p": {
+                              "@id": "ia1ffddf59c64fd58be80dc46cf89652",
+                              "#text": "7"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fill_in_the_blank": {
+                      "@shuffle": "true",
+                      "@id": "i22dacd4089a45cba20e5f2682fd6d0f",
+                      "@name": "",
+                      "#array": [
+                        {
+                          "choice": {
+                            "@value": "c465ce7e74a4415fb386892498547500",
+                            "@color": "",
+                            "p": {
+                              "@id": "e7c96247f0994d21b23d6a1d5f4f7473",
+                              "#text": "5"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v7f22539ee3ff4dbdb97bed040ccc2580",
+                            "@color": "",
+                            "p": {
+                              "@id": "i3cd7d5457884cf69efe578db187b919",
+                              "#text": "6"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v7f29203a3726422ebdf7420282abcb97",
+                            "@color": "",
+                            "p": {
+                              "@id": "cd7d22f8f0914abda54a347da17ad26b",
+                              "#text": "10"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v57bdcbe0819a4a3abf899c965a437c09",
+                            "@color": "",
+                            "p": {
+                              "@id": "ib39a698deb5423fa33ab6a5ff367f80",
+                              "#text": "18"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fill_in_the_blank": {
+                      "@shuffle": "true",
+                      "@id": "f83e861ea8e84d129c86b4683774f48d",
+                      "@name": "",
+                      "#array": [
+                        {
+                          "choice": {
+                            "@value": "v3ef8a095bb45422ebf8eee2b102bc08d",
+                            "@color": "",
+                            "p": {
+                              "@id": "eece3300e64f43bfa460f9dc312be0e9",
+                              "#text": "7"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v70ffcb068e974d62b73c625bf02d1d58",
+                            "@color": "",
+                            "p": {
+                              "@id": "i7b4a9b587cb48beaca9ce2d5792992a",
+                              "#text": "14"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v7241e5a79f11435894ab1d05f6d6c920",
+                            "@color": "",
+                            "p": {
+                              "@id": "ife3cbccbfc1410390bcde66df3c6039",
+                              "#text": "18"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v0584c4a139e643488359d3af4a63d2f6",
+                            "@color": "",
+                            "p": {
+                              "@id": "ff834a8b1c1d4b7698496e561630be2e",
+                              "#text": "-9"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "fill_in_the_blank": {
+                      "@shuffle": "true",
+                      "@id": "c0c569e3a72c4f998e2bfb5824740d84",
+                      "@name": "",
+                      "#array": [
+                        {
+                          "choice": {
+                            "@value": "d6bb90f7a93940f99182e6e7439e72a6",
+                            "@color": "",
+                            "p": {
+                              "@id": "i73fcfcf0db64c198223ad75745b1bbb",
+                              "#text": "0"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "b583a259b2fa4790a4dac96b2f27e83d",
+                            "@color": "",
+                            "p": {
+                              "@id": "i5018bccabde4e3196f8adc1c3120909",
+                              "#text": "2"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v8557cc5cf6b4450488c535b45cd5e0a4",
+                            "@color": "",
+                            "p": {
+                              "@id": "i4690a87137a416581b00c744d74a7c1",
+                              "#text": "5"
+                            }
+                          }
+                        },
+                        {
+                          "choice": {
+                            "@value": "v4631696fadf344f7af68116273368544",
+                            "@color": "",
+                            "p": {
+                              "@id": "i733409eccb94beb92c68d4d3ddea18c",
+                              "#text": "6"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "part": {
+                      "@id": "ia9a2044e674d4aa5a25e17f022aa7103",
+                      "#array": [
+                        {},
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v307b57bd3898406087e48f0f98d4a791",
+                            "@score": "1",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "ia1ef487343a4e6fb7bfe20d0d38871e",
+                                "#text": "Correct; Great job!"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v9bd69afb49ab45619fd4d8f4819ec796",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "cee6b65758654da88d39de4ee87f3568",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v3d6ab67dd14645c19f05b71f8e918194",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i1a0ee1863524a54a17278dff6a5b491",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v9d043d84831a4dfc9cffb5812c9c3bee",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i9ab47e2dd5d45c2863650468f1c205c",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "explanation": {
+                            "p": {
+                              "@id": "idc237f2ac294e95aeac5b4998a7101a"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "part": {
+                      "@id": "ief3ae458757b43e8acb4811723a4ada0",
+                      "#array": [
+                        {},
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "dead747617b84d7aa40a8d34ab5648cb",
+                            "@score": "1",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "ad4dae9b2e794e1585b585256d87e834",
+                                "#text": "Correct: Great job!"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v0fa4810ef6fb451aa1b0f36b0c02da21",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i88255af63eb493da9574e109863b20b",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v63105257491848f9bc8b9f38424fc189",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "if5e5c60aaf2493daf8fa14a018b58ad",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v9df966cbabc94d4ea1f3254f0cb60ab7",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "if9180b4177a49d8afa5ce72dab9ad43",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "explanation": {
+                            "p": {
+                              "@id": "i125c6906c3240cbb44c9d4042d92625"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "part": {
+                      "@id": "ib837e1b333d548db8f046b691b9b175a",
+                      "#array": [
+                        {},
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v8a1f6a55dc254df59c5d33e9994d2689",
+                            "@score": "1",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "ie42a326b198473cbef76a1a9c4faf90",
+                                "#text": "Correct; Great job!"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v3a85e61196eb4bb2a583de131e9460dc",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "a11e2c98d9654dccaa4c36c1ec50a61e",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v6dafd52f046b4b1383903d70dc8dd6ff",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "bdb99d78ceb047c1bb34659861869c46",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "a236a9a8a73d4ab6b395f6f2decf5c64",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "ib812adc6e1942f5aed2bdbe5aa3f264",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "explanation": {
+                            "p": {
+                              "@id": "cbd85d1567114730b32e974c3bdbef51"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "part": {
+                      "@id": "id47b763a5d1e4e1a94d11c8be80f0ced",
+                      "#array": [
+                        {},
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "c465ce7e74a4415fb386892498547500",
+                            "@score": "1",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "e3727d8b98ff46009ffe2183ed12f8d5",
+                                "#text": "Correct; Great job!"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v7f22539ee3ff4dbdb97bed040ccc2580",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i6cfe65a079247fab679c102cf0645b8",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v7f29203a3726422ebdf7420282abcb97",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "c906373cf4514b3c9fbfb95e15f778a3",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v57bdcbe0819a4a3abf899c965a437c09",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "ad35b95b61c34a1ea0545c9843afdd97",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "explanation": {
+                            "p": {
+                              "@id": "i8bb6d15043742efbc7cdb4816561b42"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "part": {
+                      "@id": "i26d987d122e2455699a14bf28363afa2",
+                      "#array": [
+                        {},
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v3ef8a095bb45422ebf8eee2b102bc08d",
+                            "@score": "1",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i3c8812600b84a4abeecaae808a627d7",
+                                "#text": "Correct; Great job!"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v70ffcb068e974d62b73c625bf02d1d58",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i24b8ab229bd4ab9a7fac8f6736164a5",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v7241e5a79f11435894ab1d05f6d6c920",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "eeee841bab624e908a9e9d0fe142ab7c",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v0584c4a139e643488359d3af4a63d2f6",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i0ee881bd71f419bbafc466beb77fcd5",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "explanation": {
+                            "p": {
+                              "@id": "b1e1afebe49f4652ba2a7e86e906e21b"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "part": {
+                      "@id": "icafd2e830de2486894c215342da1314c",
+                      "#array": [
+                        {},
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "d6bb90f7a93940f99182e6e7439e72a6",
+                            "@score": "1",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "i2e492baaee6442d94285a55f665fc4c",
+                                "#text": "Correct; Great job!"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "b583a259b2fa4790a4dac96b2f27e83d",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "d4a8ac020bce4566ab504cfab80b1e9e",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v8557cc5cf6b4450488c535b45cd5e0a4",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "ic09351b97484e88897c0595e57556cd",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "response": {
+                            "@input": "",
+                            "@match": "v4631696fadf344f7af68116273368544",
+                            "@score": "0",
+                            "@name": "",
+                            "feedback": {
+                              "@targets": "",
+                              "p": {
+                                "@id": "e95c87d871994169bd3b361491160e97",
+                                "#text": "Incorrect; Addition involves adding corresponding elements in matrix A and matrix B."
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "explanation": {
+                            "p": {
+                              "@id": "b256e67e2e254dc1b19e64c172f5cce7"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "explanation": {
+                      "p": {
+                        "@id": "ae5182e0f9aa4d1e82d4f178ecf38345"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

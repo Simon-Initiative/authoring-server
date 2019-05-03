@@ -1,0 +1,80 @@
+{
+  "workbook_page": {
+    "@id": "welcome",
+    "#array": [
+      {
+        "head": {
+          "#array": [
+            {
+              "title": {
+                "#text": "Welcome!"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "body": {
+          "#array": [
+            {
+              "audio": {
+                "@id": "a5474914cfa849c2a0da37ac102b6f63",
+                "@title": "",
+                "@src": "",
+                "@type": "audio/ac3",
+                "@controls": "true",
+                "#array": [
+                  {
+                    "title": {
+                      "#text": ""
+                    }
+                  },
+                  {
+                    "caption": {
+                      "#array": [
+                        {
+                          "p": {
+                            "#text": "",
+                            "@id": "aa6d190bd904044148bd77fc5e4276a07",
+                            "@title": ""
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "popout": {
+                      "@enable": "false",
+                      "#text": ""
+                    }
+                  },
+                  {
+                    "alternate": {
+                      "@title": "",
+                      "@idref": "",
+                      "#array": [
+                        {
+                          "p": {
+                            "#text": "",
+                            "@id": "ad14c623a152e4e99861e0cab7a23e7c6",
+                            "@title": ""
+                          }
+                        }
+                      ]
+                    }
+                  },
+                  {
+                    "source": {
+                      "@src": "..\/webcontent\/file_example_MOV_480_700kB.ac3",
+                      "@type": "audio/ac3"
+                    }
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ]
+  }
+}

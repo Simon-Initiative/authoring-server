@@ -1,0 +1,562 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE assessment PUBLIC "-//Carnegie Mellon University//DTD Assessment 2.4//EN" "http://oli.web.cmu.edu/dtd/oli_assessment_2_4.dtd">
+<?xml-stylesheet type="text/css" href="http://oli.web.cmu.edu/authoring/oxy-author/oli_assessment_2_2.css"?>
+<assessment id="_u02_m0_pre-assm" max_attempts="3">
+	<title>Pre-Assessment: Responsible Computing</title>
+<!--	<page>
+		<content>
+			<p><image src="../../webcontent/pre_assm_icon.png"/>Pre-Assessment</p>
+			<p>Use the activities below to help develop a plan for how you will work through this unit.
+				For each learning objective, first evaluate your abilities in the <em>Assess
+					Yourself</em> part and then complete the <em>Test Your Performance</em> part to get
+				a measure of your actual abilities.  Based on these results, develop a quick <em>Plan</em> for how to approach this learning ojective.</p>
+			<p>Once you've done this for all of the learning objectives, complete the <em>Reflect and
+				Plan</em> activity. In this last part, you'll compare your actual performance
+				against your self-assessment, reassess your abilities if necessary and formulate a
+				strategy for how best to approach the rest of the unit.</p>
+		</content>
+	</page> -->
+	<page>
+		<!--Self Assessment Piece -->
+		<fill_in_the_blank id="SA_u02_m01_mixed_objectives">
+			<title>Assess Yourself</title>
+			<body><p><em>Assess Yourself</em></p>
+				<p>How well can you summarize your privileges and responsibilities as a member of
+					the Carnegie Mellon community, describe the range of penalties for misuse of
+					computing resources and recognize inappropriate behavior with regard to the use
+					of computing resources?</p>
+				<p><input_ref input="choice1"/></p></body>
+			<input shuffle="false" id="choice1">
+				<choice value="1">I cannot do this at all.</choice>
+				<choice value="2">I can do this with some support.</choice>
+				<choice value="3">I can do this well with minimal support.</choice>
+				<choice value="4">I can do this well on my own.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Self Assessment -->
+		<short_answer id="short_multi" grading="instructor">
+			<body>
+				<table>
+					<tr>
+						<th>Expression to be evaluated</th>
+						<th>Your guess for <em style="italic">Value</em> obtained and <em style="italic">Type</em> of value obtained</th>
+					</tr>
+					<tr>
+						<td>50.0 + 25</td> <td><input_ref input="ex1_1_1_width100" /></td>
+					</tr>
+					<tr>
+						<td>100 / 50</td> <td><input_ref input="ex1_1_2_width100"/></td>  
+					</tr>
+					<tr>
+						<td>100.0 / 50.0</td> <td><input_ref input="ex1_1_3_width100"/></td>  
+					</tr>
+					<tr>
+						<td>100.0 / 50</td> <td><input_ref input="ex1_1_4_width100"/></td>  
+					</tr>
+					<tr>
+						<td>100 // 50</td> <td><input_ref input="ex1_1_5_width100"/></td>  
+					</tr>
+					
+					
+				</table>
+			</body>
+			<part></part>
+			<part></part>
+			<part></part>
+			<part></part>
+			<part></part>
+		</short_answer>
+		
+		<text id="text_multi">
+			<body>
+				<table>
+					<tr>
+						<th>Expression to be evaluated</th>
+						<th>Your guess for <em style="italic">Value</em> obtained and <em style="italic">Type</em> of value obtained</th>
+					</tr>
+					<tr>
+						<td>50.0 + 25</td> <td><input_ref input="ex1_1_1"/></td>
+					</tr>
+					<tr>
+						<td>100 / 50</td> <td><input_ref input="ex1_1_2"/></td>  
+					</tr>
+					<tr>
+						<td>100.0 / 50.0</td> <td><input_ref input="ex1_1_3"/></td>  
+					</tr>
+					<tr>
+						<td>100.0 / 50</td> <td><input_ref input="ex1_1_4"/></td>  
+					</tr>
+					<tr>
+						<td>100 // 50</td> <td><input_ref input="ex1_1_5"/></td>  
+					</tr>
+					
+					
+				</table>
+			</body>
+			<part></part>
+			<part></part>
+			<part></part>
+			<part></part>
+			<part></part>
+		</text>
+		
+		<!--Self Evluation Piece -->
+
+
+		<multiple_choice id="_u02_pool_respy_1_q2_inline">
+
+			<body>
+				<p><em>Test Your Performance</em></p>
+				<p>According to the Computing Policy, which of the following responsibilities
+					governs your use of the limited scanners in the computer labs?</p></body>
+			<input shuffle="false">
+				<choice value="a">Account Security and Confidentiality</choice>
+				<choice value="b">Respect for Others' Property and Privacy Rights</choice>
+				<choice value="c">Improper/Illegal Communication</choice>
+				<choice value="d">Responsible Sharing of Resources</choice>
+				<choice value="e">Reasonable and Judicious Personal Use</choice>
+				<choice value="f">This issue isn't governed by the Computing Policy.</choice>
+			</input>
+			<part>
+				<response match="d" score="1">
+					<feedback> Correct. You may want to read the exposition and complete the
+						learning activities in the <em>Privileges and Responsibilities</em> section
+						of the course to learn more.</feedback>
+				</response>
+				<response match="b" score="0">
+					<feedback>Incorrect; you should read the exposition and complete the learning
+						activities in the <em>Privileges and Responsibilities</em> section of the
+						course to learn about the Computing Policy.</feedback>
+				</response>
+				<response match="c" score="0">
+					<feedback>Incorrect; you should read the exposition and complete the learning
+						activities in the <em>Privileges and Responsibilities</em> section of the
+						course to learn about the Computing Policy.</feedback>
+				</response>
+				<response match="d" score="0">
+					<feedback>Incorrect; you should read the exposition and complete the learning
+						activities in the <em>Privileges and Responsibilities</em> section of the
+						course to learn about the Computing Policy.</feedback>
+				</response>
+				<response match="e" score="0">
+					<feedback>Incorrect; you should read the exposition and complete the learning
+						activities in the <em>Privileges and Responsibilities</em> section of the
+						course to learn about the Computing Policy.</feedback>
+				</response>
+				<response match="f" score="0">
+					<feedback>Incorrect; you should read the exposition and complete the learning
+						activities in the <em>Privileges and Responsibilities</em> section of the
+						course to learn about the Computing Policy.</feedback>
+				</response>
+			</part>
+		</multiple_choice>
+		<!-- End Self Evaluation -->
+
+		<!-- Start Planning -->
+		<fill_in_the_blank id="SA_u02_m01_mixed_objectives_planning">
+			<title>Planning</title>
+			<body><p><em>Planning</em></p>
+				<p>Based on your self-assessment and your performance, how do you plan to approach the material
+					related to this objective?</p>
+				<p><input_ref input="choice1"/></p></body>
+			<input shuffle="false" id="choice1">
+				<choice value="1">I am confident that I can meet this objective and I will proceed directly to
+					the Exam Readiness Quiz.</choice>
+				<choice value="2">I am fairly confident about my abilities with regard to this objective; I'll
+					skim through the material before heading to the Exam Readiness Quiz.</choice>
+				<choice value="3">Although I can partially meet this objective, I haven't mastered
+					it. I'll be making targeted use of the readings and activities before taking the
+					Exam Readiness Quiz.</choice>
+				<choice value="4">I'm very weak on this objective. I will work through the readings and
+					materials thoroughly before moving on to the Exam Readiness Quiz.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Planning -->
+	</page>
+
+	<page>
+		<!--Self Assessment Piece -->
+		<fill_in_the_blank id="SA_u02_m01_quota_objectives">
+			<title>Assess Yourself</title>
+			<body><p><em>Assess Yourself</em></p>
+				<p>How well can you define a quota, identify resources to which a quota may apply
+					and describe basic strategies for monitoring and managing quotas?</p>
+				<p><input_ref input="choice1"/></p></body>
+			<input shuffle="false" id="choice1">
+				<choice value="1">I cannot do this at all.</choice>
+				<choice value="2">I can do this with some support.</choice>
+				<choice value="3">I can do this well with minimal support.</choice>
+				<choice value="4">I can do this well on my own.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Self Assessment -->
+
+		<!--Self Evluation Piece -->
+
+
+		<multiple_choice id="_u02_pool_sharing_1_q2_inline">
+			<body>
+				<p><em>Test Your Performance</em></p>
+				<p>Which of the following accurately describes the university's system for
+					determining the fair use of peripherals in the computer labs?</p></body>
+
+			<input shuffle="false">
+				<choice value="a">Impact-based</choice>
+				<choice value="b">Quota-based</choice>
+				<choice value="c">No limits</choice>
+			</input>
+			<part>
+				<response match="a" score="1">
+					<feedback> Correct. You may want to review the <em>Sharing Resources</em>
+						section of the unit to learn more about quotas.</feedback>
+				</response>
+				<response match="b" score="0">
+					<feedback>Incorrect; you have not demonstrated mastery of this learning
+						objective so you'll need to review the <em>Sharing Resources</em> section of
+						the course and complete the learning activities.</feedback>
+				</response>
+				<response match="c" score="0">
+					<feedback>Incorrect; you have not demonstrated mastery of this learning
+						objective so you'll need to review the <em>Sharing Resources</em> section of
+						the course and complete the learning activities.</feedback>
+				</response>
+			</part>
+		</multiple_choice>
+		<!-- End Self Evaluation -->
+		<!-- Start Planning -->
+		<fill_in_the_blank id="SA_u02_m01_quota_objective_planning">
+			<title>Planning</title>
+			<body><p><em>Planning</em></p>
+				<p>Based on your self-assessment and your performance, how do you plan to approach the material
+					related to this objective?</p>
+				<p><input_ref input="choice1"/></p></body>
+			<input shuffle="false" id="choice1">
+				<choice value="1">I am confident that I can meet this objective and I will proceed directly to
+					the Exam Readiness Quiz.</choice>
+				<choice value="2">I am fairly confident about my abilities with regard to this objective; I'll
+					skim through the material before heading to the Exam Readiness Quiz.</choice>
+				<choice value="3">Although I can partially meet this objective, I haven't mastered
+					it. I'll be making targeted use of the readings and activities before taking the
+					Exam Readiness Quiz.</choice>
+				<choice value="4">I'm very weak on this objective. I will work through the readings and
+					materials thoroughly before moving on to the Exam Readiness Quiz.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Planning -->
+	</page>
+
+	<page>
+		<!--Self Assessment Piece -->
+		<fill_in_the_blank id="SA__u02_m02_protect_OBJ">
+			<title>Assess Yourself</title>
+			<body><p><em>Assess Yourself</em></p>
+				<p>How well can you predict the impact of specific activities on the
+					confidentiality, integrity and availability of personal and university
+					resources, and recommend appropriate actions based on those predictions?</p>
+				<p><input_ref input="cia"/></p></body>
+			<input shuffle="false" id="cia">
+				<choice value="1">I cannot do this at all.</choice>
+				<choice value="2">I can do this with some support.</choice>
+				<choice value="3">I can do this well with minimal support.</choice>
+				<choice value="4">I can do this well on my own.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<fill_in_the_blank id="SA__u02_m02_pii_OBJ">
+
+			<body>
+				<p>How well can you recognize personal information that is protected by your Andrew ID and
+					password?</p>
+				<p><input_ref input="andrew"/></p></body>
+			<input shuffle="false" id="andrew">
+				<choice value="1">I cannot do this at all.</choice>
+				<choice value="2">I can do this with some support.</choice>
+				<choice value="3">I can do this well with minimal support.</choice>
+				<choice value="4">I can do this well on my own.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Self Assessment -->
+
+		<!--Self Evluation Piece -->
+
+
+		<multiple_choice id="_u02_pool_protecting_1_q1_inline">
+			<body>
+				<p><em>Test Your Performance</em></p>
+				<p>Devon visits his neighbor’s room to get help on a homework assignment. While there, he logs
+					into his Andrew account and forgets to log out before he leaves. His neighbor
+					notices that Devon is still logged in and adds a class to Devon’s academic
+					schedule. Which of the following has been violated?</p></body>
+			<input shuffle="false">
+				<choice value="a">Confidentiality</choice>
+				<choice value="b">Integrity</choice>
+				<choice value="c">Availability</choice>
+				<choice value="d">None of the above</choice>
+
+			</input>
+			<part>
+				<response match="b" score="1">
+					<feedback> Correct. You may want to review the <em>Protecting Information and Resources</em>
+						section to learn more.</feedback>
+				</response>
+				<response match="a" score="0">
+					<feedback>Incorrect; you need to review the <em>Protecting Information and
+							Resources</em> section of the course and complete the learning
+						activities.</feedback>
+				</response>
+				<response match="c" score="0">
+					<feedback>Incorrect; you need to review the <em>Protecting Information and
+							Resources</em> section of the course and complete the learning
+						activities.</feedback>
+				</response>
+				<response match="d" score="0">
+					<feedback>Incorrect; you need to review the <em>Protecting Information and
+							Resources</em> section of the course and complete the learning
+						activities.</feedback>
+				</response>
+
+			</part>
+
+		</multiple_choice>
+		<!-- End Self Evaluation -->
+		<!-- Start Planning -->
+		<fill_in_the_blank id="SA_u02_m02_protect_pii_objectives_planning">
+			<title>Planning</title>
+			<body><p><em>Planning</em></p>
+				<p>Based on your self-assessment and your performance, how do you plan to approach the material
+					related to this objective?</p>
+				<p><input_ref input="choice1"/></p></body>
+			<input shuffle="false" id="choice1">
+				<choice value="1">I am confident that I can meet this objective and I will proceed directly to
+					the Exam Readiness Quiz.</choice>
+				<choice value="2">I am fairly confident about my abilities with regard to this objective; I'll
+					skim through the material before heading to the Exam Readiness Quiz.</choice>
+				<choice value="3">Although I can partially meet this objective, I haven't mastered
+					it. I'll be making targeted use of the readings and activities before taking the
+					Exam Readiness Quiz.</choice>
+				<choice value="4">I'm very weak on this objective. I will work through the readings and
+					materials thoroughly before moving on to the Exam Readiness Quiz.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Planning -->
+	</page>
+
+	<page>
+		<!--Self Assessment Piece -->
+		<fill_in_the_blank id="SA__u02_m03_sharing_mixed_objectives">
+			<title>Assess Yourself</title>
+			<body><p><em>Assess Yourself</em></p>
+				<p>How well can you identify appropriate (and inappropriate) sharing of digital content, and
+					recognize some of the most common consequences of misuse? Can you define P2P and
+					identify the risks involved in using file-sharing technology?</p>
+				<p><input_ref input="sharing"/></p></body>
+			<input shuffle="false" id="sharing">
+				<choice value="1">I cannot do this at all.</choice>
+				<choice value="2">I can do this with some support.</choice>
+				<choice value="3">I can do this well with minimal support.</choice>
+				<choice value="4">I can do this well on my own.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<fill_in_the_blank id="SA__u02_m03_dmca_mixed_objectives">
+			<body>
+				<p>How well can you summarize your and the university's obligations under the DMCA
+					(Digital Millennium Copyright Act)? Can you describe the penalties for being the
+					target of a DMCA notice?</p>
+				<p><input_ref input="dmca"/></p></body>
+			<input shuffle="false" id="dmca">
+				<choice value="1">I cannot do this at all.</choice>
+				<choice value="2">I can do this with some support.</choice>
+				<choice value="3">I can do this well with minimal support.</choice>
+				<choice value="4">I can do this well on my own.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Self Assessment -->
+
+		<!--Self Evluation Piece -->
+
+
+		<multiple_choice id="_u02_pool_copyright_1_q1_inline">
+			<body>
+				<p><em>Test Your Performance</em></p>
+				<p>What is the immediate university-imposed consequence of being the target of a
+					DMCA Takedown Notice?</p></body>
+			<input shuffle="false">
+				<choice value="a">Criminal charges</choice>
+				<choice value="b">Civil lawsuit</choice>
+				<choice value="c">Student Affairs disciplinary proceedings</choice>
+				<choice value="d">45-day network suspension</choice>
+				<choice value="e">Failing course grade</choice>
+			</input>
+			<part>
+				<response match="d" score="1">
+					<feedback> Correct. You may want to review the <em>Copyright and Digital File Sharing</em>
+						section of the course to learn more.</feedback>
+				</response>
+				<response match="a" score="0">
+					<feedback>Incorrect; you need to review the <em>Copyright and Digital File
+							Sharing</em> section of the course and complete the learning
+						activities.</feedback>
+				</response>
+				<response match="b" score="0">
+					<feedback>Incorrect; you need to review the <em>Copyright and Digital File
+							Sharing</em> section of the course and complete the learning
+						activities.</feedback>
+				</response>
+				<response match="c" score="0">
+					<feedback>Incorrect; you need to review the <em>Copyright and Digital File
+							Sharing</em> section of the course and complete the learning
+						activities.</feedback>
+				</response>
+				<response match="e" score="0">
+					<feedback>Incorrect; you need to review the <em>Copyright and Digital File
+							Sharing</em> section of the course and complete the learning
+						activities.</feedback>
+				</response>
+
+			</part>
+
+		</multiple_choice>
+		<!-- End Self Evaluation -->
+		<!-- Start Planning -->
+		<fill_in_the_blank id="SA_u02_03_dmca_mixed_objectives_planning">
+			<title>Planning</title>
+			<body><p><em>Planning</em></p>
+				<p>Based on your self assessment and your performance, how do you plan to approach
+					the material related to this objective?</p>
+				<p><input_ref input="choice1"/></p></body>
+			<input shuffle="false" id="choice1">
+				<choice value="1">I am confident that I can meet this objective and I will proceed directly to
+					the Exam Readiness Quiz.</choice>
+				<choice value="2">I am fairly confident about my abilities with regard to this objective; I'll
+					skim through the material before heading to the Exam Readiness Quiz.</choice>
+				<choice value="3">Although I can partially meet this objective, I haven't mastered
+					it. I'll be making targeted use of the readings and activities before taking the
+					Exam Readiness Quiz.</choice>
+				<choice value="4">I'm very weak on this objective. I will work through the readings and
+					materials thoroughly before moving on to the Exam Readiness Quiz.</choice>
+
+			</input>
+			<part>
+				<response match="1" score="1"/>
+				<response match="2" score="1"/>
+				<response match="3" score="1"/>
+				<response match="4" score="1"/>
+			</part>
+		</fill_in_the_blank>
+		<!-- End Planning -->
+	</page>
+	<page>
+		<short_answer id="_u5_reflect" grading="automatic">
+			<body>
+				<p>Using the textbox below, compare your self-assessment to your actual performance for each of
+					these learning objectives:</p>
+				<ul>
+					<li>Summarize your privileges and responsibilities as a member of the Carnegie
+						Mellon community, describe the range of penalties for misuse of computing
+						resources and recognize inappropriate behavior with regard to the use of
+						computing resources.</li>
+					<li>Define quota, identify resources to which a quota may apply and describe
+						basic strategies for monitoring and managing quotas.</li>
+					<li>Identify appropriate (and inappropriate) sharing of digital content, and recognize some of
+						the most common consequences of misuse. Define P2P and identify the risks
+						involved in using file-sharing technology.</li>
+					<li>Recognize personal information that is protected by your Andrew ID and
+						password.</li>
+					<li>Summarize your and the university's obligations under the DMCA (Digital
+						Millennium Copyright Act). Describe the penalties for being the target of a
+						DMCA notice.</li>
+
+				</ul>
+				<p>Was your actual performance better or worse than you would have predicted based on your
+					self-assessment? Depending on your answer, how do you think you should approach
+					the material in this unit? Is the same approach appropriate for all parts of the
+					unit?</p>
+				<p>Use the space below to reflect on what you learned from comparing your
+					self-assessment and performance assessment, and explain how you will use this
+					information to guide your study strategies for the unit.</p></body>
+			<part>
+				<response match="*" score="1">
+					<feedback><p>Continue to think about which learning strategies are working and
+							which ones don't seem to be effective as you work through the
+							course.</p></feedback>
+				</response>
+				<hint>Did you find that you did worse on the performance assessment than you thought
+					you would? It could be because your prior knowledge isn’t as applicable to the
+					CMU (or college) context as you had believed. To ensure that you master the
+					material, you should probably start at the beginning of the unit and work
+					through the activities as they come up.</hint>
+
+				<hint>Did you find that you did well on the performance assessment? If so, you may
+					not need to work through all the material in this unit. But to be on the safe
+					side, try answering a few questions in each section to further assess your
+					capabilities. If you find you do well, skip to the unit review quiz and see how
+					you do on that. If you find that you don’t do well, consider going back and
+					reading through the exposition for each topic. </hint>
+				<hint>For more assistance in developing a study strategy, you may want to refer back
+					to the portion of the course on Learning Strategies.</hint>
+			</part>
+		</short_answer>
+	</page>
+</assessment>

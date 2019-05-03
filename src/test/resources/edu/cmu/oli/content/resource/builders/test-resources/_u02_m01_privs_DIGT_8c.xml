@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE assessment PUBLIC "-//Carnegie Mellon University//DTD Inline Assessment 1.4//EN" "http://oli.cmu.edu/dtd/oli_inline_assessment_1_4.dtd">
+<?xml-stylesheet type="text/css" href="http://oli.web.cmu.edu/authoring/oxy-author/oli_inline_assessment_1_1.css"?>
+<assessment id="_u02_m01_privs_DIGT_8c">
+    <title>What's on the Network?34534435345534345</title>
+    <page>
+        <content>
+            <p> More test assd As soon as he got onto the campus network, Kurt began scanning for shared files,
+                hoping to find free music and movies. In the process of looking for media, he found
+                that he also had access to some students’ personal files—health histories, journals,
+                even some pictures. Since the information wasn’t protected, Kurt felt free to enjoy
+                the free movies, songs and applications, and started snooping on other students’
+                information. Kurt didn’t stop at accessing the files himself; he also began to share
+                many of the files with his friends, and to talk about some of the pictures he viewed
+                with a number of his close friends. </p>
+            <p>Which of Kurt’s actions are acceptable according to the Computing Policy and
+            guidelines?</p>
+            <table >
+                <tr>
+                    <td colspan="100%">1</td>
+                </tr>
+                <tr>
+                    <td colspan="100%">2</td>
+                </tr>
+                <tr>
+                    <td colspan="100%">3</td>
+                </tr>
+            </table>
+            
+        </content>
+        <question id="_u02_m01_privs_DIGT_8c_1">
+            <body>Scanning the network for IP addresses TEST
+                <table rowstyle="alternating">
+                    <tr>
+                        <td>1</td><td>2</td><td>3</td>
+                    </tr>
+                    <tr>
+                        <td>4</td><td>5</td><td>6</td>
+                    </tr>
+                    <tr>
+                        <td>7</td><td>8</td><td>9</td>
+                    </tr>
+                </table>
+            </body>
+            <multiple_choice shuffle="false" id="ans">
+                <choice value="y">Acceptable<table rowstyle="alternating">
+                    <tr>
+                        <td>1</td><td>2</td><td>3</td>
+                    </tr>
+                    <tr>
+                        <td>4</td><td>5</td><td>6</td>
+                    </tr>
+                    <tr>
+                        <td>7</td><td>8</td><td>9</td>
+                    </tr>
+                </table>
+                </choice>
+                <choice value="n"><p><youtube src="9bZkp7q19f0"></youtube></p></choice>
+            </multiple_choice>
+            <part>
+                <response match="y" score="1">
+                    <feedback>Correct; the policy does not state that port scanning is wrong in and
+                        of itself. <youtube src="jZkHpNnXLB0"/> </feedback>
+                </response>
+                <response match="n" score="0">
+                    <feedback>Incorrect. The Computing Policy explicitly states that scanning itself
+                        is not unacceptable.</feedback>
+                </response>
+                <hint>This could become a violation if individuals request that the scanning stop
+                    and Kurt does not stop. <youtube src="6Cf7IL_eZ38"/> </hint>
+            </part>
+        </question>
+        <question id="_u02_m01_privs_DIGT_8c_2">
+            <body>Illegal download and distribution of copyrighted material Is true</body>
+            <multiple_choice shuffle="false" id="ans">
+                <choice value="y">Acceptable</choice>
+                <choice value="n">Unacceptable</choice>
+
+            </multiple_choice>
+            <part>
+                <response match="y" score="0">
+                    <feedback>Incorrect; this is not respectful of others property rights and is a
+                        violation of university policy and copyright law. </feedback>
+                </response>
+                <response match="n" score="1">
+                    <feedback>Correct; this kind of activity does not respect property rights and is
+                        explicitly discussed in the copyright guidelines.</feedback>
+                </response>
+                <hint>Violation of any local, state or federal laws is expressly forbidden by the
+                    Computing Policy.</hint>
+            </part>
+        </question>
+        <question id="_u02_m01_privs_DIGT_8c_3">
+            <body><ol>
+                <title>The Title for the List</title>
+                <li>
+                    First item.
+                </li>
+                <li>
+                    Second item.
+                </li>
+                <li>
+                    Third item.
+                </li>
+            </ol>
+            </body>
+            <multiple_choice shuffle="false" id="ans">
+                <choice value="y">Acceptable</choice>
+                <choice value="n">Unacceptable</choice>
+
+            </multiple_choice>
+            <part>
+                <response match="y" score="0">
+                    <feedback>Incorrect; though the files were not secure, this does not mean that
+                        it’s OK access them.</feedback>
+                </response>
+                <response match="n" score="1">
+                    <feedback>Correct. Even though the files were not secure, Kurt still has an
+                        obligation to respect other users’ privacy rights.</feedback>
+                </response>
+                <hint>Review the Privacy section of the Computing Policy.</hint>
+            </part>
+        </question>
+        <question id="_u02_m01_privs_DIGT_8c_4">
+            <body>Sharing files and private information about other students with his friends</body>
+            <multiple_choice shuffle="false" id="ans">
+                <choice value="y">Acceptable</choice>
+                <choice value="n">Unacceptable</choice>
+
+            </multiple_choice>
+            <part>
+                <response match="y" score="0">
+                    <feedback>Incorrect; the policy explicitly states that material should not be
+                        distributed by users without permission.</feedback>
+                </response>
+                <response match="n" score="1">
+                    <feedback>Correct; this is not respectful of privacy or of property
+                        rights.</feedback>
+                </response>
+                <hint>Review the Respect for Others’ Property and Privacy Rights section of the
+                    Computing Policy.</hint>
+            </part>
+        </question>
+        <question id="_u02_m01_privs_DIGT_8c_5">
+            <body><p>Here is a <term>Term Tag</term>, and a
+                <extra><anchor>process</anchor><meaning>
+                    <material><p>This is the meaning.</p></material>
+                </meaning></extra>
+            </p></body>
+            <multiple_choice shuffle="false" id="ans">
+                <choice value="y">Acceptable</choice>
+                <choice value="n">Unacceptable</choice>
+
+            </multiple_choice>
+            <part>
+                <response match="y" score="0">
+                    <feedback>Incorrect. The Computing Policy explicitly states that one should
+                        assume files are intended to be private.</feedback>
+                </response>
+                <response match="n" score="1">
+                    <feedback>Correct. Although the files may not have been appropriately secured,
+                        Kurt still needs to be respectful of other users’ privacy.</feedback>
+                </response>
+                <hint>Unless the names of the files, folders or directories were clearly marked as
+                    public, Kurt must ask for permission to access them. </hint>
+            </part>
+        </question>
+        <question id="_u02_m01_privs_DIGT_8c_6">
+            <body>Spreading rumors based on the private information he discovered</body>
+            <multiple_choice shuffle="false" id="ans">
+                <choice value="y">Acceptable</choice>
+                <choice value="n">Unacceptable</choice>
+                <choice value="na">Not applicable</choice>
+
+            </multiple_choice>
+            <part>
+                <response match="y" score="0">
+                    <feedback>Incorrect. The Computing Policy doesn’t govern this kind of
+                        behavior.</feedback>
+                </response>
+                <response match="n" score="0">
+                    <feedback>Incorrect. The Computing Policy doesn’t govern this kind of
+                        behavior.</feedback>
+                </response>
+                <response match="na" score="1">
+                    <feedback>Correct; this behavior may be punishable under other university
+                        policies, but the Computing Policy isn’t at play in this situation unless it
+                        occurs electronically and could be construed as harassment.</feedback>
+                </response>
+                <?oxy_comment_start author="mmyers" timestamp="20110728T090522-0400" comment="It seems like this hint refers to the previous question, not to this question."?>
+                <hint>Unless the names of the files, folders, or directories were clearly marked as
+                    public, Kurt must ask for permission to access them. <?oxy_comment_end?></hint>
+            </part>
+        </question>
+    </page>
+    <page>
+        <question id="_u02_m01_privs_DIGT_8c_7">
+
+            <body>
+                <p>Consider this scenario and reflect on the Computing Policy. Does anyone involved
+                    besides Kurt have relevant responsibilities? What do you consider appropriate
+                    consequences for Kurt? Compare your answer to that of an expert.</p>
+            </body>
+            <short_answer id="reflect"/>
+            <part>
+                <response input="reflect" score="1"/>
+                <explanation><p>In the scenario above, it’s clear that the bulk of the policy violations are on Kurt’s
+                        shoulders—his behavior is particularly disrespectful and is an inappropriate
+                        use of shared community resources. Although he was finding media and
+                        personal files that were not protected against viewing from other community
+                        members, it’s clear that his continued access violates the privacy and
+                        property rights of other individuals or groups, some as outside copyright
+                        holders (in the case of the media and applications) and others as members of
+                        the Carnegie Mellon community. However, it’s also worth noting that other
+                        users appear to have not taken their own responsibilities seriously
+                        enough—protecting their own account security and confidentiality (and
+                        respecting the property rights of copyright owners) means they should be
+                        taking appropriate action to protect shared files, whether by password
+                        protecting them or turning off file sharing all together. At a minimum, Kurt
+                        could probably face a network suspension if complaints are made or network
+                        detection of his unauthorized scanning continues. Beyond the Computing
+                        Policy, it also seems likely that Kurt will face a more formal disciplinary
+                        process through Student Affairs.</p>
+                </explanation>
+
+            </part>
+        </question>
+    </page>
+</assessment>

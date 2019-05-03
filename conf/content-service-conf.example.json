@@ -1,0 +1,643 @@
+{
+  "contentServiceDebugEnabled": true,
+  "contentSourceXml": "/oli/course_content_xml",
+  "contentVolume": "/oli/course_content_volume",
+  "webContentVolume": "/oli/webcontent",
+  "themesRepository": "/oli/repository/presentation",
+  "editLockMaxDuration": 300000,
+  "transactionRetrys": 3,
+  "previewServers": [
+    {
+      "name": "dev",
+      "previewSetupUrl": "https://example.edu/jcourse/publish/rest/identify/preview/setup",
+      "previewLaunchUrl": "https://example.edu/jcourse/publish/rest/identify/preview/url"
+    },
+    {
+      "name": "qa",
+      "previewSetupUrl": "https://example.edu/jcourse/publish/rest/identify/preview/setup",
+      "previewLaunchUrl": "https://example.edu/jcourse/publish/rest/identify/preview/url"
+    },
+    {
+      "name": "prod",
+      "previewSetupUrl": "https://example.edu/jcourse/publish/rest/identify/preview/setup",
+      "previewLaunchUrl": "https://example.edu/jcourse/publish/rest/identify/preview/url"
+    }
+  ],
+  "deploymentRequest": {
+    "token": "xxxxxxxxxxxxxxxxxxxxxxxxxx",
+    "fromEmail": "help@example.edu",
+    "emailServer": "https://example.edu/rest/process/email",
+    "deployRequestEmails": [
+      "xxxxx@example.edu",
+      "help@lists.example.edu"
+    ]
+  },
+  "themes": [
+    {
+      "id": "whirlwind-1.4",
+      "location": "/oli/repository/presentation/whirlwind-1.4",
+      "default": true
+    },
+    {
+      "id": "chaperone-1.0",
+      "location": "/oli/repository/presentation/chaperone-1.0",
+      "default": false
+    }
+  ],
+  "namespaces": {
+    "wb": "http://oli.web.cmu.edu/activity/workbook/",
+    "bib": "http://bibtexml.sf.net/",
+    "cmd": "http://oli.web.cmu.edu/content/metadata/2.1/",
+    "m": "http://www.w3.org/1998/Math/MathML",
+    "theme": "http://oli.web.cmu.edu/presentation/",
+    "pref": "http://oli.web.cmu.edu/preferences/"
+  },
+  "resourceTypes": [
+    {
+      "id": "x-oli-package",
+      "displayName": "Content Package",
+      "description": "",
+      "jsonCapable": true,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Content Package Simple 2.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_content_package_simple_2_0.dtd",
+      "resourceService": {
+        "name": "content-service"
+      }
+    },
+    {
+      "id": "x-oli-organization",
+      "displayName": "Organization",
+      "description": "",
+      "jsonCapable": true,
+      "validatorClass": "edu.cmu.oli.content.resource.validators.OrganizationValidator",
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Content Organization Simple 2.3//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_content_organization_simple_2_3.dtd",
+      "resourceService": {
+        "name": "content-service"
+      }
+    },
+    {
+      "id": "x-oli-webcontent",
+      "displayName": "Webcontent",
+      "description": "",
+      "jsonCapable": false,
+      "resourceService": {
+        "name": "webcontent-service"
+      }
+    },
+    {
+      "id": "x-oli-sequence",
+      "displayName": "Sequence",
+      "description": "",
+      "jsonCapable": true,
+      "resourceService": {
+        "name": "content-service"
+      }
+    },
+    {
+      "id": "x-oli-unit",
+      "displayName": "Unit",
+      "description": "",
+      "jsonCapable": true,
+      "resourceService": {
+        "name": "content-service"
+      }
+    },
+    {
+      "id": "x-oli-module",
+      "displayName": "Module",
+      "description": "",
+      "jsonCapable": true,
+      "resourceService": {
+        "name": "content-service"
+      }
+    },
+    {
+      "id": "x-oli-section",
+      "displayName": "Section",
+      "description": "",
+      "jsonCapable": true,
+      "resourceService": {
+        "name": "content-service"
+      }
+    },
+    {
+      "id": "x-oli-assessment2",
+      "displayName": "Assessment",
+      "description": "",
+      "jsonCapable": true,
+      "delivery": {
+        "standalone": {
+          "deliveryUri": "/content-service/api/jcourse/assessment2/activity/view.do"
+        }
+      },
+      "validatorClass": "edu.cmu.oli.assessment.validators.AssessmentV1Validator",
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Assessment MathML 2.4//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_assessment_mathml_2_4.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      },
+      "namespacePrefixes": [
+        "cmd"
+      ]
+    },
+    {
+      "id": "x-oli-inline-assessment",
+      "displayName": "Embedded Assessment",
+      "description": "",
+      "jsonCapable": true,
+      "delivery": {
+        "inline": {
+          "method": "inline_flash",
+          "clientURI": "/superactivity/assessment2/InlineAssessmentClient.swf",
+          "serviceURI": "/content-service/api/jcourse/a2/rest",
+          "properties": [
+            {
+              "key": "activityComponents",
+              "value": "/superactivity/assessment/"
+            }
+          ]
+        }
+      },
+      "validatorClass": "edu.cmu.oli.assessment.validators.AssessmentV2Validator",
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Inline Assessment MathML 1.4//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli_inline_assessment_mathml_1_4.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      },
+      "namespacePrefixes": [
+        "cmd"
+      ]
+    },
+    {
+      "id": "x-oli-assessment2-pool",
+      "displayName": "Pool",
+      "description": "",
+      "jsonCapable": true,
+      "validatorClass": "edu.cmu.oli.assessment.validators.AssessmentV1Validator",
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Assessment Pool MathML 2.4//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_assessment_mathml_2_4.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      },
+      "namespacePrefixes": [
+        "cmd"
+      ]
+    },
+    {
+      "id": "x-oli-autolab",
+      "displayName": "Autolab",
+      "description": "",
+      "jsonCapable": false,
+      "delivery": {
+        "standalone": {
+          "deliveryUri": "/content-service/api/jcourse/autolab/content-service/api/activity/view"
+        }
+      },
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD AutoLab 1.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_autolab_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-dataset",
+      "displayName": "Dataset",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Dataset 1.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_dataset_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-feedback",
+      "displayName": "Feedback",
+      "description": "",
+      "jsonCapable": true,
+      "delivery": {
+        "standalone": {
+          "deliveryUri": "/content-service/api/jcourse/feedback/activity.do"
+        }
+      },
+      "validatorClass": "edu.cmu.oli.feedback.validators.FeedbackValidator",
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Feedback 1.2//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_feedback_1_2.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-skills_model",
+      "displayName": "Skills",
+      "description": "",
+      "jsonCapable": true,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Skills Model 1.0//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli_skills_model_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-learning_objectives",
+      "displayName": "Learning Objectives",
+      "description": "",
+      "jsonCapable": true,
+      "validatorClass": "edu.cmu.oli.content.resource.validators.LearningObjectivesValidator",
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Learning Objectives 2.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_learning_objectives_2_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-question_bank",
+      "displayName": "Question Bank",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Question Bank 2.4//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_assessment_2_4.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-supertutor",
+      "displayName": "Supertutor",
+      "description": "",
+      "jsonCapable": false,
+      "delivery": {
+        "standalone": {
+          "deliveryUri": "/content-service/api/jcourse/superactivity/launcher/deliver"
+        }
+      },
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD SuperTutor 1.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_supertutor_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-workbook_page",
+      "displayName": "Workbook Page",
+      "description": "",
+      "jsonCapable": true,
+      "delivery": {
+        "standalone": {
+          "deliveryUri": "/content-service/api/jcourse/workbook/activity/page"
+        },
+        "deliveryClass": "edu.cmu.oli.workbookpage.WorkbookPageDelivery"
+      },
+      "validatorClass": "edu.cmu.oli.workbookpage.validators.WorkbookPageValidator",
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Workbook Page MathML 3.8//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/oli_workbook_page_mathml_3_8.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      },
+      "namespacePrefixes": [
+        "wb",
+        "bib",
+        "cmd",
+        "m",
+        "theme",
+        "pref"
+      ]
+    },
+    {
+      "id": "x-oli-embed-activity",
+      "displayName": "Embed Activity",
+      "description": "",
+      "jsonCapable": false,
+      "delivery": {
+        "inline": {
+          "method": "inline_superactivity",
+          "clientURI": "/superactivity/embed/embed.html",
+          "serviceURI": "/content-service/api/jcourse/superactivity/rest"
+        }
+      },
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Embed 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli-embed-activity_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-embed-activity-highstakes",
+      "displayName": "Embed Highstakes",
+      "description": "",
+      "jsonCapable": false,
+      "delivery": {
+        "inline": {
+          "method": "inline_superactivity",
+          "clientURI": "/superactivity/embed/embed.html",
+          "serviceURI": "/content-service/api/jcourse/superactivity/rest"
+        }
+      },
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Embed 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli-embed-activity_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-linked-activity",
+      "displayName": "Linked Activity",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Linked 1.0//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli-linked-activity_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-lti-activity",
+      "displayName": "Linked Activity",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD LTI 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli-lti-activity_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-repl-activity",
+      "displayName": "Linked Activity",
+      "description": "",
+      "jsonCapable": false,
+      "delivery": {
+        "inline": {
+          "method": "inline_superactivity",
+          "clientURI": "/superactivity/repl/repl.html",
+          "serviceURI": "/content-service/api/jcourse/superactivity/rest"
+        }
+      },
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD REPL 1.0//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli-repl-activity_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-pitt-lrdc-andes1-assignment",
+      "displayName": "Andes Assignment",
+      "description": "",
+      "jsonCapable": false,
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-cpl-assignment",
+      "displayName": "Phil Assignment",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD CPL Assignment 4.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_cpl_assignment_4_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-cpl-section",
+      "displayName": "Problem Set",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD CPL Assignment 4.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_cpl_assignment_4_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-cpl-item",
+      "displayName": "ProofLab",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD CPL Assignment 4.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_cpl_assignment_4_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-cl-assignment",
+      "displayName": "Causality Lab",
+      "description": "",
+      "jsonCapable": false,
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-ilogos",
+      "displayName": "iLogos",
+      "description": "",
+      "jsonCapable": false,
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-problemset",
+      "displayName": "Problem Set",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Problem Set 1.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_problemset_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-logic-lab",
+      "displayName": "Logic Lab",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD LogicLab 1.0//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/cmu_phil_logiclab_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-circuitlab",
+      "displayName": "CircuitLab",
+      "description": "",
+      "jsonCapable": false,
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-prooflab",
+      "displayName": "ProofLab",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD ProofLab Problem 1.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_prooflab_problem_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-truthlab",
+      "displayName": "TruthLab",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD TRUTHLAB Problem 1.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_truthlab_problem_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-syntaxlab",
+      "displayName": "SyntaxLab",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD SYNTAXLAB Problem 2.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_syntaxlab_problem_2_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-bio-simulator",
+      "displayName": "BioSimulator",
+      "description": "",
+      "jsonCapable": false,
+      "delivery": {
+        "inline": {
+          "method": "inline_superactivity",
+          "clientURI": "/superactivity/bio_simulator/simulator.html",
+          "serviceURI": "/content-service/api/jcourse/superactivity/rest"
+        }
+      },
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Simulator 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli-bio-simulator_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-chat-bazaar",
+      "displayName": "Bazaar",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Simulator 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli-bio-simulator_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-phil-argumentlab",
+      "displayName": "ArgumentLab",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD ArgumentLab Problem 1.0//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_phil_argumentlab_problem_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-collaboration",
+      "displayName": "Collaboration",
+      "description": "",
+      "jsonCapable": false,
+      "delivery": {
+        "inline": {
+          "method": "inline_superactivity",
+          "clientURI": "/superactivity//node/index.html",
+          "serviceURI": "/content-service/api/jcourse/superactivity/rest"
+        }
+      },
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Collaboration 1.0//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/cmu-collaboration_1.0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-stat-stattutor3",
+      "displayName": "Stat Tutor3",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Stattutor 3.1//EN",
+      "SYSTEM_ID": "http://oli.web.cmu.edu/dtd/cmu_stat_stattutor_3_1.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-ctat-tutor",
+      "displayName": "CTAT-Tutor",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD CTAT 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/cmu-ctat-tutor_1.1.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-ctat-tutor2",
+      "displayName": "CTAT-Tutor2",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD CTAT 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/cmu-ctat-tutor_1.1.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-ctattutors",
+      "displayName": "CTAT-Tutors",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD CTAT 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/cmu-ctat-tutor_1.1.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-idea-watson",
+      "displayName": "Watson",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Watson 1.1//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/cmu-idea-watson_1.1.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-cmu-mwe-policyworld",
+      "displayName": "PolicyWorld",
+      "description": "",
+      "jsonCapable": false,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD PolicyWorld 1.0//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/cmu_mwe_policyworld_game_1_0.dtd",
+      "resourceService": {
+        "name": "activity-service"
+      }
+    },
+    {
+      "id": "x-oli-dynadrop_layout",
+      "displayName": "Dynadrop Layout",
+      "description": "",
+      "jsonCapable": true,
+      "PUBLIC_ID": "-//Carnegie Mellon University//DTD Dynadrop Layout 3.8//EN",
+      "SYSTEM_ID": "http://oli.cmu.edu/dtd/oli_dynadrop_layout_1_0.dtd",
+      "resourceService": {
+        "name": "content-service"
+      }
+    }
+  ]
+}

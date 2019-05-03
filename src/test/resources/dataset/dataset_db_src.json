@@ -1,0 +1,7 @@
+{
+  "sqlScripts": {
+    "byResource": "dataset/dataset-create-by-resource.sql",
+    "byPart": "dataset/dataset-create-by-part.sql",
+    "bySkill": "dataset/dataset-create-by-skill.sql"
+  }
+}

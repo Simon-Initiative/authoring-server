@@ -1,0 +1,99 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="content_package" columnName="objectives_index"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="content_package">
+            <column name="objectives_index" type="JSON"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="content_package" columnName="skills_index"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="content_package">
+            <column name="skills_index" type="JSON"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="edge" columnName="source_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="edge">
+            <column name="source_type" type="VARCHAR(100)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="edge" columnName="destination_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="edge">
+            <column name="destination_type" type="VARCHAR(100)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-5">
+        <preConditions onFail="MARK_RAN">
+                <columnExists tableName="edge" columnName="broken"/>
+        </preConditions>
+        <dropColumn tableName="edge" columnName="broken"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="edge" columnName="status"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="edge">
+            <column name="status" type="VARCHAR(255)" defaultValue="NOT_VALIDATED">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-7">
+        <preConditions  onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="edge" columnName="metadata"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="edge">
+            <column name="metadata" type="JSON"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-8">
+        <preConditions  onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="edge" columnName="reference_type"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="edge">
+            <column name="reference_type" type="VARCHAR(100)" defaultValue="unknown">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.3.0-9">
+        <preConditions  onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="resource" columnName="metadata"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="resource">
+            <column name="metadata" type="JSON"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

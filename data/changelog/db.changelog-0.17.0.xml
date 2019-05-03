@@ -1,0 +1,224 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext
+                   http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.5.xsd">
+
+    <changeSet author="eliknebel@cmu.edu" id="0.17.0-1">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="content_package" columnName="parent_package"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="content_package">
+            <column name="parent_package" type="VARCHAR(32)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="eliknebel@cmu.edu" id="0.17.0-2">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="content_package" columnName="package_family"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="content_package">
+            <column name="package_family" type="VARCHAR(32)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="eliknebel@cmu.edu" id="0.17.0-3">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="content_package" columnName="deployment_status"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="content_package">
+            <column name="deployment_status" type="VARCHAR(32)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="eliknebel@cmu.edu" id="0.17.0-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="resource" columnName="last_revision"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="resource">
+            <column name="last_revision" type="VARCHAR(32)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="eliknebel@cmu.edu" id="0.17.0-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="resource" columnName="last_session"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="resource">
+            <column name="last_session" type="VARCHAR(32)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="eliknebel@cmu.edu" id="0.17.0-6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="web_content" columnName="md5"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="web_content">
+            <column name="md5" type="CHAR(32)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="eliknebel@cmu.edu" id="0.17.0-7">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="revision" />
+            </not>
+        </preConditions>
+        <createTable tableName="revision">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="resource" type="VARCHAR(32)"/>
+            <column name="previous_revision" type="VARCHAR(32)"/>
+            <column name="md5" type="CHAR(32)"/>
+            <column name="body" type="JSON"/>
+            <column name="author" type="VARCHAR(255)"/>
+            <column name="revision_type" type="VARCHAR(255)"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="revision"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-8">
+        <preConditions onFail="MARK_RAN">
+                <columnExists tableName="revision" columnName="resource"/>
+        </preConditions>
+        <dropColumn tableName="revision" columnName="resource"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-9">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="revision" columnName="resource_guid"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="revision">
+            <column name="resource_guid" type="VARCHAR(32)"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-10">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_revision_resource_guid_resource_guid" foreignKeyTableName="revision"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_revision_resource_guid_resource_guid" tableName="revision">
+            <column name="resource_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="resource_guid" baseTableName="revision" constraintName="fk_revision_resource_guid_resource_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="resource"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-11">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_resource_last_revision_last_revision" foreignKeyTableName="resource"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_resource_last_revision_last_revision" tableName="resource">
+            <column name="last_revision"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="last_revision" baseTableName="resource" constraintName="fk_resource_last_revision_last_revision" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="revision"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-12">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="revision" columnName="date_created"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="revision">
+            <column name="date_created" type="datetime"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-13">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="revision" columnName="date_updated"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="revision">
+            <column name="date_updated" type="datetime"/>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-14">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="revision" columnName="rev"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="revision">
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-15">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <tableExists tableName="revision_blob" />
+            </not>
+        </preConditions>
+        <createTable tableName="revision_blob">
+            <column name="guid" type="VARCHAR(32)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="rev" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+            <column name="json_payload" type="JSON"/>
+            <column name="xml_payload" type="MEDIUMTEXT"/>
+            <column name="date_created" type="datetime"/>
+            <column name="date_updated" type="datetime"/>
+        </createTable>
+        <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="revision_blob"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-16">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_revision_revision_blob_guid_revision_blob_guid" foreignKeyTableName="revision"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="revision">
+            <column name="revision_blob_guid" type="VARCHAR(32)"/>
+        </addColumn>
+        <createIndex indexName="fk_revision_revision_blob_guid_revision_blob_guid" tableName="revision">
+            <column name="revision_blob_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="revision_blob_guid" baseTableName="revision" constraintName="fk_revision_revision_blob_guid_revision_blob_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="revision_blob"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-17">
+        <preConditions onFail="MARK_RAN">
+            <columnExists tableName="revision" columnName="body"/>
+        </preConditions>
+        <dropColumn tableName="revision" columnName="body"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-18">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="revision" columnName="revision_number"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="revision">
+            <column name="revision_number" type="BIGINT">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-19">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <columnExists tableName="web_content" columnName="web_content_state"/>
+            </not>
+        </preConditions>
+        <addColumn tableName="web_content">
+            <column name="web_content_state" type="VARCHAR(255)" defaultValue="ACTIVE">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.17.0-20">
+        <modifyDataType tableName="content_package" columnName="package_family" newDataType="VARCHAR(255)"/>
+    </changeSet>
+</databaseChangeLog>

@@ -1,0 +1,34 @@
+SERVER_URL=http://dev.local
+
+# MySQL configuration
+MYSQL_ROOT_PASSWORD=password
+MYSQL_USER=content
+MYSQL_PASSWORD=password2
+MYSQL_DATABASE=content_db
+
+# Wildfly configuration
+adminuser=admin
+adminpass=Admin#70365
+managementport=9110
+serverport=8110
+
+# Keycloak configuration
+keycloakadmin=admin
+keycloakpass=admin
+keycloakrestauthz=false
+keycloakrealm=oli_security
+keycloakresource=content_service
+keycloaksecret=xxxxxxxxxxxxxxxxxxxxxxxx
+
+# SVN configuration
+svn_user=xxxxxxx
+svn_password=xxxxxxxx
+svn_template=https://example.edu/svn/content/editor/template/
+svn_projects=https://example.edu/svn/content/editor/projects/dev-local/
+
+# Dataset configuration
+#dataset_db=jdbc:mysql://example.edu:3306?useTimezone=true&serverTimezone=UTC&user=xxxxxxx&password=xxxxxxxxx
+dataset_db=jdbc:mysql://example.edu:3306?user=xxxxxxx&password=xxxxxxxx
+
+# Java runtime options
+JAVA_OPTS=-Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -Dxml.catalog.ignoreMissing=true -Dxml.catalog.files=/oli/dtd/catalog.xml -Dxml.catalog.verbosity=1 -Dxml.catalog.prefer=public  -Dxml.catalog.staticCatalog=yes -Dxml.catalog.allowPI=yes -Dxml.catalog.className=com.sun.org.apache.xml.internal.resolver.Resolver
