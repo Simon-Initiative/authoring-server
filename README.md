@@ -1,3 +1,5 @@
+[![Open Learning Initiative](https://oli.cmu.edu/wp-content/uploads/2018/10/oli-logo-78px-high-1.svg)](http://oli.cmu.edu/)
+
 # authoring-server
 
 [![Build Status](https://dalaran.oli.cmu.edu/jenkins/buildStatus/icon?job=content-service)](https://dalaran.oli.cmu.edu/jenkins/job/content-service/)
