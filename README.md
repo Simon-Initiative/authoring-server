@@ -8,6 +8,12 @@ This includes:
 * Dockerized Wildfly testing 
 * Jenkins for testing and continuous integration
 
+## Related repositories
+* [authoring-dev](https://github.com/Simon-Initiative/authoring-dev) - Docker development environment for the course authoring platform
+* [authoring-client](https://github.com/Simon-Initiative/authoring-client) - Typescript/React/Redux editing client
+* [authoring-admin](https://github.com/Simon-Initiative/authoring-admin) - Elm admin client
+* [authoring-eval](https://github.com/Simon-Initiative/authoring-eval) - Typescript/Node dynamic question evaluation engine
+
 ## Dependencies
 * Maven
 * Docker
@@ -73,3 +79,6 @@ $ docker-compose down
 
 $ docker-compose up --build
 ```
+
+## License
+This software is licensed under the [MIT License](./LICENSE) © 2019 Carnegie Mellon University
