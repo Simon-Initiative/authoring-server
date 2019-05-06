@@ -2,7 +2,7 @@
 
 [![Open Learning Initiative](https://oli.cmu.edu/wp-content/uploads/2018/10/oli-logo-78px-high-1.svg)](http://oli.cmu.edu/)
 
-[![Build Status](https://dalaran.oli.cmu.edu/jenkins/buildStatus/icon?job=content-service)](https://dalaran.oli.cmu.edu/jenkins/job/content-service/)
+[![Build Status](https://dalaran.oli.cmu.edu/jenkins/buildStatus/icon?job=authoring-server)](https://dalaran.oli.cmu.edu/jenkins/job/authoring-server/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/Simon-Initiative/course-editor/blob/master/LICENSE)
 
 Java EE OLI Content Service Maven project
