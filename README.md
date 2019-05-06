@@ -30,7 +30,7 @@ This includes:
 Clone this repository:
 
 ```
-$ git clone https://github.com/Simon-Initiative/content-service
+$ git clone https://github.com/Simon-Initiative/authoring-server
 ```
 
 Next change the values in the `service.envs` file (database names, passwords, ports etc). Note that the 
