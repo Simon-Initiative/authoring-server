@@ -25,9 +25,14 @@ public class StartupHook {
 
     // Reset any datasets that are in the PROCESSING state to the FAILED state.
     private void resetDatasets() {
-        final Query q = em.createNamedQuery("Dataset.resetProcessing");
-        q.executeUpdate();
-        log.info("Reset PROCESSING datasets to FAILED");
+        try {
+            final Query q = em.createNamedQuery("Dataset.resetProcessing");
+            q.executeUpdate();
+            log.info("Reset PROCESSING datasets to FAILED");
+        }catch (Throwable e){
+            log.info(e.getLocalizedMessage());
+        }
+
     }
 
     public void init(@Observes @Initialized(ApplicationScoped.class) Object init) {
