@@ -74,4 +74,4 @@ where enrolled_students.section_guid = student_performance.sectionGuid
   and student_performance.part_id = resources_and_parts.part_uid
 
 # Collapse sections from student_performance and aggregate data by part
-group by resources_and_parts.part_uid
+group by resources_and_parts.resource_id, resources_and_parts.question_id
