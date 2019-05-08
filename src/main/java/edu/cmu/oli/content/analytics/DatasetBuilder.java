@@ -37,14 +37,12 @@ import edu.cmu.oli.content.models.persistance.entities.DatasetBlob;
 import edu.cmu.oli.content.models.persistance.entities.DatasetStatus;
 import edu.cmu.oli.content.reportingdb.DbConnector;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Tuple;
 
 import edu.cmu.oli.content.ResourceException;
 import javax.ws.rs.core.Response;
