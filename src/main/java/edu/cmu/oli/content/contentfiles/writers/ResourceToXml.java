@@ -798,7 +798,7 @@ public class ResourceToXml {
                 }
             }
             if (el.getName().equalsIgnoreCase("content")) {
-                if ((el.getValue().isEmpty())) {
+                if ((el.getValue().isEmpty()) && el.getChildren().size() == 0) {
                     el.detach();
                 }
             }

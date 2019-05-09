@@ -59,77 +59,78 @@ public class MigrationProcessor {
             migrationRecord = new JsonParser().parse(fileString).getAsJsonObject();
         } else {
             migrationRecord = new JsonObject();
-            Files.write(migrationTracker, AppUtils.gsonBuilder().create().toJson(migrationRecord).getBytes());
+            outputTrackerFile(migrationTracker, migrationRecord);
         }
 
         TypedQuery<ContentPackage> q = em.createNamedQuery("ContentPackage.findAll", ContentPackage.class);
         List<ContentPackage> contentPackages = q.getResultList();
         log.debug("Migrating " + contentPackages.size() + " ContentPackages");
-        // This processing will take long; no need for entities to remain attached to session, so detach all
+        // This processing will take long; no need for entities to remain attached to
+        // session, so detach all
         em.clear();
         for (ContentPackage contentPackage : contentPackages) {
-            String pkgIdentifier = contentPackage.getId() + "_" + contentPackage.getVersion();
-            if (contentPackage.getSourceLocation() == null) {
-                trackMigration(migrationTracker, migrationRecord, contentPackage, pkgIdentifier, "missing source location");
-                continue;
-            }
-            Path p = Paths.get(contentPackage.getSourceLocation());
-            Path pkgXml = Paths.get(contentPackage.getSourceLocation() + File.separator + "content" + File.separator + "package.xml");
-            log.debug(pkgIdentifier + " already migrated " + migrationRecord.has(pkgIdentifier));
+            try {
+                final String pkgIdentifier = contentPackage.getId() + "_" + contentPackage.getVersion();
 
-            if (Files.exists(pkgXml) && !migrationRecord.has(pkgIdentifier)) {
-                log.debug("migration started for " + pkgIdentifier);
-                trackMigration(migrationTracker, migrationRecord, contentPackage, pkgIdentifier, "processing");
-                this.rscExec.submit(() -> processPackage(p, pkgXml, pkgIdentifier));
+                if (contentPackage.getSourceLocation() == null) {
+                    trackMigration(migrationTracker, migrationRecord, contentPackage, pkgIdentifier,
+                            "missing source location");
+                    continue;
+                }
+                Path p = Paths.get(contentPackage.getSourceLocation());
+                Path pkgXml = Paths.get(contentPackage.getSourceLocation() + File.separator + "content" + File.separator
+                        + "package.xml");
+                log.debug(pkgIdentifier + " already migrated " + migrationRecord.has(pkgIdentifier));
+
+                if (Files.exists(pkgXml) && !migrationRecord.has(pkgIdentifier)) {
+                    log.debug("migration started for " + pkgIdentifier);
+
+                    trackMigration(migrationTracker, migrationRecord, contentPackage, pkgIdentifier, "processing");
+
+                    final boolean success = processPackage(p, pkgXml, pkgIdentifier);
+                    trackMigration(migrationTracker, migrationRecord, contentPackage, pkgIdentifier,
+                            success ? "success" : "failed");
+                }
+
+            } catch (Throwable t) {
+                final String pkgIdentifier = contentPackage.getId() + "_" + contentPackage.getVersion();
+                final String message = "Error while processing course content package import " + pkgIdentifier;
+                log.error(message, t);
+
+                trackMigration(migrationTracker, migrationRecord, contentPackage, pkgIdentifier, "failed");
             }
+
         }
 
         this.rscExec.submit(this::webContentFolderCleanup);
     }
 
+    private static void outputTrackerFile(Path migrationTracker, JsonObject migrationRecord) throws IOException {
+        Files.write(migrationTracker, AppUtils.gsonBuilder().create().toJson(migrationRecord).getBytes());
+    }
+
     private void trackMigration(Path migrationTracker, JsonObject migrationRecord, ContentPackage contentPackage,
-                                String pkgIdentifier, String status) throws IOException {
+            String pkgIdentifier, String status) throws IOException {
         JsonObject pkgInfo = new JsonObject();
         pkgInfo.addProperty("id", contentPackage.getId());
         pkgInfo.addProperty("version", contentPackage.getVersion());
         pkgInfo.addProperty("location", contentPackage.getSourceLocation());
         pkgInfo.addProperty("status", status);
         migrationRecord.add(pkgIdentifier, pkgInfo);
-        Files.write(migrationTracker, AppUtils.gsonBuilder().create().toJson(migrationRecord).getBytes());
+
+        outputTrackerFile(migrationTracker, migrationRecord);
     }
 
-    private void processPackage(Path packageFolder, Path pkgXml, String pkgIdentifier) {
-        String status = "failed";
+    private boolean processPackage(Path packageFolder, Path pkgXml, String pkgIdentifier) {
         try {
-            PackageProcessor packageProcessor = (PackageProcessor)
-                    new InitialContext().lookup("java:global/content-service/PackageProcessor");
+            PackageProcessor packageProcessor = (PackageProcessor) new InitialContext()
+                    .lookup("java:global/content-service/PackageProcessor");
             packageProcessor.processPackage(packageFolder, pkgXml, "migrate");
-            status = "success";
-        } catch (Throwable e) {
+            return true;
+        } catch (Throwable t) {
             String message = "Error while processing course content package import " + packageFolder.toString();
-            log.error(message, e);
-        } finally {
-            String sourceLocation = this.config.get().getContentSourceXml();
-            Path migrationTracker = Paths.get(sourceLocation + File.separator + "migration_tracker.json");
-            if (Files.exists(migrationTracker)) {
-                String fileString = null;
-                try {
-                    fileString = new String(Files.readAllBytes(migrationTracker), StandardCharsets.UTF_8);
-                } catch (IOException e) {
-                    log.error("Error reading to migration_tracker file", e);
-                    return;
-                }
-                JsonObject migrationRecord = new JsonParser().parse(fileString).getAsJsonObject();
-                JsonObject pkgInfo = (JsonObject) migrationRecord.get(pkgIdentifier);
-                pkgInfo.addProperty("status", status);
-                try {
-                    Files.write(migrationTracker, AppUtils.gsonBuilder().create().toJson(migrationRecord).getBytes());
-                } catch (IOException e) {
-                    log.error("Error writing to migration_tracker file", e);
-                    return;
-                }
-
-            }
+            log.error(message, t);
+            return false;
         }
     }
 
@@ -138,8 +139,8 @@ public class MigrationProcessor {
         scheduler.schedule(() -> {
             WebContentFolderCleanup webContentFolderCleanup = null;
             try {
-                webContentFolderCleanup = (WebContentFolderCleanup)
-                        new InitialContext().lookup("java:global/content-service/WebContentFolderCleanup");
+                webContentFolderCleanup = (WebContentFolderCleanup) new InitialContext()
+                        .lookup("java:global/content-service/WebContentFolderCleanup");
                 webContentFolderCleanup.cleanupWebContentVolume();
             } catch (Throwable e) {
                 String message = "Error calling cleanupWebContentVolume";
