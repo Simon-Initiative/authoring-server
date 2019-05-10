@@ -1,9 +1,9 @@
 version: '3.1'
 services:
-  content:
+  authoring-server:
     build: .
-    image: oli/content-service
-    container_name: content-service
+    image: oli/authoring-server
+    container_name: authoring-server
     env_file: service.envs
     environment:
       - MYSQL_ADDRESS=mysql-content
@@ -14,7 +14,7 @@ services:
       - /oli_content/course_content_xml:/oli/course_content_xml
       - /oli/service_config:/oli/service_config
     networks:
-      - content-tier
+      - authoring-server-tier
     depends_on:
       - mysql-content
   mysql-content:
@@ -23,7 +23,7 @@ services:
     ports:
       - "33382:3306"
     networks:
-      - content-tier
+      - authoring-server-tier
 networks:
-  content-tier:
+  authoring-server-tier:
     driver: bridge
