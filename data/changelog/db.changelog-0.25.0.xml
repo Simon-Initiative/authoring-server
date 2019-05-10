@@ -22,16 +22,6 @@
             <column name="date_completed" type="datetime"/>
         </createTable>
         <addPrimaryKey columnNames="guid" constraintName="PRIMARY" tableName="dataset"/>
-
-        <addForeignKeyConstraint baseColumnNames="package_guid" baseTableName="dataset" constraintName="fk_dataset_content_package_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="content_package"/>
-        <createIndex indexName="fk_dataset_content_package_guid" tableName="dataset">
-            <column name="package_guid"/>
-        </createIndex>
-
-        <addForeignKeyConstraint baseColumnNames="dataset_blob_guid" baseTableName="dataset" constraintName="fk_dataset_dataset_blob_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="dataset_blob"/>
-        <createIndex indexName="fk_dataset_dataset_blob_guid" tableName="dataset">
-            <column name="dataset_blob_guid"/>
-        </createIndex>
     </changeSet>
 
     <!-- Dataset blob table -->
@@ -62,10 +52,41 @@
         <addColumn tableName="content_package">
             <column name="active_dataset_guid" type="VARCHAR(32)"/>
         </addColumn>
-        <addForeignKeyConstraint baseColumnNames="active_dataset_guid" baseTableName="content_package" constraintName="fk_content_package_dataset_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="dataset"/>
+
+    </changeSet>
+
+    <changeSet author="rgachuhi@cmu.edu" id="0.25.0-4">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_content_package_guid" foreignKeyTableName="dataset"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_dataset_content_package_guid" tableName="dataset">
+            <column name="package_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="package_guid" baseTableName="dataset" constraintName="fk_dataset_content_package_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="content_package"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.25.0-5">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_dataset_dataset_blob_guid" foreignKeyTableName="dataset"/>
+            </not>
+        </preConditions>
+        <createIndex indexName="fk_dataset_dataset_blob_guid" tableName="dataset">
+            <column name="dataset_blob_guid"/>
+        </createIndex>
+        <addForeignKeyConstraint baseColumnNames="dataset_blob_guid" baseTableName="dataset" constraintName="fk_dataset_dataset_blob_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="dataset_blob"/>
+    </changeSet>
+    <changeSet author="rgachuhi@cmu.edu" id="0.25.0-6">
+        <preConditions onFail="MARK_RAN">
+            <not>
+                <foreignKeyConstraintExists foreignKeyName="fk_content_package_dataset_guid" foreignKeyTableName="content_package"/>
+            </not>
+        </preConditions>
         <createIndex indexName="fk_content_package_dataset_guid" tableName="content_package">
             <column name="active_dataset_guid"/>
         </createIndex>
+        <addForeignKeyConstraint baseColumnNames="active_dataset_guid" baseTableName="content_package" constraintName="fk_content_package_dataset_guid" deferrable="false" initiallyDeferred="false" onDelete="NO ACTION" onUpdate="NO ACTION" referencedColumnNames="guid" referencedTableName="dataset"/>
     </changeSet>
 
 </databaseChangeLog>
