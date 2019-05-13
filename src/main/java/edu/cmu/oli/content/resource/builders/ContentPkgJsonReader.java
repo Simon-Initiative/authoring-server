@@ -91,7 +91,7 @@ public final class ContentPkgJsonReader {
             if (iconHref != null && !iconHref.isEmpty()) {
                 WebContent oldIcon = mnfst.getIcon();
                 if (!(oldIcon != null && oldIcon.getFileNode().getPathTo().equals(iconHref))) {
-                    FileNode iconFile = new FileNode(mnfst.getWebContentVolume(), iconHref, iconHref, "Undetermined");
+                    FileNode iconFile = new FileNode(mnfst.getWebContentVolume(), iconHref, iconHref, "undetermined");
                     WebContent icon = new WebContent();
                     icon.setFileNode(iconFile);
                     mnfst.setIcon(icon);

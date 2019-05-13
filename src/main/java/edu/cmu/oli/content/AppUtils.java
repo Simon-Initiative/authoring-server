@@ -283,7 +283,7 @@ public class AppUtils {
         Tika tika = new Tika();
         try {
             contentType = tika.detect(filePath);
-        } catch (IOException e) {
+        } catch (Throwable e) {
             log.debug("Error getting file size " + filePath);
         }
         return contentType;

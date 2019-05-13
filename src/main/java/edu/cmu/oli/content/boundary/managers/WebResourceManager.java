@@ -232,7 +232,7 @@ public class WebResourceManager {
                 long size = 0L;
                 size = AppUtils.getSize(uploadPath, size);
 
-                String contentType = "Undetermined";
+                String contentType = "undetermined";
                 contentType = AppUtils.getFileType(uploadPath, contentType);
 
                 FileNode resourceNode = new FileNode(contentPackage.getWebContentVolume(), "content" + File.separator + fileName, fileName, contentType);
