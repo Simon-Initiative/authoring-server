@@ -288,12 +288,8 @@ public class XmlToContentPackage {
         } else {
             webContent.setContentPackage(contentPackage);
         }
-        Tika tika = new Tika();
-        String contentType = "Undetermined";
-        try {
-            contentType = tika.detect(file);
-        } catch (IOException e) {
-        }
+
+        String contentType = AppUtils.getFileType(file, "undetermined");
 
         // Remove the leading "content/"
         String toPath = path.substring(path.indexOf("/") + 1);
