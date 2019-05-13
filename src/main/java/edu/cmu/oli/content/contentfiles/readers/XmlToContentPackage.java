@@ -18,7 +18,6 @@ import edu.cmu.oli.content.resource.validators.ResourceValidator;
 import edu.cmu.oli.content.security.AppSecurityController;
 import edu.cmu.oli.content.security.Scopes;
 import edu.cmu.oli.content.security.Secure;
-import org.apache.tika.Tika;
 import org.jdom2.DocType;
 import org.jdom2.Document;
 import org.jdom2.Element;
