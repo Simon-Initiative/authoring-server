@@ -148,35 +148,39 @@ public class DatasetBuilder {
      * versions of that package, and "parents" of the package if it was cloned.
      */
     private List<String> getPackages(final Dataset dataset) throws SQLException {
-        ContentPackage contentPackage = dataset.getContentPackage();
-
-        List<String> packageGuids = new ArrayList<String>();
-        // First preference is to use data from the dataset package itself
-        packageGuids.add(contentPackage.getGuid());
-
-        Map<String, String> variableReplacements = new HashMap<>();
-        variableReplacements.put("packageId", toSqlString(contentPackage.getId()));
-        variableReplacements.put("packageGuid", toSqlString(contentPackage.getGuid()));
-        String query = parseQuery(findPackagesQuery, variableReplacements);
-
-        // This blocks until the db returns results
-        JsonArray results = db.readDatabase(query);
-        log.info("Received packages from db: " + results.toString());
-
-        // Query returns packages ordered from newest to oldest. Results are in the form
-        // [{ "guid": "234587878753827" }]
-        for (JsonElement result : results) {
-            packageGuids.add(result.getAsJsonObject().get("guid").getAsString());
-        }
+        ContentPackage datasetPackage = dataset.getContentPackage();
+        List<ContentPackage> packagesToQuery = new ArrayList<>();
+        packagesToQuery.add(datasetPackage);
 
         // If this course has been cloned, there may be no previous versions of the
         // course with data, so we also consider package parents created before the
         // date this course was cloned.
-        String parentGuid = contentPackage.getParentPackage();
+        String parentGuid = datasetPackage.getParentPackage();
         while (parentGuid != null) {
-            packageGuids.add(parentGuid);
             ContentPackage parent = findContentPackage(parentGuid);
+            packagesToQuery.add(parent);
             parentGuid = parent.getParentPackage();
+        }
+        // Sort packages from newest to oldest
+        packagesToQuery.sort((ContentPackage a, ContentPackage b) -> b.getDateCreated().compareTo(a.getDateCreated()));
+
+        List<String> packageGuids = new ArrayList<String>();
+
+        for (ContentPackage contentPackage : packagesToQuery) {
+            Map<String, String> variableReplacements = new HashMap<>();
+            variableReplacements.put("packageId", toSqlString(contentPackage.getId()));
+            variableReplacements.put("packageGuid", toSqlString(contentPackage.getGuid()));
+            String query = parseQuery(findPackagesQuery, variableReplacements);
+
+            // DB queries run synchronously
+            JsonArray results = db.readDatabase(query);
+            log.info("Received packages from db: " + results.toString());
+
+            // Query returns package versions ordered from newest to oldest. Results are in
+            // the form [{ "guid": "234587878753827" }]
+            for (JsonElement result : results) {
+                packageGuids.add(result.getAsJsonObject().get("guid").getAsString());
+            }
         }
 
         return packageGuids;

@@ -18,7 +18,6 @@ import edu.cmu.oli.content.resource.validators.ResourceValidator;
 import edu.cmu.oli.content.security.AppSecurityController;
 import edu.cmu.oli.content.security.Scopes;
 import edu.cmu.oli.content.security.Secure;
-import org.apache.tika.Tika;
 import org.jdom2.DocType;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -288,12 +287,8 @@ public class XmlToContentPackage {
         } else {
             webContent.setContentPackage(contentPackage);
         }
-        Tika tika = new Tika();
-        String contentType = "Undetermined";
-        try {
-            contentType = tika.detect(file);
-        } catch (IOException e) {
-        }
+
+        String contentType = AppUtils.getFileType(file, "undetermined");
 
         // Remove the leading "content/"
         String toPath = path.substring(path.indexOf("/") + 1);
