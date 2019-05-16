@@ -40,9 +40,9 @@ public class LDModelControllerTest {
         Logger mockLogger = mock(Logger.class);
         this.cut.log = mockLogger;
 
-        when(this.cut.contentResourceManager.doCreate(anyString(), anyString(), any(), anyString(), anyString()))
+        when(this.cut.contentResourceManager.doCreate(anyString(), anyString(), any(), anyString(), anyString(), true))
                 .thenReturn(new Resource());
-        when(this.cut.contentResourceManager.doUpdate(anyString(), any(), any(), anyString(), anyString(), anyString()))
+        when(this.cut.contentResourceManager.doUpdate(anyString(), any(), any(), anyString(), anyString(), anyString(), true))
                 .thenReturn(new Resource());
 
         when(this.contentPackage.getId()).thenReturn("ccdm");
