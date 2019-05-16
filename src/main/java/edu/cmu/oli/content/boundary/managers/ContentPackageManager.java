@@ -242,7 +242,7 @@ public class ContentPackageManager {
         contentPackage.setDoc(new JsonWrapper(body));
         em.merge(contentPackage);
 
-//        packageFileController.updatePackgeJson(packageId, contentPackage);
+        // packageFileController.updatePackgeJson(packageId, contentPackage);
 
         packageFileController.updatePackgeXmlFile(contentPackage);
 
@@ -308,8 +308,8 @@ public class ContentPackageManager {
 
         boolean alreadyExist = validatePackageDoesNotAlreadyExist(contentPackage.getId(), contentPackage.getVersion());
         if (alreadyExist) {
-            String message = "Error creating new Content Package, it already exists " + id + "_"
-                    + contentPackage.getVersion();
+            String message = "Error creating new course package: a package with ID " + id + " and version "
+                    + contentPackage.getVersion() + " already exists.";
             log.error(message);
             throw new ResourceException(Response.Status.BAD_REQUEST, id + "_" + contentPackage.getVersion(), message);
         }
@@ -348,8 +348,10 @@ public class ContentPackageManager {
 
         // Replace cloned package and organization ids with corresponding values from
         // new package
-        packageFileController.updatePackageXmlIdAndVersion(pkgXml, contentPackage.getId(), contentPackage.getVersion(), contentPackage.getTitle());
-        packageFileController.updateOrganizationXmlIdAndVersion(orgXml, contentPackage.getId() + "-" + contentPackage.getVersion() + "_default", "1.0");
+        packageFileController.updatePackageXmlIdAndVersion(pkgXml, contentPackage.getId(), contentPackage.getVersion(),
+                contentPackage.getTitle());
+        packageFileController.updateOrganizationXmlIdAndVersion(orgXml,
+                contentPackage.getId() + "-" + contentPackage.getVersion() + "_default", "1.0");
 
         buildContentPackage(contentPackage, newSourceDir, pkgXml);
 
@@ -391,7 +393,7 @@ public class ContentPackageManager {
     }
 
     private void syncWithSVN(AppSecurityContext session, ContentPackage contentPackage, Path newSourceDir,
-                             String packageGuid) {
+            String packageGuid) {
         svnExecutor.submit(() -> {
             svnSyncController.updateSvnRepo(newSourceDir.toFile(), packageGuid);
             Optional<String> svnRepositoryUrl = svnSyncController.svnRepositoryUrl(newSourceDir.toFile());
@@ -461,7 +463,7 @@ public class ContentPackageManager {
         Optional<String> packageXmlFile = svnImportController.fetchRemotePackageXmlFile(repositoryUrl);
 
         if (!packageXmlFile.isPresent()) {
-            String message = "Error: " + repositoryUrl + " is not a valid OLI content repository.";
+            String message = "Error importing package: No course package exists at '" + repositoryUrl + "'.";
             log.error(message);
             throw new ResourceException(Response.Status.BAD_REQUEST, repositoryUrl, message);
         }
@@ -473,7 +475,7 @@ public class ContentPackageManager {
         try {
             document = builder.build(new StringReader(packageXmlFile.get()));
         } catch (JDOMException | IOException e) {
-            String message = "Error parsing package.xml file for content import requested";
+            String message = "Error importing package: There's a problem with the 'package.xml' file for this course.";
             log.error(message, e);
             throw new ResourceException(Response.Status.BAD_REQUEST, repositoryUrl, message);
         }
@@ -497,15 +499,15 @@ public class ContentPackageManager {
             contentPackage.setDoc(jsonWrapper);
             contentPackage.setPackageFamily(contentPackage.getId());
         } catch (BuildException e) {
-            String message = "Error parsing package.xml file for package import requested";
+            String message = "Error importing package: There's a problem with the 'package.xml' file for this course.";
             log.error(message, e);
             throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, repositoryUrl, message);
         }
 
         String shallowId = contentPackage.getId() + "-" + contentPackage.getVersion();
         if (SVNImportController.importPending.containsKey(shallowId)) {
-            String message = "Error: another import for the same package in progress:- " + contentPackage.getId() + "_"
-                    + contentPackage.getVersion();
+            String message = "Error importing package: There's another import in progress for the same package ("
+                    + contentPackage.getId() + ", version " + contentPackage.getVersion() + ").";
             log.error(message);
             throw new ResourceException(Response.Status.BAD_REQUEST,
                     contentPackage.getId() + "_" + contentPackage.getVersion(), message);
@@ -538,7 +540,8 @@ public class ContentPackageManager {
 
     }
 
-    public JsonElement deployPkg(AppSecurityContext session, String packageId, DeployStage deployStage, boolean redeploy) {
+    public JsonElement deployPkg(AppSecurityContext session, String packageId, DeployStage deployStage,
+            boolean redeploy) {
         this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
                 Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
         ContentPackage contentPackage = findContentPackage(packageId);
@@ -548,46 +551,52 @@ public class ContentPackageManager {
         ContentPackage.DeploymentStatus currentStatus = contentPackage.getDeploymentStatus();
         String deployAction = "update";
         switch (deployStage) {
-            case qa:
-                if (currentStatus == ContentPackage.DeploymentStatus.REQUESTING_QA) {
-                    // Push to QA already in progress; do nothing
-                    break;
+        case qa:
+            if (currentStatus == ContentPackage.DeploymentStatus.REQUESTING_QA) {
+                // Push to QA already in progress; do nothing
+                break;
+            }
+            deployAction = redeploy ? "update" : "deploy";
+            Optional<String> svnRepositoryUrl = svnSyncController
+                    .svnRepositoryUrl(Paths.get(contentPackage.getSourceLocation()).toFile());
+            String svnLocation = null;
+            if (svnRepositoryUrl.isPresent()) {
+                svnLocation = svnRepositoryUrl.get();
+                try {
+                    svnLocation = svnImportController.createSvnTag(svnLocation, contentPackage.getVersion(),
+                            "qa-" + deployAction);
+                } catch (ContentServiceException e) {
                 }
-                deployAction = redeploy ? "update" : "deploy";
-                Optional<String> svnRepositoryUrl = svnSyncController.svnRepositoryUrl(Paths.get(contentPackage.getSourceLocation()).toFile());
-                String svnLocation = null;
-                if (svnRepositoryUrl.isPresent()) {
-                    svnLocation = svnRepositoryUrl.get();
-                    try {
-                        svnLocation = svnImportController.createSvnTag(svnLocation, contentPackage.getVersion(), "qa-" + deployAction);
-                    } catch (ContentServiceException e) {
-                    }
-                }
+            }
 
-                deployController.sendRequestDeployEmail(session, contentPackage, deployAction, "QA", svnLocation);
-                contentPackage.setDeploymentStatus(ContentPackage.DeploymentStatus.REQUESTING_QA);
+            deployController.sendRequestDeployEmail(session, contentPackage, deployAction, "QA", svnLocation);
+            contentPackage.setDeploymentStatus(ContentPackage.DeploymentStatus.REQUESTING_QA);
+            break;
+        case prod:
+            if (currentStatus == ContentPackage.DeploymentStatus.REQUESTING_PRODUCTION
+                    || currentStatus == ContentPackage.DeploymentStatus.DEVELOPMENT) {
+                // Prevent request to production if on development or if push to Production
+                // already in progress; do nothing
                 break;
-            case prod:
-                if (currentStatus == ContentPackage.DeploymentStatus.REQUESTING_PRODUCTION
-                        || currentStatus == ContentPackage.DeploymentStatus.DEVELOPMENT) {
-                    // Prevent request to production if on development or if push to Production already in progress; do nothing
-                    break;
+            }
+            if (currentStatus == ContentPackage.DeploymentStatus.QA) {
+                deployAction = "deploy";
+            }
+            Optional<String> svnRepositoryUrlProd = svnSyncController
+                    .svnRepositoryUrl(Paths.get(contentPackage.getSourceLocation()).toFile());
+            String svnLocationProd = null;
+            if (svnRepositoryUrlProd.isPresent()) {
+                svnLocationProd = svnRepositoryUrlProd.get();
+                try {
+                    svnLocationProd = svnImportController.createSvnTag(svnLocationProd, contentPackage.getVersion(),
+                            "prod-" + deployAction);
+                } catch (ContentServiceException e) {
                 }
-                if (currentStatus == ContentPackage.DeploymentStatus.QA) {
-                    deployAction = "deploy";
-                }
-                Optional<String> svnRepositoryUrlProd = svnSyncController.svnRepositoryUrl(Paths.get(contentPackage.getSourceLocation()).toFile());
-                String svnLocationProd = null;
-                if (svnRepositoryUrlProd.isPresent()) {
-                    svnLocationProd = svnRepositoryUrlProd.get();
-                    try {
-                        svnLocationProd = svnImportController.createSvnTag(svnLocationProd, contentPackage.getVersion(), "prod-" + deployAction);
-                    } catch (ContentServiceException e) {
-                    }
-                }
-                deployController.sendRequestDeployEmail(session, contentPackage, deployAction, "Production", svnLocationProd);
-                contentPackage.setDeploymentStatus(ContentPackage.DeploymentStatus.REQUESTING_PRODUCTION);
-                break;
+            }
+            deployController.sendRequestDeployEmail(session, contentPackage, deployAction, "Production",
+                    svnLocationProd);
+            contentPackage.setDeploymentStatus(ContentPackage.DeploymentStatus.REQUESTING_PRODUCTION);
+            break;
         }
         JsonObject deployStatus = new JsonObject();
         deployStatus.addProperty("deployStatus", contentPackage.getDeploymentStatus().toString());
@@ -595,7 +604,8 @@ public class ContentPackageManager {
     }
 
     @TransactionTimeout(unit = TimeUnit.MINUTES, value = 50L)
-    public JsonElement newVersionOrClone(AppSecurityContext session, String packageId, String newPkgId, String version) {
+    public JsonElement newVersionOrClone(AppSecurityContext session, String packageId, String newPkgId,
+            String version) {
         securityManager.authorize(session, Collections.singletonList(ADMIN), null, null, null);
         ContentPackage contentPackage = findContentPackage(packageId);
         // Assume clone and own if newPkgId is not null;
@@ -613,21 +623,18 @@ public class ContentPackageManager {
         q.setParameter("version", version);
         List<ContentPackage> resultList = q.getResultList();
         if (!resultList.isEmpty()) {
-            String message = "Error creating new Content Package version, it already exists " + pkgId + "_"
-                    + version;
+            String message = "Error creating new package version: Version " + version.toString()
+                    + " already exists for package ID " + pkgId;
             log.error(message);
-            throw new ResourceException(Response.Status.BAD_REQUEST,
-                    pkgId + "_" + version, message);
+            throw new ResourceException(Response.Status.BAD_REQUEST, pkgId + "_" + version, message);
         }
 
         Path xmlSrcFolder = Paths.get(contentPackage.getSourceLocation());
         String sourceLocation = this.config.get().getContentSourceXml();
 
-        Path targetDir = Paths
-                .get(sourceLocation + File.separator + pkgId + "_" + AppUtils.generateUID(12));
+        Path targetDir = Paths.get(sourceLocation + File.separator + pkgId + "_" + AppUtils.generateUID(12));
         while (packageFileController.fileExists(targetDir)) {
-            targetDir = Paths
-                    .get(sourceLocation + File.separator + pkgId + "_" + AppUtils.generateUID(12));
+            targetDir = Paths.get(sourceLocation + File.separator + pkgId + "_" + AppUtils.generateUID(12));
         }
 
         String volumeLocation = this.config.get().getContentVolume();
@@ -637,11 +644,12 @@ public class ContentPackageManager {
         }
         ContentPackage cloneVersion = null;
         try {
-            cloneVersion = contentPackage.cloneVersion(pkgId, version, targetDir.toAbsolutePath().toString(), volumeLocation, null);
+            cloneVersion = contentPackage.cloneVersion(pkgId, version, targetDir.toAbsolutePath().toString(),
+                    volumeLocation, null);
             em.persist(cloneVersion);
             em.flush();
         } catch (Exception e) {
-            final String message = "Package cloning error:  " + e.getMessage();
+            final String message = "Package cloning error: " + e.getMessage();
             log.error(message, e);
             throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR,
                     pkgId + "_" + contentPackage.getVersion(), message);
@@ -678,7 +686,6 @@ public class ContentPackageManager {
                 Scopes.EDIT_MATERIAL_ACTION.toString(), "ContentPackage", cloneVersion.getTitle()));
         securityManager.updateUserAttributes(session.getPreferredUsername(), userPermission, null);
 
-
         final ContentPackage cloneVersionFinal = cloneVersion;
         svnExecutor.submit(() -> {
             try {
@@ -699,11 +706,14 @@ public class ContentPackageManager {
                 try {
                     String editorBranch = null;
                     if (newPkgId != null) {
-                        editorBranch = svnSyncController.cloneRemoteAndOwn(svnRepositoryUrl.get(), cloneVersionFinal.getId(), cloneVersionFinal.getVersion());
+                        editorBranch = svnSyncController.cloneRemoteAndOwn(svnRepositoryUrl.get(),
+                                cloneVersionFinal.getId(), cloneVersionFinal.getVersion());
                     } else {
-                        editorBranch = svnImportController.createEditorBranch(svnRepositoryUrl.get(), cloneVersionFinal.getVersion());
+                        editorBranch = svnImportController.createEditorBranch(svnRepositoryUrl.get(),
+                                cloneVersionFinal.getVersion());
                     }
-                    svnSyncController.switchSvnRepo(Paths.get(cloneVersionFinal.getSourceLocation()).toFile(), editorBranch);
+                    svnSyncController.switchSvnRepo(Paths.get(cloneVersionFinal.getSourceLocation()).toFile(),
+                            editorBranch);
                 } catch (ContentServiceException e) {
                     // No-op
                 }
@@ -717,11 +727,13 @@ public class ContentPackageManager {
         });
 
         JsonObject message = new JsonObject();
-        message.addProperty("message", "New version creation in progress: packageId=" + cloneVersion.getId() + " version=" + cloneVersion.getVersion());
+        message.addProperty("message", "New version creation in progress: packageId=" + cloneVersion.getId()
+                + " version=" + cloneVersion.getVersion());
         return message;
     }
 
-    public boolean updateDeploymentStatus(AppSecurityContext session, String packageId, ContentPackage.DeploymentStatus newStatus) {
+    public boolean updateDeploymentStatus(AppSecurityContext session, String packageId,
+            ContentPackage.DeploymentStatus newStatus) {
         // Admin only action
         securityManager.authorize(session, Collections.singletonList(ADMIN), null, null, null);
 
@@ -733,26 +745,26 @@ public class ContentPackageManager {
 
         String server = null;
 
-        switch (newStatus){
-            case QA:
-                server = "QA";
-                break;
-            case PRODUCTION:
-                server = "Production";
-                break;
-            default:
-                server = null;
+        switch (newStatus) {
+        case QA:
+            server = "QA";
+            break;
+        case PRODUCTION:
+            server = "Production";
+            break;
+        default:
+            server = null;
         }
 
-        if(server != null) {
-            String subject = (serverName.contains("dev.local") ? "TESTING: PLEASE IGNORE THIS - " : "") + "OLI package " +
-                    pkg.getTitle() + " has been pushed to " + server;
+        if (server != null) {
+            String subject = (serverName.contains("dev.local") ? "TESTING: PLEASE IGNORE THIS - " : "") + "OLI package "
+                    + pkg.getTitle() + " has been pushed to " + server;
 
             StringBuilder sb = new StringBuilder();
             sb.append("The user ").append(session.getFirstName()).append(" ").append(session.getLastName()).append(" (")
                     .append(session.getEmail()).append(") has published the course content package (id=")
-                    .append(pkg.getId()).append(" and version=").append(pkg.getVersion())
-                    .append(") to ").append(server);
+                    .append(pkg.getId()).append(" and version=").append(pkg.getVersion()).append(") to ")
+                    .append(server);
             deployController.sendStateTransitionEmail(pkg, subject, sb.toString());
         }
         return true;
@@ -760,8 +772,10 @@ public class ContentPackageManager {
 
     private void postProcessNewVersion(ContentPackage contentPackage) {
         try {
-            Path pkgXmlPath = Paths.get(contentPackage.getSourceLocation() + File.separator + contentPackage.getFileNode().getPathFrom());
-            packageFileController.updatePackageXmlIdAndVersion(pkgXmlPath, contentPackage.getId(), contentPackage.getVersion(), contentPackage.getTitle());
+            Path pkgXmlPath = Paths.get(
+                    contentPackage.getSourceLocation() + File.separator + contentPackage.getFileNode().getPathFrom());
+            packageFileController.updatePackageXmlIdAndVersion(pkgXmlPath, contentPackage.getId(),
+                    contentPackage.getVersion(), contentPackage.getTitle());
 
             Map<String, Map<String, String>> jobs = new HashMap<>();
             Map<String, String> revsMap = new HashMap<>();
@@ -786,8 +800,8 @@ public class ContentPackageManager {
 
                 jobs.forEach((key, value) -> versionExec.submit(() -> {
                     try {
-                        VersionBatchProcess versionBatchProcess = (VersionBatchProcess)
-                                new InitialContext().lookup("java:global/content-service/VersionBatchProcess");
+                        VersionBatchProcess versionBatchProcess = (VersionBatchProcess) new InitialContext()
+                                .lookup("java:global/content-service/VersionBatchProcess");
                         versionBatchProcess.versionProcess(contentPackage.getGuid(), value, jobIds, key);
                     } catch (Throwable e) {
                         String message = "Error while creating revisions in " + contentPackage.toString();
@@ -804,8 +818,8 @@ public class ContentPackageManager {
 
     private void removeExistingPackage(String pkgGuid) {
         try {
-            VersionBatchProcess versionBatchProcess = (VersionBatchProcess)
-                    new InitialContext().lookup("java:global/content-service/VersionBatchProcess");
+            VersionBatchProcess versionBatchProcess = (VersionBatchProcess) new InitialContext()
+                    .lookup("java:global/content-service/VersionBatchProcess");
             versionBatchProcess.removeExistingPackage(pkgGuid);
         } catch (Throwable e) {
             log.error(e.getLocalizedMessage(), e);
