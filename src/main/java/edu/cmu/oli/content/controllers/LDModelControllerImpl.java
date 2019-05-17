@@ -81,7 +81,7 @@ public class LDModelControllerImpl implements LDModelController {
 
     @Override
     public List<String> importLDModel(String pkgGuid, Optional<String> skillsModel, Optional<String> problemsModel,
-            Optional<String> losModel) throws ContentServiceException {
+                                      Optional<String> losModel) throws ContentServiceException {
         ContentPackage aPackage = findPackage(pkgGuid, 0);
         return importLDModel(aPackage, skillsModel, problemsModel, losModel);
     }
@@ -110,7 +110,7 @@ public class LDModelControllerImpl implements LDModelController {
     @Override
     @TransactionTimeout(unit = TimeUnit.MINUTES, value = 50L)
     public List<String> importLDModel(ContentPackage pkg, Optional<String> skillsModel, Optional<String> problemsModel,
-            Optional<String> losModel) throws ContentServiceException {
+                                      Optional<String> losModel) throws ContentServiceException {
 
         Path ldmodelTracker = Paths
                 .get(pkg.getSourceLocation() + File.separator + "ldmodel" + File.separator + "ldhash.json");
@@ -319,9 +319,9 @@ public class LDModelControllerImpl implements LDModelController {
             String lockId = AppUtils.generateGUID();
 
             if (resourceById == null) {
-                contentResourceManager.doCreate(pkg.getGuid(), "x-oli-skills_model", res, "LDModel", lockId);
+                contentResourceManager.doCreate(pkg.getGuid(), "x-oli-skills_model", res, "LDModel", lockId, true);
             } else {
-                contentResourceManager.doUpdate(pkg.getGuid(), resourceById.resource, res, "LDModel", lockId, null);
+                contentResourceManager.doUpdate(pkg.getGuid(), resourceById.resource, res, "LDModel", lockId, null, true);
             }
 
             log.debug("Imported SkillModel: created model id=" + resourceId + " with " + m + " skills");
@@ -592,13 +592,13 @@ public class LDModelControllerImpl implements LDModelController {
             wrapper.add("doc", doc);
 
             String lockId = UUID.randomUUID().toString().replaceAll("-", "");
-            contentResourceManager.doUpdate(pkg.getGuid(), e.getValue().resource, wrapper, "LDModel", lockId, null);
+            contentResourceManager.doUpdate(pkg.getGuid(), e.getValue().resource, wrapper, "LDModel", lockId, null, true);
         });
         return errors;
     }
 
     private ResourceJson getResourceJson(ContentPackage pkg, Map<String, ResourceJson> resourceMapById,
-            String objectiveResourceId) {
+                                         String objectiveResourceId) {
         ResourceJson resourceById = null;
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Resource> criteria = cb.createQuery(Resource.class);
@@ -671,7 +671,8 @@ public class LDModelControllerImpl implements LDModelController {
         List<String> errors = new ArrayList<>();
         String line;
         int n = 2, m = 0;
-        loop: for (int x = n; lines.length > x; x++) {
+        loop:
+        for (int x = n; lines.length > x; x++) {
             line = lines[x];
             // Increment line number
             n++;
@@ -799,7 +800,8 @@ public class LDModelControllerImpl implements LDModelController {
                 wrapper.add("doc", doc);
 
                 String lockId = AppUtils.generateUID(32);
-                contentResourceManager.doUpdate(pkg.getGuid(), e.getValue().resource, wrapper, "LDModel", lockId, null);
+                contentResourceManager.doUpdate(pkg.getGuid(), e.getValue().resource, wrapper, "LDModel", lockId, null, false);
+
             }
         });
 
@@ -807,7 +809,7 @@ public class LDModelControllerImpl implements LDModelController {
     }
 
     private void addSkillTag(ContentPackage pkg, String fileName, Map<String, ResourceJson> resourceMapById,
-            List<String> errors, int n, ResourceJson resourceById, String problemId, String stepId, String skillId) {
+                             List<String> errors, int n, ResourceJson resourceById, String problemId, String stepId, String skillId) {
         JsonElement activity = resourceById.json.entrySet().iterator().next().getValue();
         JsonArray contentArray = activity.getAsJsonObject().getAsJsonArray("#array");
         if (problemId == null) {
@@ -818,40 +820,56 @@ public class LDModelControllerImpl implements LDModelController {
                 errors.add(message);
                 return;
             }
-            int index = -1;
-            int gIndex = 0;
-            boolean skillRefAlreadyExists = false;
-            for (JsonElement it : contentArray) {
-                // Skip title and short_title elements if present
-                JsonObject ob = it.getAsJsonObject();
-                if (ob.has("title") || ob.has("short_title")) {
-                    index = gIndex;
-                }
-                // Skip to after last skillref
-                if (ob.has("skillref")) {
-                    index = gIndex;
-                    // If skillref already set, break loop
-                    if (ob.get("skillref").getAsJsonObject().get("@idref").getAsString().equals(skillId)) {
-                        skillRefAlreadyExists = true;
-                        break;
+            List<JsonElement> allParts = new ArrayList<>();
+            findAllParts(contentArray, allParts);
+            if (allParts.isEmpty()) {
+                int index = -1;
+                int gIndex = 0;
+                boolean skillRefAlreadyExists = false;
+                for (JsonElement it : contentArray) {
+                    // Skip title and short_title elements if present
+                    JsonObject ob = it.getAsJsonObject();
+                    if (ob.has("title") || ob.has("short_title")) {
+                        index = gIndex;
                     }
+                    // Skip to after last skillref
+                    if (ob.has("skillref")) {
+                        index = gIndex;
+                        // If skillref already set, break loop
+                        if (ob.get("skillref").getAsJsonObject().get("@idref").getAsString().equals(skillId)) {
+                            skillRefAlreadyExists = true;
+                            break;
+                        }
+                    }
+                    gIndex++;
                 }
-                gIndex++;
-            }
 
-            if (skillRefAlreadyExists) {
-                return;
+                tagWithSkill(skillId, activity, contentArray, index, skillRefAlreadyExists);
+            } else {
+                // Remove all activity level tagging
+                List<JsonElement> aTags = new ArrayList<>();
+                contentArray.forEach(e->{
+                    if(e.getAsJsonObject().has("skillref")){
+                        aTags.add(e.getAsJsonObject());
+                    }
+                });
+                aTags.forEach(e->contentArray.remove(e));
+
+                // Apply tagging to the part level
+                allParts.forEach(part -> {
+                    tagPartWithSkill(skillId, part);
+                });
             }
-            JsonObject wrapper = new JsonObject();
-            JsonObject skillTag = new JsonObject();
-            skillTag.addProperty("@idref", skillId);
-            wrapper.add("skillref", skillTag);
-            JsonArray insert = insert(index, wrapper, contentArray);
-            activity.getAsJsonObject().add("#array", insert);
 
         } else {
-            Optional<JsonElement> problem = locateParentObjectById(contentArray, problemId);
-            if (!problem.isPresent()) {
+            List<JsonElement> problemList = new ArrayList<>();
+            findProblemById(contentArray, problemId, problemList);
+            if (problemList.isEmpty()) {
+                if (!resourceById.resource.getType().equals("x-oli-assessment2-pool")) {
+                    log.info("Problem=" + problemId + " not found within activity="
+                            + activity.getAsJsonObject().get("@id").getAsString() + " resource type="
+                            + resourceById.resource.getType());
+                }
                 // Problem (question) not found within this activity, look for it within pools
                 // used by this activity
                 // log.debug("problem " + problemId + " not found. Looking in question pools");
@@ -874,47 +892,24 @@ public class LDModelControllerImpl implements LDModelController {
                             String message = "line " + n + ": " + fileName + " no such resource in package: " + e;
                             log.error(message);
                             errors.add(message);
+                        } else {
+                            addSkillTag(pkg, fileName, resourceMapById, errors, n, resById, problemId, stepId, skillId);
                         }
-
-                        addSkillTag(pkg, fileName, resourceMapById, errors, n, resById, problemId, stepId, skillId);
 
                     });
                 }
             } else {
-                if (stepId != null) {
-                    Optional<JsonElement> step = locateParentObjectById(problem.get(), stepId);
-                    if (step.isPresent()) {
-                        JsonArray stepArray = step.get().getAsJsonObject().getAsJsonArray("#array");
-                        boolean skillRefAlreadyExists = false;
-                        for (JsonElement next : stepArray) {
-                            if (next.isJsonObject() && next.getAsJsonObject().has("skillref") && next.getAsJsonObject()
-                                    .get("skillref").getAsJsonObject().get("@idref").getAsString().equals(skillId)) {
-                                skillRefAlreadyExists = true;
-                                break;
-                            }
-                        }
-                        if (skillRefAlreadyExists) {
-                            return;
-                        }
+                JsonElement problemBody = problemList.get(0);
+                JsonArray problemArray = problemBody.getAsJsonObject().getAsJsonArray("#array");
+                if (problemArray == null) {
+                    log.error("problem " + problemId + " not found. " + fileName + "\nMalformed Problem? "
+                            + AppUtils.gsonBuilder().create().toJson(problemBody));
+                    return;
+                }
 
-                        JsonObject wrapper = new JsonObject();
-                        JsonObject skillTag = new JsonObject();
-                        skillTag.addProperty("@idref", skillId);
-                        wrapper.add("skillref", skillTag);
-                        JsonArray insert = insert(-1, wrapper, stepArray);
-                        step.get().getAsJsonObject().add("#array", insert);
-                    } else {
-                        log.error("problem " + problemId + " and step " + stepId + " not found. Should not happen "
-                                + fileName);
-                    }
-                } else {
-                    JsonArray problemArray = problem.get().getAsJsonObject().getAsJsonArray("#array");
-                    if (problemArray == null) {
-                        log.error("problem " + problemId + " not found. " + fileName + "\nMalformed Problem? "
-                                + AppUtils.gsonBuilder().create().toJson(problem.get()));
-                        return;
-                    }
-
+                List<JsonElement> allParts = new ArrayList<>();
+                findAllParts(problemArray, allParts);
+                if (allParts.isEmpty()) {
                     int index = -1;
                     int gIndex = -1;
                     boolean bodyElementFound = false;
@@ -940,20 +935,167 @@ public class LDModelControllerImpl implements LDModelController {
                                 skillRefAlreadyExists = true;
                                 break;
                             }
-
                         }
                         gIndex++;
                     }
-                    if (skillRefAlreadyExists) {
-                        return;
-                    }
+                    tagWithSkill(skillId, problemBody, problemArray, index, skillRefAlreadyExists);
+                } else {
+                    // Remove all question level tagging
+                    List<JsonElement> qTags = new ArrayList<>();
+                    problemArray.forEach(e->{
+                        if(e.getAsJsonObject().has("skillref")){
+                            qTags.add(e.getAsJsonObject());
+                        }
+                    });
+                    qTags.forEach(e->problemArray.remove(e));
 
-                    JsonObject wrapper = new JsonObject();
-                    JsonObject skillTag = new JsonObject();
-                    skillTag.addProperty("@idref", skillId);
-                    wrapper.add("skillref", skillTag);
-                    JsonArray insert = insert(index, wrapper, problemArray);
-                    problem.get().getAsJsonObject().add("#array", insert);
+                    // Apply all tagging at the part level
+                    assignPartIdIfAbsent(problemBody.getAsJsonObject());
+                    Optional<JsonElement> partByStepId = findPartByStepId(allParts, stepId);
+                    if (partByStepId.isPresent()) {
+                        tagPartWithSkill(skillId, partByStepId.get());
+                    } else {
+                        allParts.forEach(part -> {
+                            tagPartWithSkill(skillId, part);
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    private void tagWithSkill(String skillId, JsonElement problemBody, JsonArray problemArray, int index, boolean skillRefAlreadyExists) {
+        if (skillRefAlreadyExists) {
+            return;
+        }
+
+        JsonObject wrapper = new JsonObject();
+        JsonObject skillTag = new JsonObject();
+        skillTag.addProperty("@idref", skillId);
+        wrapper.add("skillref", skillTag);
+        JsonArray insert = insert(index, wrapper, problemArray);
+        problemBody.getAsJsonObject().add("#array", insert);
+    }
+
+    private Optional<JsonElement> findPartByStepId(List<JsonElement> allParts, String stepId) {
+        if (stepId == null) {
+            return Optional.empty();
+        }
+        for (JsonElement el : allParts) {
+            final JsonObject part = el.getAsJsonObject();
+            if (part.has("@id") && part.get("@id").getAsString().equalsIgnoreCase(stepId)) {
+                return Optional.of(part);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    private void tagPartWithSkill(String skillId, JsonElement part) {
+
+        final JsonObject partAsJsonObject = part.getAsJsonObject();
+        if (!partAsJsonObject.has("@id")) {
+            partAsJsonObject.addProperty("@id", UUID.randomUUID().toString().replaceAll("-", ""));
+        }
+        if(!partAsJsonObject.has("#array")){
+            log.error("part before -- " +AppUtils.gsonBuilder().create().toJson(part));
+            JsonArray stepArray = new JsonArray();
+
+            Iterator<Map.Entry<String, JsonElement>> it = partAsJsonObject.entrySet().iterator();
+            Set<String> keySet = new HashSet<>();
+            keySet.addAll(partAsJsonObject.keySet());
+            keySet.forEach(key->{
+                if(!key.equals("@id")) {
+                    JsonElement remove = partAsJsonObject.remove(key);
+                    JsonObject ob = new JsonObject();
+                    ob.add(key, remove);
+                }
+            });
+            partAsJsonObject.add("#array", stepArray);
+
+            log.error("part after -- " +AppUtils.gsonBuilder().create().toJson(part));
+        }
+        JsonArray stepArray = partAsJsonObject.getAsJsonArray("#array");
+
+        boolean skillRefAlreadyExists = false;
+        try {
+            for (JsonElement next : stepArray) {
+                if (next.isJsonObject() && next.getAsJsonObject().has("skillref") && next.getAsJsonObject()
+                        .get("skillref").getAsJsonObject().get("@idref").getAsString().equals(skillId)) {
+                    skillRefAlreadyExists = true;
+                    break;
+                }
+            }
+        }catch (Exception e){
+            log.error(AppUtils.gsonBuilder().create().toJson(part));
+            throw e;
+        }
+        tagWithSkill(skillId, part, stepArray, -1, skillRefAlreadyExists);
+    }
+
+    private void findAllParts(JsonElement content, List<JsonElement> parts) {
+        if (content.isJsonArray()) {
+            for (JsonElement e : content.getAsJsonArray()) {
+                findAllParts(e, parts);
+            }
+        } else if (content.isJsonObject()) {
+            if (content.getAsJsonObject().has("part")) {
+                parts.add(content.getAsJsonObject().get("part"));
+            } else {
+                for (Map.Entry<String, JsonElement> e : content.getAsJsonObject().entrySet()) {
+                    findAllParts(e.getValue(), parts);
+                }
+            }
+        }
+    }
+
+    private void findProblemById(JsonElement content, String problemId, List<JsonElement> problemList) {
+        if (content.isJsonArray()) {
+            for (JsonElement e : content.getAsJsonArray()) {
+                findProblemById(e, problemId, problemList);
+            }
+        } else if (content.isJsonObject()) {
+            if (content.getAsJsonObject().has("question")) {
+                JsonObject question = content.getAsJsonObject().get("question").getAsJsonObject();
+                if(question.has("@id") && question.get("@id").getAsString().equalsIgnoreCase(problemId)){
+                    problemList.add(question);
+                    return;
+                }
+            } else {
+                for (Map.Entry<String, JsonElement> e : content.getAsJsonObject().entrySet()) {
+                    findProblemById(e.getValue(), problemId, problemList);
+                }
+            }
+        }
+    }
+
+    private void findFirstResponseFromPart(JsonElement content, List<JsonElement> response) {
+        if (content.isJsonArray()) {
+            for (JsonElement e : content.getAsJsonArray()) {
+                findFirstResponseFromPart(e, response);
+            }
+        } else if (content.isJsonObject()) {
+            if (content.getAsJsonObject().has("response")) {
+                response.add(content.getAsJsonObject().get("response"));
+                return;
+            } else {
+                for (Map.Entry<String, JsonElement> e : content.getAsJsonObject().entrySet()) {
+                    findFirstResponseFromPart(e.getValue(), response);
+                }
+            }
+        }
+    }
+
+    private void assignPartIdIfAbsent(JsonObject problemBody) {
+        JsonArray problemElements = problemBody.get("#array").getAsJsonArray();
+        int p = 0;
+        boolean partIdMissing = false;
+        for (JsonElement el : problemElements) {
+            if (el.getAsJsonObject().has("part")) {
+                final JsonObject part = el.getAsJsonObject().get("part").getAsJsonObject();
+                if (!part.has("@id")) {
+                    part.addProperty("@id", "p" + (++p));
+                    partIdMissing = true;
                 }
             }
         }
@@ -991,7 +1133,7 @@ public class LDModelControllerImpl implements LDModelController {
     }
 
     @Override
-    public Map<String, String> extractTabSeparatedModel(ContentPackage pkg){
+    public Map<String, String> extractTabSeparatedModel(ContentPackage pkg) {
         JsonWrapper skillsIndexWrapper = pkg.getSkillsIndex();
         String skillsTabSeparated = null;
         if (skillsIndexWrapper != null) {
@@ -1190,7 +1332,7 @@ public class LDModelControllerImpl implements LDModelController {
     }
 
     private void skillModelTag(Map<SkillTagLevel, List<Edge>> probRefs, Edge e, String resourceId, String problem,
-            String step) {
+                               String step) {
         SkillTagLevel skillTagLevel = new SkillTagLevel(resourceId, problem, step);
         List<Edge> edges = probRefs.get(skillTagLevel);
         if (edges == null) {
@@ -1358,7 +1500,7 @@ public class LDModelControllerImpl implements LDModelController {
     }
 
     private ResourceJson getResourceJson(ContentPackage pkg, String fileName, Map<String, ResourceJson> resourceMapById,
-            String resourceId, Set<String> rscTypeFilter) throws ContentServiceException {
+                                         String resourceId, Set<String> rscTypeFilter) throws ContentServiceException {
         ResourceJson resourceById = null;
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Resource> criteria = cb.createQuery(Resource.class);

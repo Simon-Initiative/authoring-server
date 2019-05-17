@@ -407,7 +407,7 @@ public class ContentResourceManager {
                 Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
         Resource resource = doCreate(packageId, resourceTypeId, resourceContent, session.getPreferredUsername(),
-                session.getTokenString());
+                session.getTokenString(), true);
 
         Gson gson = AppUtils.gsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create();
         JsonObject resourceJson = (JsonObject) gson.toJsonTree(resource);
@@ -420,7 +420,7 @@ public class ContentResourceManager {
     }
 
     public Resource doCreate(String packageId, String resourceTypeId, JsonElement resourceContent, String author,
-            String lockId) {
+                             String lockId, boolean throwErrors) {
         Configurations serviceConfig = this.configuration.get();
         JsonObject resourceTypeDefinition = serviceConfig.getResourceTypeById(resourceTypeId);
         if (resourceTypeDefinition == null) {
@@ -483,7 +483,7 @@ public class ContentResourceManager {
                 jsonCapable ? "application/json" : "text/xml");
         resource.setFileNode(fileNode);
         resource.setContentPackage(contentPackage);
-        validateXmlContent(contentPackage.getId(), resource, contentValues.get("xmlContent"));
+        validateXmlContent(contentPackage.getId(), resource, contentValues.get("xmlContent"), throwErrors);
 
         RevisionBlob revisionBlob = jsonCapable
                 ? new RevisionBlob(new JsonWrapper(new JsonParser().parse(contentValues.get("content"))))
@@ -518,7 +518,7 @@ public class ContentResourceManager {
         }
 
         String lockId = this.lockController.getLockForResource(session, resourceId, false).getLockId();
-        doUpdate(packageId, resource, resourceContent, session.getPreferredUsername(), lockId, null);
+        doUpdate(packageId, resource, resourceContent, session.getPreferredUsername(), lockId, null, true);
 
         Gson gson = AppUtils.gsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create();
 
@@ -548,7 +548,7 @@ public class ContentResourceManager {
         System.err.println("Supplied revision: " + baseRevision);
 
         if (resource.getLastRevision().getGuid().equals(baseRevision)) {
-            doUpdate(packageId, resource, resourceContent, session.getPreferredUsername(), null, nextRevision);
+            doUpdate(packageId, resource, resourceContent, session.getPreferredUsername(), null, nextRevision, true);
         } else {
             String message = "Conflict detected " + resourceId;
             throw new ResourceException(Response.Status.CONFLICT, resourceId, message);
@@ -569,7 +569,7 @@ public class ContentResourceManager {
     }
 
     public Resource doUpdate(String packageId, Resource resource, JsonElement resourceContent, String author,
-            String lockId, String nextRevision) {
+                             String lockId, String nextRevision, boolean throwErrors) {
         JsonObject resourceTypeDefinition = null;
         if (((JsonObject) resourceContent).has("type")) {
             String type = ((JsonObject) resourceContent).get("type").getAsString();
@@ -643,7 +643,7 @@ public class ContentResourceManager {
         // Parse update payload into final xml and json documents
         Map<String, String> contentValues = contentValues(resourceContent, resource, jsonCapable);
 
-        Document document = validateXmlContent(packageId, resource, contentValues.get("xmlContent"));
+        Document document = validateXmlContent(packageId, resource, contentValues.get("xmlContent"), throwErrors);
 
         Gson gson = AppUtils.gsonBuilder().setPrettyPrinting().create();
         if (jsonCapable && document != null && !resource.getType().equalsIgnoreCase("x-oli-learning_objectives")
@@ -954,7 +954,7 @@ public class ContentResourceManager {
         return resourceContent;
     }
 
-    private Document validateXmlContent(String packageId, Resource resource, String xmlContent) {
+    private Document validateXmlContent(String packageId, Resource resource, String xmlContent, boolean throwErrors) {
         // Validate xmlContent
         SAXBuilder builder = AppUtils.validatingSaxBuilder();
         builder.setExpandEntities(false);
@@ -968,7 +968,7 @@ public class ContentResourceManager {
                 // log.info("XML Content \n" + xmlContent);
             }
             ResourceValidator validator = new BaseResourceValidator();
-            validator.initValidator(resource, build, true);
+            validator.initValidator(resource, build, throwErrors);
             validator.validate();
             Configurations serviceConfig = this.configuration.get();
             JsonObject resourceTypeDefinition = serviceConfig.getResourceTypeById(resource.getType());
@@ -980,7 +980,7 @@ public class ContentResourceManager {
                 try {
                     Class<?> aClass = Class.forName(validatorClass);
                     ResourceValidator resourceValidator = (ResourceValidator) AppUtils.lookupCDIBean(aClass);
-                    resourceValidator.initValidator(resource, build, true);
+                    resourceValidator.initValidator(resource, build, throwErrors);
                     resourceValidator.validate();
                 } catch (ClassNotFoundException e) {
                     String message = resource.getType() + " validator class not found";
