@@ -336,13 +336,16 @@ public class SVNSyncController {
                 log.error("SVN Update Error: ", ex);
             }
             try {
-                String commitMessage = "Publisher: committing changes to svn repository " + base.getName();
-                log.info("Committing changes to svn " + base.getName());
-                repos.put(base.getAbsolutePath(), Boolean.FALSE);
-                svnManager.commit(base, commitMessage);
+                svnCommit(base, svnManager);
 
             } catch (SVNException ex) {
                 log.error("SVN Commit Error: ", ex);
+                log.info("Retrying SVN Commit");
+                try {
+                    svnCommit(base, svnManager);
+                } catch (SVNException e) {
+                    log.error("SVN commit failed a second time");
+                }
             }
 
             log.info("Done Committing changes to svn " + base.getName());
@@ -353,6 +356,13 @@ public class SVNSyncController {
                 updateSvnRepo(base, packageGuid);
             }
         }
+    }
+
+    private void svnCommit(File base, SVNManager svnManager) throws SVNException {
+        String commitMessage = "Publisher: committing changes to svn repository " + base.getName();
+        log.info("Committing changes to svn " + base.getName());
+        repos.put(base.getAbsolutePath(), Boolean.FALSE);
+        svnManager.commit(base, commitMessage);
     }
 
     private void parseResource(File base, String crud, String packageId, Path file) {

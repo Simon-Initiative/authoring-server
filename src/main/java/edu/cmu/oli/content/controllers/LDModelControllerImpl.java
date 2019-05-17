@@ -846,14 +846,30 @@ public class LDModelControllerImpl implements LDModelController {
 
                 tagWithSkill(skillId, activity, contentArray, index, skillRefAlreadyExists);
             } else {
+                // Remove all activity level tagging
+                List<JsonElement> aTags = new ArrayList<>();
+                contentArray.forEach(e->{
+                    if(e.getAsJsonObject().has("skillref")){
+                        aTags.add(e.getAsJsonObject());
+                    }
+                });
+                aTags.forEach(e->contentArray.remove(e));
+
+                // Apply tagging to the part level
                 allParts.forEach(part -> {
                     tagPartWithSkill(skillId, part);
                 });
             }
 
         } else {
-            Optional<JsonElement> problem = locateParentObjectById(contentArray, problemId);
-            if (!problem.isPresent()) {
+            List<JsonElement> problemList = new ArrayList<>();
+            findProblemById(contentArray, problemId, problemList);
+            if (problemList.isEmpty()) {
+                if (!resourceById.resource.getType().equals("x-oli-assessment2-pool")) {
+                    log.info("Problem=" + problemId + " not found within activity="
+                            + activity.getAsJsonObject().get("@id").getAsString() + " resource type="
+                            + resourceById.resource.getType());
+                }
                 // Problem (question) not found within this activity, look for it within pools
                 // used by this activity
                 // log.debug("problem " + problemId + " not found. Looking in question pools");
@@ -883,7 +899,7 @@ public class LDModelControllerImpl implements LDModelController {
                     });
                 }
             } else {
-                JsonElement problemBody = problem.get();
+                JsonElement problemBody = problemList.get(0);
                 JsonArray problemArray = problemBody.getAsJsonObject().getAsJsonArray("#array");
                 if (problemArray == null) {
                     log.error("problem " + problemId + " not found. " + fileName + "\nMalformed Problem? "
@@ -919,18 +935,26 @@ public class LDModelControllerImpl implements LDModelController {
                                 skillRefAlreadyExists = true;
                                 break;
                             }
-
                         }
                         gIndex++;
                     }
                     tagWithSkill(skillId, problemBody, problemArray, index, skillRefAlreadyExists);
                 } else {
+                    // Remove all question level tagging
+                    List<JsonElement> qTags = new ArrayList<>();
+                    problemArray.forEach(e->{
+                        if(e.getAsJsonObject().has("skillref")){
+                            qTags.add(e.getAsJsonObject());
+                        }
+                    });
+                    qTags.forEach(e->problemArray.remove(e));
+
+                    // Apply all tagging at the part level
                     assignPartIdIfAbsent(problemBody.getAsJsonObject());
                     Optional<JsonElement> partByStepId = findPartByStepId(allParts, stepId);
                     if (partByStepId.isPresent()) {
                         tagPartWithSkill(skillId, partByStepId.get());
                     } else {
-
                         allParts.forEach(part -> {
                             tagPartWithSkill(skillId, part);
                         });
@@ -968,17 +992,43 @@ public class LDModelControllerImpl implements LDModelController {
     }
 
     private void tagPartWithSkill(String skillId, JsonElement part) {
-        if (!part.getAsJsonObject().has("@id")) {
-            part.getAsJsonObject().addProperty("@id", UUID.randomUUID().toString().replaceAll("-", ""));
+
+        final JsonObject partAsJsonObject = part.getAsJsonObject();
+        if (!partAsJsonObject.has("@id")) {
+            partAsJsonObject.addProperty("@id", UUID.randomUUID().toString().replaceAll("-", ""));
         }
-        JsonArray stepArray = part.getAsJsonObject().getAsJsonArray("#array");
+        if(!partAsJsonObject.has("#array")){
+            log.error("part before -- " +AppUtils.gsonBuilder().create().toJson(part));
+            JsonArray stepArray = new JsonArray();
+
+            Iterator<Map.Entry<String, JsonElement>> it = partAsJsonObject.entrySet().iterator();
+            Set<String> keySet = new HashSet<>();
+            keySet.addAll(partAsJsonObject.keySet());
+            keySet.forEach(key->{
+                if(!key.equals("@id")) {
+                    JsonElement remove = partAsJsonObject.remove(key);
+                    JsonObject ob = new JsonObject();
+                    ob.add(key, remove);
+                }
+            });
+            partAsJsonObject.add("#array", stepArray);
+
+            log.error("part after -- " +AppUtils.gsonBuilder().create().toJson(part));
+        }
+        JsonArray stepArray = partAsJsonObject.getAsJsonArray("#array");
+
         boolean skillRefAlreadyExists = false;
-        for (JsonElement next : stepArray) {
-            if (next.isJsonObject() && next.getAsJsonObject().has("skillref") && next.getAsJsonObject()
-                    .get("skillref").getAsJsonObject().get("@idref").getAsString().equals(skillId)) {
-                skillRefAlreadyExists = true;
-                break;
+        try {
+            for (JsonElement next : stepArray) {
+                if (next.isJsonObject() && next.getAsJsonObject().has("skillref") && next.getAsJsonObject()
+                        .get("skillref").getAsJsonObject().get("@idref").getAsString().equals(skillId)) {
+                    skillRefAlreadyExists = true;
+                    break;
+                }
             }
+        }catch (Exception e){
+            log.error(AppUtils.gsonBuilder().create().toJson(part));
+            throw e;
         }
         tagWithSkill(skillId, part, stepArray, -1, skillRefAlreadyExists);
     }
@@ -999,48 +1049,41 @@ public class LDModelControllerImpl implements LDModelController {
         }
     }
 
-    private Optional<JsonElement> findFirstResponseFromPart(JsonElement content) {
+    private void findProblemById(JsonElement content, String problemId, List<JsonElement> problemList) {
         if (content.isJsonArray()) {
             for (JsonElement e : content.getAsJsonArray()) {
-                findFirstResponseFromPart(e);
+                findProblemById(e, problemId, problemList);
+            }
+        } else if (content.isJsonObject()) {
+            if (content.getAsJsonObject().has("question")) {
+                JsonObject question = content.getAsJsonObject().get("question").getAsJsonObject();
+                if(question.has("@id") && question.get("@id").getAsString().equalsIgnoreCase(problemId)){
+                    problemList.add(question);
+                    return;
+                }
+            } else {
+                for (Map.Entry<String, JsonElement> e : content.getAsJsonObject().entrySet()) {
+                    findProblemById(e.getValue(), problemId, problemList);
+                }
+            }
+        }
+    }
+
+    private void findFirstResponseFromPart(JsonElement content, List<JsonElement> response) {
+        if (content.isJsonArray()) {
+            for (JsonElement e : content.getAsJsonArray()) {
+                findFirstResponseFromPart(e, response);
             }
         } else if (content.isJsonObject()) {
             if (content.getAsJsonObject().has("response")) {
-                return Optional.of(content.getAsJsonObject().get("response"));
+                response.add(content.getAsJsonObject().get("response"));
+                return;
             } else {
                 for (Map.Entry<String, JsonElement> e : content.getAsJsonObject().entrySet()) {
-                    findFirstResponseFromPart(e.getValue());
+                    findFirstResponseFromPart(e.getValue(), response);
                 }
             }
         }
-        return Optional.empty();
-    }
-
-    private Optional<JsonElement> findStepByPartId(JsonObject problemBody, String stepId) {
-        JsonArray problemElements = problemBody.get("#array").getAsJsonArray();
-        int p = 0;
-        for (JsonElement el : problemElements) {
-            if (el.getAsJsonObject().has("part")) {
-                final JsonObject part = el.getAsJsonObject().get("part").getAsJsonObject();
-                if (part.has("@id") && part.get("@id").getAsString().equalsIgnoreCase(stepId)) {
-                    return Optional.of(part);
-                }
-            }
-        }
-        return Optional.empty();
-    }
-
-    private Optional<JsonElement> findStepByPartNumber(JsonObject problemBody, int partNum) {
-        JsonArray problemElements = problemBody.get("#array").getAsJsonArray();
-        int p = 0;
-        for (JsonElement el : problemElements) {
-            if (el.getAsJsonObject().has("part")) {
-                if (++p == partNum) {
-                    return Optional.of(el.getAsJsonObject().get("part"));
-                }
-            }
-        }
-        return Optional.empty();
     }
 
     private void assignPartIdIfAbsent(JsonObject problemBody) {
