@@ -8,8 +8,7 @@ import org.junit.Before;
 import org.junit.Test;
 import org.slf4j.Logger;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -40,9 +39,9 @@ public class LDModelControllerTest {
         Logger mockLogger = mock(Logger.class);
         this.cut.log = mockLogger;
 
-        when(this.cut.contentResourceManager.doCreate(anyString(), anyString(), any(), anyString(), anyString(), true))
+        when(this.cut.contentResourceManager.doCreate(anyString(), anyString(), any(), anyString(), anyString(), anyBoolean()))
                 .thenReturn(new Resource());
-        when(this.cut.contentResourceManager.doUpdate(anyString(), any(), any(), anyString(), anyString(), anyString(), true))
+        when(this.cut.contentResourceManager.doUpdate(anyString(), any(), any(), anyString(), anyString(), anyString(), anyBoolean()))
                 .thenReturn(new Resource());
 
         when(this.contentPackage.getId()).thenReturn("ccdm");
