@@ -142,7 +142,6 @@ public class AnalyticsResourceManager {
         output.put("byResource", byResourceToTsv(json.get("byResource").getAsJsonArray()));
         output.put("byPart", byPartToTsv(json.get("byPart").getAsJsonArray()));
         output.put("bySkill", bySkillToTsv(json.get("bySkill").getAsJsonArray()));
-        System.out.println("Output size: " + output.entrySet().size());
         return output;
     }
 
