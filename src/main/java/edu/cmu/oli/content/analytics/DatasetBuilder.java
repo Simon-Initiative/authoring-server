@@ -397,16 +397,12 @@ public class DatasetBuilder {
     }
 
     private String toSqlString(final String x) {
-        final StringBuilder builder = new StringBuilder();
-        builder.append("'");
-        builder.append(x);
-        builder.append("'");
-        return builder.toString();
+        return "'" + x + "'";
     }
 
     private String toSqlString(final List<String> xs) {
         if (xs.size() == 1) {
-            return "'" + xs.get(0) + "'";
+            return toSqlString(xs.get(0));
         }
 
         final StringBuilder builder = new StringBuilder();
@@ -415,24 +411,6 @@ public class DatasetBuilder {
         builder.replace(builder.lastIndexOf(",") - 1, builder.lastIndexOf("'"), "");
         return builder.toString();
     }
-
-    // private <T> T findResource(T resourceType, String guid) {
-    // T object = null;
-    // try {
-    // object = em.find(resourceType, guid);
-    // if (object == null) {
-    // String message = "Error: resource requested was not found " + guid;
-    // log.error(message);
-    // throw new ResourceException(Response.Status.NOT_FOUND, guid, message);
-    // }
-    // } catch (IllegalArgumentException e) {
-    // String message = "Server Error while locating package " + guid;
-    // log.error(message);
-    // throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, guid,
-    // message);
-    // }
-    // return object;
-    // }
 
     private Dataset findDataset(String datasetGuid) {
         Dataset dataset = null;
