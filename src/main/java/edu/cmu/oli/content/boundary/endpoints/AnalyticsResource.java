@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
-import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -51,14 +50,6 @@ public class AnalyticsResource {
 
     @Context
     private HttpServletRequest httpServletRequest;
-
-    // private AppSecurityContext appSecurityContext;
-
-    // @PostConstruct
-    // public void init(){
-    // this.appSecurityContext =
-    // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-    // }
 
     @GET
     @Path("v1/analytics/{packageGuid}")
