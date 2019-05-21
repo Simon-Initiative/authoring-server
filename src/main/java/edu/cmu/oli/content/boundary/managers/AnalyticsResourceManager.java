@@ -22,6 +22,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
@@ -106,18 +107,17 @@ public class AnalyticsResourceManager {
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
-        datasetJsonToTsv(dataset).entrySet().forEach(slice -> {
-            try (ZipOutputStream zos = new ZipOutputStream(baos)) {
-                ZipEntry entry = new ZipEntry(slice.getKey());
-                zos.putNextEntry(entry);
-                zos.write(slice.getValue().getBytes());
+        try (ZipOutputStream zos = new ZipOutputStream(baos)) {
+            for (Map.Entry<String, String> entry : datasetJsonToTsv(dataset).entrySet()) {
+                ZipEntry zipEntry = new ZipEntry(entry.getKey() + ".tsv");
+                zos.putNextEntry(zipEntry);
+                zos.write(entry.getValue().getBytes());
                 zos.closeEntry();
-            } catch (IOException e) {
-                log.error(e.getMessage(), e);
-                throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, datasetGuid,
-                        "Unable to export dataset");
             }
-        });
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, datasetGuid, "Unable to export dataset");
+        }
 
         return baos;
     }
@@ -142,11 +142,11 @@ public class AnalyticsResourceManager {
         output.put("byResource", byResourceToTsv(json.get("byResource").getAsJsonArray()));
         output.put("byPart", byPartToTsv(json.get("byPart").getAsJsonArray()));
         output.put("bySkill", bySkillToTsv(json.get("bySkill").getAsJsonArray()));
+        System.out.println("Output size: " + output.entrySet().size());
         return output;
     }
 
     private String byResourceToTsv(JsonArray dataRows) {
-        // Order of titles matters here!
         List<String> titleHeaders = Arrays.asList("Resource", "Title");
         Set<String> titleKeys = new LinkedHashSet<String>();
         titleKeys.addAll(Arrays.asList("resource", "title"));
@@ -155,10 +155,9 @@ public class AnalyticsResourceManager {
     }
 
     private String byPartToTsv(JsonArray dataRows) {
-        List<String> headers = Arrays.asList("ID", "Resource", "Title", "Question", "Revision", "Part",
-                "Submit and Compare");
+        List<String> headers = Arrays.asList("ID", "Resource", "Title", "Revision", "Part", "Submit and Compare");
         Set<String> keys = new LinkedHashSet<String>();
-        keys.addAll(Arrays.asList("id", "resource", "title", "question", "revision", "part", "submitAndCompare"));
+        keys.addAll(Arrays.asList("id", "resourceId", "resourceTitle", "revision", "part", "submitAndCompare"));
 
         return datasetToTsv(headers, keys, dataRows);
     }
@@ -187,18 +186,17 @@ public class AnalyticsResourceManager {
         allKeys.addAll(keys);
         allKeys.addAll(commonKeys);
 
-        StringBuilder tsvDataset = new StringBuilder(titleRow(allHeaders));
-        dataRows.forEach(row -> dataRowToTsv(tsvDataset, (JsonObject) row, allKeys));
+        StringBuilder tsvDataset = new StringBuilder(tsvTitleRow(allHeaders));
+        dataRows.forEach(row -> tsvDataRow(tsvDataset, (JsonObject) row, allKeys));
 
         return tsvDataset.toString();
     }
 
-    private String titleRow(List<String> titles) {
-        return IntStream.range(0, titles.size())
-                .mapToObj(i -> i == titles.size() - 1 ? titles.get(i) + "\n" : titles.get(i) + "\t").toString();
+    private String tsvTitleRow(List<String> titles) {
+        return IntStream.range(0, titles.size()).mapToObj(i -> titles.get(i)).collect(Collectors.joining("\t")) + "\n";
     }
 
-    private StringBuilder dataRowToTsv(StringBuilder sb, JsonObject row, Set<String> keys) {
+    private StringBuilder tsvDataRow(StringBuilder sb, JsonObject row, Set<String> keys) {
         Iterator<String> iterator = keys.iterator();
         while (iterator.hasNext()) {
             sb.append(row.get(iterator.next())).append("\t");

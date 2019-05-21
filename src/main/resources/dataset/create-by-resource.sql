@@ -21,7 +21,7 @@ from
 
   # Resource info
   (select 
-    resource.guid as resource,
+    resource.id as resource,
     resource.title,
     count(part.id) as opportunities
   from (

@@ -13,6 +13,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import javax.annotation.PostConstruct;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
@@ -51,9 +52,13 @@ public class AnalyticsResource {
     @Context
     private HttpServletRequest httpServletRequest;
 
-    @Context
-    private AppSecurityContext appSecurityContext = appSecurityContextFactory
-            .extractSecurityContext(httpServletRequest);
+    // private AppSecurityContext appSecurityContext;
+
+    // @PostConstruct
+    // public void init(){
+    // this.appSecurityContext =
+    // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
+    // }
 
     @GET
     @Path("v1/analytics/{packageGuid}")
@@ -64,6 +69,7 @@ public class AnalyticsResource {
             @ApiResponse(responseCode = "404", description = "No datasets found for package guid") })
     public void getPackageDatasets(@Suspended AsyncResponse response, @PathParam("packageGuid") String packageGuid) {
         missingParameterResponse(response, packageGuid);
+        AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
 
         CompletableFuture.supplyAsync(() -> manager.getPackageDatasets(appSecurityContext, packageGuid), executor)
                 .thenApply(this::serializeResponse).exceptionally(ExceptionHandler::handleExceptions)
@@ -79,6 +85,7 @@ public class AnalyticsResource {
             @ApiResponse(responseCode = "404", description = "No dataset found with that guid") })
     public void getDataset(@Suspended AsyncResponse response, @PathParam("datasetGuid") String datasetGuid) {
         missingParameterResponse(response, datasetGuid);
+        AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
 
         CompletableFuture.supplyAsync(() -> manager.getDataset(appSecurityContext, datasetGuid), executor)
                 .thenApply(this::serializeResponse).exceptionally(ExceptionHandler::handleExceptions)
@@ -94,6 +101,7 @@ public class AnalyticsResource {
             @ApiResponse(responseCode = "404", description = "No package found with that guid") })
     public void createDataset(@Suspended AsyncResponse response, @PathParam("packageGuid") String packageGuid) {
         missingParameterResponse(response, packageGuid);
+        AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
 
         CompletableFuture.supplyAsync(() -> manager.createDataset(appSecurityContext, packageGuid), executor)
                 .thenApply(this::serializeResponse).exceptionally(ExceptionHandler::handleExceptions)
@@ -110,6 +118,7 @@ public class AnalyticsResource {
             @ApiResponse(responseCode = "404", description = "No dataset found with that guid") })
     public void exportDataset(@Suspended AsyncResponse response, @PathParam("datasetGuid") String datasetGuid) {
         missingParameterResponse(response, datasetGuid);
+        AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
 
         CompletableFuture.supplyAsync(() -> manager.exportDataset(appSecurityContext, datasetGuid), executor)
                 .thenApply((datasetBitStream) -> Response.ok(new ByteArrayInputStream(datasetBitStream.toByteArray()))
