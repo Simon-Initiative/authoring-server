@@ -800,8 +800,6 @@ public class LDModelControllerImpl implements LDModelController {
             }
         }
 
-        AtomicInteger cnt = new AtomicInteger();
-
         resourceMapById.entrySet().forEach(e -> {
             if (e.getValue().json != null) {
                 JsonObject wrapper = new JsonObject();
