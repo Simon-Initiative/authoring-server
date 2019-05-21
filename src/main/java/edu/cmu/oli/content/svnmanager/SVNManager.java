@@ -8,10 +8,12 @@ import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
+import org.tmatesoft.svn.core.internal.wc.ISVNHostOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.*;
 import org.tmatesoft.svn.core.wc2.SvnCheckout;
+import org.tmatesoft.svn.core.wc2.SvnCommit;
 import org.tmatesoft.svn.core.wc2.SvnOperationFactory;
 import org.tmatesoft.svn.core.wc2.SvnTarget;
 
@@ -44,6 +46,9 @@ public class SVNManager {
     private ISVNEventHandler myCommitEventHandler;
     private ISVNEventHandler myUpdateEventHandler;
     private ISVNEventHandler myWCEventHandler;
+
+    private  ISVNHostOptions delegate;
+
 
     @PostConstruct
     private void init() {
@@ -170,8 +175,9 @@ public class SVNManager {
     public void checkout(String baseUrl, String target) throws SVNException {
         DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(null, true);
         boolean store = options.isAuthStorageEnabled();
-        ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(null, "olipublisher", "Edit@works2".toCharArray(), null, null, store);
-        //createDefaultAuthenticationManager("olipublisher", "Edit@works2");
+        ISVNAuthenticationManager authManager = SVNWCUtil.createDefaultAuthenticationManager(null,
+                System.getenv().get("svn_user"), System.getenv().get("svn_password").toCharArray(), null, null, store);
+
         SVNURL svnUrl = SVNURL.parseURIEncoded(baseUrl);
 
         SVNRepository svnRepo = SVNRepositoryFactory.create(svnUrl);
@@ -181,7 +187,6 @@ public class SVNManager {
 
         SVNDirEntry entry = svnRepo.info(".", -1);
         long remoteRevision = entry.getRevision();
-
 
         final SvnCheckout checkout = svnOperationFactory.createCheckout();
         checkout.setSource(SvnTarget.fromURL(svnUrl));
@@ -213,13 +218,31 @@ public class SVNManager {
      */
     public SVNCommitInfo commit(File wcPath, String commitMessage)
             throws SVNException {
+        log.info("Committing to svn repo now " + wcPath.getAbsolutePath());
         /*
          * Returns SVNCommitInfo containing information on the new revision committed
          * (revision number, etc.)
          */
-        // , null, null, false, force, SVNDepth.fromRecurse(recursive)
-        return clientManager.getCommitClient().doCommit(new File[]{wcPath}, false, commitMessage, null, null, false, true, SVNDepth.fromRecurse(true));
-        //doCommit(new File[] { wcPath }, false,commitMessage, false, true);
+
+        DefaultSVNOptions options = SVNWCUtil.createDefaultOptions(null, true);
+        boolean store = options.isAuthStorageEnabled();
+        ISVNAuthenticationManager authManager = new SVNAuthManager(null, store,
+                System.getenv().get("svn_user"), System.getenv().get("svn_password").toCharArray(), null, null);
+
+        SvnOperationFactory svnOperationFactory = new SvnOperationFactory();
+        svnOperationFactory.setAuthenticationManager(authManager);
+
+        svnOperationFactory.setEventHandler(myCommitEventHandler);
+
+        SvnCommit commit = svnOperationFactory.createCommit();
+        commit.setSingleTarget(SvnTarget.fromFile(wcPath));
+        commit.setCommitMessage(commitMessage);
+        commit.setKeepLocks(false);
+        commit.setKeepChangelists(false);
+        commit.setDepth(SVNDepth.fromRecurse(true));
+        SVNCommitInfo run = commit.run();
+        log.info("Committing to svn repo done " + wcPath.getAbsolutePath());
+        return run;
     }
 
     /*

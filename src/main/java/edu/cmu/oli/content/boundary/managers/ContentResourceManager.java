@@ -1066,7 +1066,13 @@ public class ContentResourceManager {
             content = gson.toJson(resourceContent);
             ResourceToXml resourceToXml = new ResourceToXml();
             resourceToXml.setConfig(configuration.get());
-            xmlContent = resourceToXml.resourceToXml(resource.getType(), content);
+            try {
+                xmlContent = resourceToXml.resourceToXml(resource.getType(), content);
+            }catch (Exception e){
+                log.error(content);
+                throw e;
+            }
+
         } else {
             content = resourceContent.getAsString();
             xmlContent = AppUtils.escapeAmpersand(content);
