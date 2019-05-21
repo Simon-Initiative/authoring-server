@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import javax.ejb.Stateless;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -64,9 +66,6 @@ public class LDModelControllerImpl implements LDModelController {
 
     @Inject
     DirectoryUtils directoryUtils;
-
-    @Inject
-    SVNSyncController svnSyncController;
 
     @Inject
     EdgesController edgesController;
@@ -183,9 +182,14 @@ public class LDModelControllerImpl implements LDModelController {
             edgesController.validateEdgesAsync(pkg.getGuid());
 
             svnExecutor.submit(() -> {
-                Map<String, List<File>> changedFiles = svnSyncController.updateSvnRepo(
-                        FileSystems.getDefault().getPath(pkg.getSourceLocation()).toFile(), pkg.getGuid());
-
+                try {
+                    SVNSyncController svnSyncController = (SVNSyncController)
+                            new InitialContext().lookup("java:global/content-service/SVNSyncController");
+                    Map<String, List<File>> changedFiles = svnSyncController.updateSvnRepo(
+                            FileSystems.getDefault().getPath(pkg.getSourceLocation()).toFile(), pkg.getGuid());
+                } catch (NamingException e) {
+                    log.error(e.getExplanation(), e);
+                }
             });
         }
 
@@ -801,7 +805,6 @@ public class LDModelControllerImpl implements LDModelController {
 
                 String lockId = AppUtils.generateUID(32);
                 contentResourceManager.doUpdate(pkg.getGuid(), e.getValue().resource, wrapper, "LDModel", lockId, null, false);
-
             }
         });
 
@@ -848,12 +851,12 @@ public class LDModelControllerImpl implements LDModelController {
             } else {
                 // Remove all activity level tagging
                 List<JsonElement> aTags = new ArrayList<>();
-                contentArray.forEach(e->{
-                    if(e.getAsJsonObject().has("skillref")){
+                contentArray.forEach(e -> {
+                    if (e.getAsJsonObject().has("skillref")) {
                         aTags.add(e.getAsJsonObject());
                     }
                 });
-                aTags.forEach(e->contentArray.remove(e));
+                aTags.forEach(e -> contentArray.remove(e));
 
                 // Apply tagging to the part level
                 allParts.forEach(part -> {
@@ -942,16 +945,16 @@ public class LDModelControllerImpl implements LDModelController {
                 } else {
                     // Remove all question level tagging
                     List<JsonElement> qTags = new ArrayList<>();
-                    problemArray.forEach(e->{
-                        if(e.getAsJsonObject().has("skillref")){
+                    problemArray.forEach(e -> {
+                        if (e.getAsJsonObject().has("skillref")) {
                             qTags.add(e.getAsJsonObject());
                         }
                     });
-                    qTags.forEach(e->problemArray.remove(e));
+                    qTags.forEach(e -> problemArray.remove(e));
 
                     // Apply all tagging at the part level
-                    assignPartIdIfAbsent(problemBody.getAsJsonObject());
-                    Optional<JsonElement> partByStepId = findPartByStepId(allParts, stepId);
+                    assignPartIdIfAbsent(problemBody.getAsJsonObject(), problemId);
+                    Optional<JsonElement> partByStepId = findPartByStepId(allParts, problemId, stepId);
                     if (partByStepId.isPresent()) {
                         tagPartWithSkill(skillId, partByStepId.get());
                     } else {
@@ -977,13 +980,14 @@ public class LDModelControllerImpl implements LDModelController {
         problemBody.getAsJsonObject().add("#array", insert);
     }
 
-    private Optional<JsonElement> findPartByStepId(List<JsonElement> allParts, String stepId) {
+    private Optional<JsonElement> findPartByStepId(List<JsonElement> allParts, String problemId, String stepId) {
         if (stepId == null) {
             return Optional.empty();
         }
         for (JsonElement el : allParts) {
             final JsonObject part = el.getAsJsonObject();
-            if (part.has("@id") && part.get("@id").getAsString().equalsIgnoreCase(stepId)) {
+            if (part.has("@id") && (part.get("@id").getAsString().equalsIgnoreCase(stepId) ||
+                    part.get("@id").getAsString().equalsIgnoreCase(problemId + "_" + stepId))) {
                 return Optional.of(part);
             }
         }
@@ -997,15 +1001,15 @@ public class LDModelControllerImpl implements LDModelController {
         if (!partAsJsonObject.has("@id")) {
             partAsJsonObject.addProperty("@id", UUID.randomUUID().toString().replaceAll("-", ""));
         }
-        if(!partAsJsonObject.has("#array")){
-            log.error("part before -- " +AppUtils.gsonBuilder().create().toJson(part));
+        if (!partAsJsonObject.has("#array")) {
+            log.error("part before -- " + AppUtils.gsonBuilder().create().toJson(part));
             JsonArray stepArray = new JsonArray();
 
             Iterator<Map.Entry<String, JsonElement>> it = partAsJsonObject.entrySet().iterator();
             Set<String> keySet = new HashSet<>();
             keySet.addAll(partAsJsonObject.keySet());
-            keySet.forEach(key->{
-                if(!key.equals("@id")) {
+            keySet.forEach(key -> {
+                if (!key.equals("@id")) {
                     JsonElement remove = partAsJsonObject.remove(key);
                     JsonObject ob = new JsonObject();
                     ob.add(key, remove);
@@ -1013,7 +1017,7 @@ public class LDModelControllerImpl implements LDModelController {
             });
             partAsJsonObject.add("#array", stepArray);
 
-            log.error("part after -- " +AppUtils.gsonBuilder().create().toJson(part));
+            log.error("part after -- " + AppUtils.gsonBuilder().create().toJson(part));
         }
         JsonArray stepArray = partAsJsonObject.getAsJsonArray("#array");
 
@@ -1026,7 +1030,7 @@ public class LDModelControllerImpl implements LDModelController {
                     break;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(AppUtils.gsonBuilder().create().toJson(part));
             throw e;
         }
@@ -1057,7 +1061,7 @@ public class LDModelControllerImpl implements LDModelController {
         } else if (content.isJsonObject()) {
             if (content.getAsJsonObject().has("question")) {
                 JsonObject question = content.getAsJsonObject().get("question").getAsJsonObject();
-                if(question.has("@id") && question.get("@id").getAsString().equalsIgnoreCase(problemId)){
+                if (question.has("@id") && question.get("@id").getAsString().equalsIgnoreCase(problemId)) {
                     problemList.add(question);
                     return;
                 }
@@ -1086,16 +1090,14 @@ public class LDModelControllerImpl implements LDModelController {
         }
     }
 
-    private void assignPartIdIfAbsent(JsonObject problemBody) {
+    private void assignPartIdIfAbsent(JsonObject problemBody, String problemId) {
         JsonArray problemElements = problemBody.get("#array").getAsJsonArray();
         int p = 0;
-        boolean partIdMissing = false;
         for (JsonElement el : problemElements) {
             if (el.getAsJsonObject().has("part")) {
                 final JsonObject part = el.getAsJsonObject().get("part").getAsJsonObject();
                 if (!part.has("@id")) {
-                    part.addProperty("@id", "p" + (++p));
-                    partIdMissing = true;
+                    part.addProperty("@id", problemId + "_p" + (++p));
                 }
             }
         }
