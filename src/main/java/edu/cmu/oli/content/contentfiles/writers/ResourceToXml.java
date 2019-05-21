@@ -286,9 +286,9 @@ public class ResourceToXml {
             if (el.getName().equalsIgnoreCase("explanation")) {
                 if (el.getValue().isEmpty()) {
                     el.detach();
-                }else {
+                } else {
                     Parent parent = el.getParent();
-                    if(parent.indexOf(el) != parent.getContentSize()-1){
+                    if (parent.indexOf(el) != parent.getContentSize() - 1) {
                         el.detach();
                         parent.addContent(el);
                     }
@@ -296,7 +296,7 @@ public class ResourceToXml {
 
             }
         }
-        query = "//response";
+        query = "//response | //match";
         xexpression = XPathFactory.instance().compile(query, Filters.element());
         kids = xexpression.evaluate(rootElement);
         for (Element el : kids) {
@@ -465,7 +465,7 @@ public class ResourceToXml {
                 }
             }
         }
-        query = "//response";
+        query = "//response | //match";
         xexpression = XPathFactory.instance().compile(query, Filters.element());
         kids = xexpression.evaluate(rootElement);
         for (Element el : kids) {
@@ -581,7 +581,7 @@ public class ResourceToXml {
                 Attribute targets = el.getAttribute("targets");
                 if (targets.getValue().isEmpty()) {
                     targets.detach();
-                }else if (Character.isDigit(targets.getValue().charAt(0))) {
+                } else if (Character.isDigit(targets.getValue().charAt(0))) {
                     el.setAttribute("targets", "i" + targets.getValue());
                 }
             }
