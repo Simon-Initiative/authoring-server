@@ -329,7 +329,7 @@ public class SVNSyncController {
 
                 doProcessLDmodelFiles(packageGuid, base.toPath().resolve("ldmodel"));
                 if (!update.isEmpty()) {
-                    edgesController.validateNonValidatedEdges(packageGuid);
+                    edgesController.validateEdgesAsync(packageGuid);
                 }
 
             } catch (SVNException ex) {
@@ -337,7 +337,6 @@ public class SVNSyncController {
             }
             try {
                 svnCommit(base, svnManager);
-
             } catch (SVNException ex) {
                 log.error("SVN Commit Error: ", ex);
             }
