@@ -67,9 +67,6 @@ public class LDModelControllerImpl implements LDModelController {
     @Inject
     DirectoryUtils directoryUtils;
 
-//    @Inject
-//    SVNSyncController svnSyncdController;
-
     @Inject
     EdgesController edgesController;
 
