@@ -43,7 +43,6 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -855,12 +854,12 @@ public class LDModelControllerImpl implements LDModelController {
             } else {
                 // Remove all activity level tagging
                 List<JsonElement> aTags = new ArrayList<>();
-                contentArray.forEach(e->{
-                    if(e.getAsJsonObject().has("skillref")){
+                contentArray.forEach(e -> {
+                    if (e.getAsJsonObject().has("skillref")) {
                         aTags.add(e.getAsJsonObject());
                     }
                 });
-                aTags.forEach(e->contentArray.remove(e));
+                aTags.forEach(e -> contentArray.remove(e));
 
                 // Apply tagging to the part level
                 allParts.forEach(part -> {
@@ -949,12 +948,12 @@ public class LDModelControllerImpl implements LDModelController {
                 } else {
                     // Remove all question level tagging
                     List<JsonElement> qTags = new ArrayList<>();
-                    problemArray.forEach(e->{
-                        if(e.getAsJsonObject().has("skillref")){
+                    problemArray.forEach(e -> {
+                        if (e.getAsJsonObject().has("skillref")) {
                             qTags.add(e.getAsJsonObject());
                         }
                     });
-                    qTags.forEach(e->problemArray.remove(e));
+                    qTags.forEach(e -> problemArray.remove(e));
 
                     // Apply all tagging at the part level
                     assignPartIdIfAbsent(problemBody.getAsJsonObject(), problemId);
@@ -991,7 +990,7 @@ public class LDModelControllerImpl implements LDModelController {
         for (JsonElement el : allParts) {
             final JsonObject part = el.getAsJsonObject();
             if (part.has("@id") && (part.get("@id").getAsString().equalsIgnoreCase(stepId) ||
-                    part.get("@id").getAsString().equalsIgnoreCase(problemId+"_"+stepId))) {
+                    part.get("@id").getAsString().equalsIgnoreCase(problemId + "_" + stepId))) {
                 return Optional.of(part);
             }
         }
@@ -1005,15 +1004,15 @@ public class LDModelControllerImpl implements LDModelController {
         if (!partAsJsonObject.has("@id")) {
             partAsJsonObject.addProperty("@id", UUID.randomUUID().toString().replaceAll("-", ""));
         }
-        if(!partAsJsonObject.has("#array")){
-            log.error("part before -- " +AppUtils.gsonBuilder().create().toJson(part));
+        if (!partAsJsonObject.has("#array")) {
+            log.error("part before -- " + AppUtils.gsonBuilder().create().toJson(part));
             JsonArray stepArray = new JsonArray();
 
             Iterator<Map.Entry<String, JsonElement>> it = partAsJsonObject.entrySet().iterator();
             Set<String> keySet = new HashSet<>();
             keySet.addAll(partAsJsonObject.keySet());
-            keySet.forEach(key->{
-                if(!key.equals("@id")) {
+            keySet.forEach(key -> {
+                if (!key.equals("@id")) {
                     JsonElement remove = partAsJsonObject.remove(key);
                     JsonObject ob = new JsonObject();
                     ob.add(key, remove);
@@ -1021,7 +1020,7 @@ public class LDModelControllerImpl implements LDModelController {
             });
             partAsJsonObject.add("#array", stepArray);
 
-            log.error("part after -- " +AppUtils.gsonBuilder().create().toJson(part));
+            log.error("part after -- " + AppUtils.gsonBuilder().create().toJson(part));
         }
         JsonArray stepArray = partAsJsonObject.getAsJsonArray("#array");
 
@@ -1034,7 +1033,7 @@ public class LDModelControllerImpl implements LDModelController {
                     break;
                 }
             }
-        }catch (Exception e){
+        } catch (Exception e) {
             log.error(AppUtils.gsonBuilder().create().toJson(part));
             throw e;
         }
@@ -1065,7 +1064,7 @@ public class LDModelControllerImpl implements LDModelController {
         } else if (content.isJsonObject()) {
             if (content.getAsJsonObject().has("question")) {
                 JsonObject question = content.getAsJsonObject().get("question").getAsJsonObject();
-                if(question.has("@id") && question.get("@id").getAsString().equalsIgnoreCase(problemId)){
+                if (question.has("@id") && question.get("@id").getAsString().equalsIgnoreCase(problemId)) {
                     problemList.add(question);
                     return;
                 }
@@ -1101,7 +1100,7 @@ public class LDModelControllerImpl implements LDModelController {
             if (el.getAsJsonObject().has("part")) {
                 final JsonObject part = el.getAsJsonObject().get("part").getAsJsonObject();
                 if (!part.has("@id")) {
-                    part.addProperty("@id", problemId+"_p" + (++p));
+                    part.addProperty("@id", problemId + "_p" + (++p));
                 }
             }
         }
