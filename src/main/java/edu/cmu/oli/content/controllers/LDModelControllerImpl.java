@@ -20,6 +20,8 @@ import org.slf4j.Logger;
 import javax.ejb.Stateless;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
@@ -41,6 +43,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -65,8 +68,8 @@ public class LDModelControllerImpl implements LDModelController {
     @Inject
     DirectoryUtils directoryUtils;
 
-    @Inject
-    SVNSyncController svnSyncController;
+//    @Inject
+//    SVNSyncController svnSyncdController;
 
     @Inject
     EdgesController edgesController;
@@ -183,9 +186,14 @@ public class LDModelControllerImpl implements LDModelController {
             edgesController.validateEdgesAsync(pkg.getGuid());
 
             svnExecutor.submit(() -> {
-                Map<String, List<File>> changedFiles = svnSyncController.updateSvnRepo(
-                        FileSystems.getDefault().getPath(pkg.getSourceLocation()).toFile(), pkg.getGuid());
-
+                try {
+                    SVNSyncController svnSyncController = (SVNSyncController)
+                            new InitialContext().lookup("java:global/content-service/SVNSyncController");
+                    Map<String, List<File>> changedFiles = svnSyncController.updateSvnRepo(
+                            FileSystems.getDefault().getPath(pkg.getSourceLocation()).toFile(), pkg.getGuid());
+                } catch (NamingException e) {
+                    log.error(e.getExplanation(), e);
+                }
             });
         }
 
@@ -792,6 +800,8 @@ public class LDModelControllerImpl implements LDModelController {
             }
         }
 
+        AtomicInteger cnt = new AtomicInteger();
+
         resourceMapById.entrySet().forEach(e -> {
             if (e.getValue().json != null) {
                 JsonObject wrapper = new JsonObject();
@@ -801,7 +811,6 @@ public class LDModelControllerImpl implements LDModelController {
 
                 String lockId = AppUtils.generateUID(32);
                 contentResourceManager.doUpdate(pkg.getGuid(), e.getValue().resource, wrapper, "LDModel", lockId, null, false);
-
             }
         });
 
@@ -950,8 +959,8 @@ public class LDModelControllerImpl implements LDModelController {
                     qTags.forEach(e->problemArray.remove(e));
 
                     // Apply all tagging at the part level
-                    assignPartIdIfAbsent(problemBody.getAsJsonObject());
-                    Optional<JsonElement> partByStepId = findPartByStepId(allParts, stepId);
+                    assignPartIdIfAbsent(problemBody.getAsJsonObject(), problemId);
+                    Optional<JsonElement> partByStepId = findPartByStepId(allParts, problemId, stepId);
                     if (partByStepId.isPresent()) {
                         tagPartWithSkill(skillId, partByStepId.get());
                     } else {
@@ -977,13 +986,14 @@ public class LDModelControllerImpl implements LDModelController {
         problemBody.getAsJsonObject().add("#array", insert);
     }
 
-    private Optional<JsonElement> findPartByStepId(List<JsonElement> allParts, String stepId) {
+    private Optional<JsonElement> findPartByStepId(List<JsonElement> allParts, String problemId, String stepId) {
         if (stepId == null) {
             return Optional.empty();
         }
         for (JsonElement el : allParts) {
             final JsonObject part = el.getAsJsonObject();
-            if (part.has("@id") && part.get("@id").getAsString().equalsIgnoreCase(stepId)) {
+            if (part.has("@id") && (part.get("@id").getAsString().equalsIgnoreCase(stepId) ||
+                    part.get("@id").getAsString().equalsIgnoreCase(problemId+"_"+stepId))) {
                 return Optional.of(part);
             }
         }
@@ -1086,16 +1096,14 @@ public class LDModelControllerImpl implements LDModelController {
         }
     }
 
-    private void assignPartIdIfAbsent(JsonObject problemBody) {
+    private void assignPartIdIfAbsent(JsonObject problemBody, String problemId) {
         JsonArray problemElements = problemBody.get("#array").getAsJsonArray();
         int p = 0;
-        boolean partIdMissing = false;
         for (JsonElement el : problemElements) {
             if (el.getAsJsonObject().has("part")) {
                 final JsonObject part = el.getAsJsonObject().get("part").getAsJsonObject();
                 if (!part.has("@id")) {
-                    part.addProperty("@id", "p" + (++p));
-                    partIdMissing = true;
+                    part.addProperty("@id", problemId+"_p" + (++p));
                 }
             }
         }

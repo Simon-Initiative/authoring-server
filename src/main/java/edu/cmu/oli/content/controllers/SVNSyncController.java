@@ -340,12 +340,6 @@ public class SVNSyncController {
 
             } catch (SVNException ex) {
                 log.error("SVN Commit Error: ", ex);
-                log.info("Retrying SVN Commit");
-                try {
-                    svnCommit(base, svnManager);
-                } catch (SVNException e) {
-                    log.error("SVN commit failed a second time");
-                }
             }
 
             log.info("Done Committing changes to svn " + base.getName());
@@ -534,7 +528,6 @@ public class SVNSyncController {
             return;
         }
         em.merge(contentPackage);
-//        packageFileController.updatePackgeJson(packageId, contentPackage);
     }
 
     private void processResourceFile(String crud, String packageId, Path resourceFile, JsonObject resourceTypeDefinition) {
