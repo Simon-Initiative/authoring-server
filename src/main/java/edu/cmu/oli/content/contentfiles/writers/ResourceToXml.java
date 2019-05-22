@@ -181,21 +181,12 @@ public class ResourceToXml {
             }
             if (el.getName().equalsIgnoreCase("question")) {
                 el.removeAttribute("grading");
-                IteratorIterable<Element> inputRef = el.getDescendants(new ElementFilter("input_ref"));
+
+                // Move any hints (if any) found at the question level into the very first question part
+                // Assumes question level hints not supported
                 IteratorIterable<Element> part = el.getDescendants(new ElementFilter("part"));
-                while (inputRef.hasNext() && part.hasNext()) {
-                    String ival = inputRef.next().getAttributeValue("input");
-                    Element next = part.next();
-                    List<Element> responses = next.getChildren("response");
-                    responses.forEach(e -> {
-                        e.setAttribute("input", ival);
-                    });
-                }
-                part = el.getDescendants(new ElementFilter("part"));
                 List<Element> hints = el.getChildren("hint");
-                hints.forEach(h -> {
-                    log.info("hints in question ------------------------- " + h.getText());
-                });
+
                 List<Element> removal = new ArrayList<>();
                 removal.addAll(hints);
                 if (part.hasNext()) {
