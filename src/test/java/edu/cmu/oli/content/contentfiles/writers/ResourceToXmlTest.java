@@ -101,7 +101,6 @@ public class ResourceToXmlTest {
     toXml.setConfig(config);
     String xml = toXml.resourceToXml("x-oli-inline-assessment", json);
     xml = xml.replaceAll("\n", "");
-//    System.out.println(xml);
 
     // Verify correct alignment between match and input
     assertTrue(xml.indexOf("match=\"sm_under\" score=\"1\" input=\"s5\"") > 1);
