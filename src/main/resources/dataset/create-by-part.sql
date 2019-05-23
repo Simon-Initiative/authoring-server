@@ -8,6 +8,7 @@ select
   resources_and_parts.part_id,
   resources_and_parts.resource_id,
   resources_and_parts.resource_title,
+  resources_and_parts.question_id,
   resources_and_parts.revision,
   resources_and_parts.submit_and_compare,
   # Student enrollment
