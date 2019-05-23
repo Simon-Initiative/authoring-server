@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE assessment
+  PUBLIC "-//Carnegie Mellon University//DTD Assessment 2.2//EN" "http://oli.web.cmu.edu/dtd/oli_assessment_2_2.dtd">
+<?xml-stylesheet type="text/css" href="http://oli.web.cmu.edu/authoring/oxy-author/oli_workbook_page_3_7.css"?>
+<assessment id="convert_from_unsigned_int" max_attempts="5">
+  <title>Conversions from Unsigned Integer Types</title>
+  <content><p>In this section, we looked at conversions from unsigned smaller types for x86-32. This assessment
+      asks you to convert from <code>unsigned long long</code> to various types in a similar
+      fashion. For each resulting type, determine which method is used for the conversion and
+      indicate the potential consequences of the conversion. There is one correct combination of
+      method and consequence for each conversion.</p></content>
+
+  <fill_in_the_blank id="convert_table_1_inline_q1">
+    <body>
+      <p>Conversions from <code>unsigned long long</code> to <code>long</code> are performed by:
+          <input_ref input="method"/> with a potential consequence of: <input_ref input="consq"/>
+      </p>
+    </body>
+    <input id="method" shuffle="false">
+      <choice value="0">preserving bit pattern; high-order bit becomes sign bit</choice>
+      <choice value="1">preserving low-order byte (8 bits)</choice>
+      <choice value="2">preserving low-order doubleword (32 bits)</choice>
+      <choice value="3">preserving low-order word (16 bits)</choice>
+    </input>
+    <input id="consq" shuffle="false">
+      <choice value="0">always safe</choice>
+      <choice value="1">lost data</choice>
+      <choice value="2">lost or misinterpreted data</choice>
+      <choice value="3">misinterpreted data</choice>
+    </input>
+    <part>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(long) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(long) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(long) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(long) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. All data in the high-order bytes are lost. If the data can be fully
+          represented in the low-order doubleword (32 bits) but the resulting sign bit is set, no
+          data will be lost but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. In addition to losing the high-order bytes, data can be misinterpreted.
+          If the data can be fully represented in the low-order doubleword (32 bits) but the
+          resulting sign bit is set, no data will be lost but the resulting value will be
+          misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="1">
+        <match input="method" match="2"/>
+        <match input="consq" match="2"/>
+        <feedback>Correct! All data in the high-order bytes are lost. If the data can be fully
+          represented in the low-order doubleword (32 bits) but the resulting sign bit is set, no
+          data will be lost but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. Data can be lost as well as misinterpreted because all data in the
+          high-order bytes are lost</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because
+            <code>long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <hint>Review the x86-32 data model and conversion to signed with a loss of precision.</hint>
+      <hint>Because <code>width(long) &lt; width(unsigned long long)</code> on x86-32, the
+        high-order bytes are lost in the conversion.</hint>
+      <hint>The resulting value may be negative or positive depending on the value of the high-order
+        bit following truncation.</hint>
+    </part>
+  </fill_in_the_blank>
+
+<fill_in_the_blank id="convert_table_1_inline_q17">
+    <body>
+      <p>Conversions from <code>unsigned long long</code> to <code>long long</code> are performed
+        by: <input_ref input="method"/> with a potential consequence of: <input_ref input="consq"/>
+      </p>
+    </body>
+    <input id="method" shuffle="false">
+      <choice value="0">preserving bit pattern; high-order bit becomes sign bit</choice>
+      <choice value="1">preserving low-order byte (8 bits)</choice>
+      <choice value="2">preserving low-order doubleword (32 bits)</choice>
+      <choice value="3">preserving low-order word (16 bits)</choice>
+    </input>
+    <input id="consq" shuffle="false">
+      <choice value="0">always safe</choice>
+      <choice value="1">lost data</choice>
+      <choice value="2">lost or misinterpreted data</choice>
+      <choice value="3">misinterpreted data</choice>
+    </input>
+    <part>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. Because <code>width(long long) == width( unsigned long long)</code> on
+          x86-32, no data is lost in the conversion. However, very large positive values will be
+          interpreted as negative values.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. Because <code>width(long long) == width( unsigned long long)</code> on
+          x86-32, no data is lost in the conversion. However, very large positive values will be
+          interpreted as negative values.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. Because <code>width(long long) == width( unsigned long long)</code> on
+          x86-32, no data is lost in the conversion. However, very large positive values will be
+          interpreted as negative values.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="1">
+        <match input="method" match="0"/>
+        <match input="consq" match="3"/>
+        <feedback>Correct! Because <code>width(long long) == width( unsigned long long)</code> on
+          x86-32, no data is lost in the conversion. However, very large positive values will be
+          interpreted as negative values.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern is preserved because <code>width(long long) == width(
+            unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <hint>Review the x86-32 data model and unsigned to signed conversion.</hint>
+      <hint>On x86-32, <code>width(long long) == width(unsigned long long)</code>. However, the
+        high-order bit becomes a sign bit.</hint>
+      <hint>When unsigned integer types are converted to a signed integer type of equal width, no
+        data is lost because the bit pattern is preserved.</hint>
+    </part>
+  </fill_in_the_blank>
+
+<fill_in_the_blank id="convert_table_1_inline_q33">
+    <body>
+      <p>Conversions from <code>unsigned long long</code> to <code>short</code> are performed by:
+          <input_ref input="method"/> with a potential consequence of: <input_ref input="consq"/>
+      </p>
+    </body>
+    <input id="method" shuffle="false">
+      <choice value="0">preserving bit pattern; high-order bit becomes sign bit</choice>
+      <choice value="1">preserving low-order byte (8 bits)</choice>
+      <choice value="2">preserving low-order doubleword (32 bits)</choice>
+      <choice value="3">preserving low-order word (16 bits)</choice>
+    </input>
+    <input id="consq" shuffle="false">
+      <choice value="0">always safe</choice>
+      <choice value="1">lost data</choice>
+      <choice value="2">lost or misinterpreted data</choice>
+      <choice value="3">misinterpreted data</choice>
+    </input>
+    <part>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(short) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(short) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(short) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(short) &lt;
+            width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>short</code> is
+          16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>short</code> is
+          16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>short</code> is
+          16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>short</code> is
+          16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. All data in the high-order bytes are lost. If the data can be fully
+          represented in the low-order word but the resulting sign bit is set, no data will be lost
+          but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. Data can be misinterpreted as well as lost. If the data can be fully
+          represented in the low-order word but the resulting sign bit is set, no data will be lost
+          but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="1">
+        <match input="method" match="3"/>
+        <match input="consq" match="2"/>
+        <feedback>Correct! All data in the high-order bytes are lost. If the data can be fully
+          represented in the low-order word (16 bits) but the resulting sign bit is set, no data
+          will be lost but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. Data can be lost as well as misinterpreted.</feedback>
+      </response_mult>
+      <hint>Review the x86-32 data model and conversion to signed with a loss of precision.</hint>
+      <hint>Because <code>width(short) &lt; width(unsigned long long)</code> on x86-32, the
+        high-order bytes are lost in the conversion.</hint>
+      <hint>The resulting value may be negative or positive depending on the value of the high-order
+        bit following truncation.</hint>
+    </part>
+  </fill_in_the_blank>
+
+<fill_in_the_blank id="convert_table_1_inline_q49">
+    <body>
+      <p>Conversions from <code>unsigned long long</code> to <code>signed char</code> are performed
+        by: <input_ref input="method"/> with a potential consequence of: <input_ref input="consq"/>
+      </p>
+    </body>
+    <input id="method" shuffle="false">
+      <choice value="0">preserving bit pattern; high-order bit becomes sign bit</choice>
+      <choice value="1">preserving low-order byte (8 bits)</choice>
+      <choice value="2">preserving low-order doubleword (32 bits)</choice>
+      <choice value="3">preserving low-order word (16 bits)</choice>
+    </input>
+    <input id="consq" shuffle="false">
+      <choice value="0">always safe</choice>
+      <choice value="1">lost data</choice>
+      <choice value="2">lost or misinterpreted data</choice>
+      <choice value="3">misinterpreted data</choice>
+    </input>
+    <part>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>signed char</code> is
+          8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>signed char</code> is
+          8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>signed char</code> is
+          8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>signed char</code> is
+          8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. All data in the high-order bytes are lost. If the data can be fully
+          represented in the low-order byte but the resulting sign bit is set, no data will be lost
+          but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. Data can be misinterpreted as well as lost. If the data can be fully
+          represented in the low-order byte but the resulting sign bit is set, no data will be lost
+          but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="1">
+        <match input="method" match="1"/>
+        <match input="consq" match="2"/>
+        <feedback>Correct! All data in the high-order bytes are lost. If the data can be fully
+          represented in the low-order byte but the resulting sign bit is set, no data will be lost
+          but the resulting value will be misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. Data can be lost as well as misinterpreted.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>signed char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>signed char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>signed char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because<code>
+            signed char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>signed
+            char</code> is 8 bits on x86-32. </feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>signed
+            char</code> is 8 bits on x86-32..</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>signed
+            char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>signed
+            char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <hint>Review the x86-32 data model and conversion to signed with a loss of precision.</hint>
+      <hint>Because <code>width(signed char) &lt; width(unsigned long long)</code> on x86-32, the
+        high-order bytes are lost in the conversion.</hint>
+      <hint>The resulting value may be negative or positive depending on the value of the high-order
+        bit following truncation. </hint>
+    </part>
+  </fill_in_the_blank>
+
+<fill_in_the_blank id="convert_table_1_inline_q65">
+    <body>
+      <p>Conversions from <code>unsigned long long</code> to <code>unsigned char</code> are
+        performed by: <input_ref input="method"/> with a potential consequence of: <input_ref
+          input="consq"/>
+      </p>
+    </body>
+    <input id="method" shuffle="false">
+      <choice value="0">preserving bit pattern; high-order bit becomes sign bit</choice>
+      <choice value="1">preserving low-order byte (8 bits)</choice>
+      <choice value="2">preserving low-order doubleword (32 bits)</choice>
+      <choice value="3">preserving low-order word (16 bits)</choice>
+    </input>
+    <input id="consq" shuffle="false">
+      <choice value="0">always safe</choice>
+      <choice value="1">lost data</choice>
+      <choice value="2">lost or misinterpreted data</choice>
+      <choice value="3">misinterpreted data</choice>
+    </input>
+    <part>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned char)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned char)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned char)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned char)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. There is no sign bit in unsigned types, so data is not misinterpreted.
+          Loss of data can occur because <code>width(unsigned char) &lt; width(unsigned long
+            long)</code> on x86-32. The high-order bytes are lost in the conversion.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="1">
+        <match input="method" match="1"/>
+        <match input="consq" match="1"/>
+        <feedback>Correct! Because <code>width(unsigned char) &lt; width(unsigned long long)</code>
+          on x86-32, the high-order bytes are lost in the conversion. </feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. There is no sign bit in unsigned types, so data is not misinterpreted.
+          Loss of data can occur because <code>width(unsigned char) &lt; width(unsigned long
+            long)</code> on x86-32. The high-order bytes are lost in the conversion.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. There is no sign bit in unsigned types, so data is not misinterpreted.
+          Loss of data can occur because <code>width(unsigned char) &lt; width(unsigned long
+            long)</code> on x86-32. The high-order bytes are lost in the conversion.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>unsigned
+            char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>unsigned
+            char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>unsigned
+            char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order word (16 bits) cannot be preserved because <code>unsigned
+            char</code> is 8 bits on x86-32.</feedback>
+      </response_mult>
+      <hint>Review the x86-32 data model and conversion of unsigned to unsigned with a loss of
+        precision.</hint>
+      <hint>Because <code>width(unsigned char) &lt; width(unsigned long long)</code> on x86-32, the
+        high-order bytes are lost in the conversion.</hint>
+      <hint>Although loss of data (truncation) can occur when converting from one unsigned type to
+        another unsigned type, there is no sign bit, so data is not misinterpreted.</hint>
+    </part>
+  </fill_in_the_blank>
+
+<fill_in_the_blank id="convert_table_1_inline_q81">
+    <body>
+      <p>Conversions from <code>unsigned long long</code> to <code>unsigned long</code> are
+        performed by: <input_ref input="method"/> with a potential consequence of: <input_ref
+          input="consq"/>
+      </p>
+    </body>
+    <input id="method" shuffle="false">
+      <choice value="0">preserving bit pattern; high-order bit becomes sign bit</choice>
+      <choice value="1">preserving low-order byte (8 bits)</choice>
+      <choice value="2">preserving low-order doubleword (32 bits)</choice>
+      <choice value="3">preserving low-order word (16 bits)</choice>
+    </input>
+    <input id="consq" shuffle="false">
+      <choice value="0">always safe</choice>
+      <choice value="1">lost data</choice>
+      <choice value="2">lost or misinterpreted data</choice>
+      <choice value="3">misinterpreted data</choice>
+    </input>
+    <part>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned long)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned long)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned long)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned long)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. Type range errors, including loss of data (truncation), can occur when
+          converting from one unsigned type to another unsigned type. Sign errors
+          (misinterpretation) cannot occur.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="1">
+        <match input="method" match="2"/>
+        <match input="consq" match="1"/>
+        <feedback>Correct! Because <code>width(unsigned long) &lt; width(unsigned long long)</code>
+          on x86-32, the high-order doubleword is lost in the conversion. </feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. Type range errors, including loss of data (truncation), can occur when
+          converting from one unsigned type to another unsigned type. Sign errors
+          (misinterpretation) cannot occur.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. Type range errors, including loss of data (truncation), can occur when
+          converting from one unsigned type to another unsigned type. Sign errors
+          (misinterpretation) cannot occur.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) is preserved because <code>unsigned
+            long</code> is 32 bits on x86-32.</feedback>
+      </response_mult>
+      <hint>Review the x86-32 data model and conversion of unsigned to unsigned with a loss of
+        precision.</hint>
+      <hint>Because <code>width(unsigned long) &lt; width(unsigned long long)</code> on x86-32, the
+        high-order bytes are lost in the conversion.</hint>
+      <hint>Although loss of data (truncation) can occur when converting from one unsigned type to
+        another unsigned type, there is no sign bit, so data is not misinterpreted.</hint>
+    </part>
+  </fill_in_the_blank>
+
+<fill_in_the_blank id="convert_table_1_inline_q97">
+    <body>
+      <p>Conversions from <code>unsigned long long</code> to <code>unsigned short</code> are
+        performed by: <input_ref input="method"/> with a potential consequence of: <input_ref
+          input="consq"/>
+      </p>
+    </body>
+    <input id="method" shuffle="false">
+      <choice value="0">preserving bit pattern; high-order bit becomes sign bit</choice>
+      <choice value="1">preserving low-order byte (8 bits)</choice>
+      <choice value="2">preserving low-order doubleword (32 bits)</choice>
+      <choice value="3">preserving low-order word (16 bits)</choice>
+    </input>
+    <input id="consq" shuffle="false">
+      <choice value="0">always safe</choice>
+      <choice value="1">lost data</choice>
+      <choice value="2">lost or misinterpreted data</choice>
+      <choice value="3">misinterpreted data</choice>
+    </input>
+    <part>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned short)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned short)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned short)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="0"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The bit pattern cannot be preserved because <code>width(unsigned short)
+            &lt; width(unsigned long long)</code> on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>unsigned
+            short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>unsigned
+            short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>unsigned
+            short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="1"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order word (16 bits) is preserved because <code>unsigned
+            short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="1"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="2"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. The low-order doubleword (32 bits) cannot be preserved because
+            <code>unsigned short</code> is 16 bits on x86-32.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="0"/>
+        <feedback>Incorrect. Because <code>width(unsigned short) &lt; width(unsigned long
+            long)</code> on x86-32, the high-order bytes are lost in the conversion.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="1">
+        <match input="method" match="3"/>
+        <match input="consq" match="1"/>
+        <feedback>Correct! Because <code>width(unsigned short) &lt; width(unsigned long long)</code>
+          on x86-32, the high-order bytes are lost in the conversion. </feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="2"/>
+        <feedback>Incorrect. Only loss of data (truncation) can occur when converting from one
+          unsigned type to another unsigned type. Because <code>width(unsigned short) &lt;
+            width(unsigned long long)</code> on x86-32, the high-order bytes are lost in the
+          conversion.</feedback>
+      </response_mult>
+      <response_mult match_style="all" score="0">
+        <match input="method" match="3"/>
+        <match input="consq" match="3"/>
+        <feedback>Incorrect. Only loss of data (truncation) can occur when converting from one
+          unsigned type to another unsigned type. Because <code>width(unsigned short) &lt;
+            width(unsigned long long)</code> on x86-32, the high-order bytes are lost in the
+          conversion.</feedback>
+      </response_mult>
+      <hint>Review the x86-32 data model and conversion of unsigned to unsigned with a loss of
+        precision.</hint>
+      <hint>Because <code>width(unsigned short) &lt; width(unsigned long long)</code> on x86-32, the
+        high-order bytes are lost in the conversion.</hint>
+      <hint>Although loss of data (truncation) can occur when converting from one unsigned type to
+        another unsigned type, there is no sign bit, so data is not misinterpreted.</hint>
+    </part>
+  </fill_in_the_blank>
+
+
+</assessment>

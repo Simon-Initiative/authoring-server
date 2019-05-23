@@ -1,0 +1,611 @@
+{
+  "assessment": {
+    "@id": "explain_why_instrctnl_desgn_complx_2",
+    "@recommended_attempts": "3",
+    "@max_attempts": "3",
+    "#array": [{
+      "title": {
+        "#text": "explain_why_instrctnl_desgn_complx_2"
+      }
+    }, {
+      "page": {
+        "@id": "a45cd12ec27f419db7b6b4582dea0ec5",
+        "#array": [{
+          "title": {
+            "#text": "Page 1"
+          }
+        }, {
+          "question": {
+            "@id": "q1_explain_why_instrctnl_desgn_complx_2",
+            "@grading": "automatic",
+            "#array": [{
+              "body": {
+                "#array": [{
+                  "p": {
+                    "#text": "Choose the learning process in the table that best satisfies the name and description of the given principle. ",
+                    "@id": "b8612bc2fe914b8ea99f4f23cdcd7bc0",
+                    "@title": ""
+                  }
+                }, {
+                  "table": {
+                    "@id": "a884a9f4fbd547f7bc3a2c7e78313d7d",
+                    "@summary": "",
+                    "@rowstyle": "plain",
+                    "#array": [{
+                      "title": {
+                        "#text": ""
+                      }
+                    }, {
+                      "cite": {
+                        "@title": "",
+                        "@id": "c6d9fb6318cd4b9e949065429bf74cef"
+                      }
+                    }, {
+                      "caption": {
+                        "#array": []
+                      }
+                    }, {
+                      "tr": {
+                        "#array": [{
+                          "th": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Instructional Principle",
+                                "@id": "ac756b969224c4c2d9c160848be9bb2cc",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "th": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Principle Description",
+                                "@id": "ac95c1d365d454a76acfddb2bf621870a",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "th": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Learning Process",
+                                "@id": "aa7b8436e195f4df996e7c124677c245b",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }]
+                      }
+                    }, {
+                      "tr": {
+                        "#array": [{
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Explanation",
+                                "@id": "ae04ac46c14334d41a5a1035fcd44d8f4",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Prompting learners to explain in their own words or providing a menu of choices",
+                                "@id": "aaea51a2888e64a958a196df480ddd056",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#array": [{
+                                  "input_ref": {
+                                    "@input": "s5"
+                                  }
+                                }],
+                                "@id": "d5cc0e9232444745a7638a19969e86ff",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }]
+                      }
+                    }, {
+                      "tr": {
+                        "#array": [{
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Anchored learning ",
+                                "@id": "afb4d01334e7b48c8aa35fbe8e1de0a35",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Giving real world problems in place of abstract problems ",
+                                "@id": "adc39a76bbc4f4d4ea82e1f372beb4d9b",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#array": [{
+                                  "input_ref": {
+                                    "@input": "s4"
+                                  }
+                                }],
+                                "@id": "b62c93cb02c84afbb2a29942c7a2500d",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }]
+                      }
+                    }, {
+                      "tr": {
+                        "#array": [{
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Pretraining",
+                                "@id": "af7d84024b2ce400797a34c6e2857f063",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Practice or review of prior skills before beginning a lesson ",
+                                "@id": "ab8e92dab5c124928a08c51c3deea3822",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#array": [{
+                                  "input_ref": {
+                                    "@input": "s3"
+                                  }
+                                }],
+                                "@id": "e2d9ad5e91c142eab5d92b6fb7089662",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }]
+                      }
+                    }, {
+                      "tr": {
+                        "#array": [{
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Testing ",
+                                "@id": "ae38cbfd685a64ee897ff2a4639934c4b",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#text": "Quizzing for retrieval",
+                                "@id": "adfdb4b322acf4d609472970df7dd8487",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }, {
+                          "td": {
+                            "@colspan": "1",
+                            "@rowspan": "1",
+                            "@align": "left",
+                            "#array": [{
+                              "p": {
+                                "#array": [{
+                                  "input_ref": {
+                                    "@input": "s1"
+                                  }
+                                }],
+                                "@id": "db729cf5fe7541d4b699706ada31ef3d",
+                                "@title": ""
+                              }
+                            }]
+                          }
+                        }]
+                      }
+                    }]
+                  }
+                }]
+              }
+            }, {
+              "fill_in_the_blank": {
+                "@shuffle": "false",
+                "@id": "s1",
+                "@name": "",
+                "#array": [{
+                  "choice": {
+                    "#text": "Memory/Fluency",
+                    "@value": "mem_flu",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Induction/Refinement",
+                    "@value": "induc_refi",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Sense-making/Understanding",
+                    "@value": "sm_under",
+                    "@color": ""
+                  }
+                }]
+              }
+            }, {
+              "fill_in_the_blank": {
+                "@shuffle": "false",
+                "@id": "s3",
+                "@name": "",
+                "#array": [{
+                  "choice": {
+                    "#text": "Memory/Fluency",
+                    "@value": "mem_flu",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Induction/Refinement",
+                    "@value": "induc_refi",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Sense-making/Understanding",
+                    "@value": "sm_under",
+                    "@color": ""
+                  }
+                }]
+              }
+            }, {
+              "fill_in_the_blank": {
+                "@shuffle": "false",
+                "@id": "s4",
+                "@name": "",
+                "#array": [{
+                  "choice": {
+                    "#text": "Memory/Fluency",
+                    "@value": "mem_flu",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Induction/Refinement",
+                    "@value": "induc_refi",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Sense-making/Understanding",
+                    "@value": "sm_under",
+                    "@color": ""
+                  }
+                }]
+              }
+            }, {
+              "fill_in_the_blank": {
+                "@shuffle": "false",
+                "@id": "s5",
+                "@name": "",
+                "#array": [{
+                  "choice": {
+                    "#text": "Memory/Fluency",
+                    "@value": "mem_flu",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Induction/Refinement",
+                    "@value": "induc_refi",
+                    "@color": ""
+                  }
+                }, {
+                  "choice": {
+                    "#text": "Sense-making/Understanding",
+                    "@value": "sm_under",
+                    "@color": ""
+                  }
+                }]
+              }
+            }, {
+              "part": {
+                "@id": "p1",
+                "@targets": "",
+                "#array": [{
+                  "title": {
+                    "#text": ""
+                  }
+                }, {
+                  "response": {
+                    "@match": "mem_flu",
+                    "@score": "1",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Correct. Memory/Fluency is involved with strengthening memory and is associated with the long term retention of facts. ",
+                            "@id": "aa36f499b0d5941208dca500be10b867b",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s1"
+                  }
+                }, {
+                  "response": {
+                    "@match": "*",
+                    "@score": "0",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Incorrect. Memory/Fluency is involved with strengthening memory and is associated with the long term retention of facts. ",
+                            "@id": "aaece21f145b64a5f830076f43f9dfffa",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s1"
+                  }
+                }, {
+                  "hint": {
+                    "#array": [{
+                      "p": {
+                        "#text": "Learning processes are broad categorizations for sorting the different types of knowledge based on the cognitive characteristics/functions of the knowledge to be learned (e.g., facts vs. rules vs. principles). The myriad techniques that have been proven to produce better learning outcomes are referred to as instructional principles. ",
+                        "@id": "acb5f2ff958c34be0a5f0e030e544fa65",
+                        "@title": ""
+                      }
+                    }],
+                    "@targets": ""
+                  }
+                }, {
+                  "explanation": {
+                    "#array": []
+                  }
+                }]
+              }
+            }, {
+              "part": {
+                "@id": "p3",
+                "@targets": "",
+                "#array": [{
+                  "title": {
+                    "#text": ""
+                  }
+                }, {
+                  "response": {
+                    "@match": "induc_refi",
+                    "@score": "1",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Correct. Induction/refinement is a learning process associated with learning rules. ",
+                            "@id": "ae593b2017ecb41289474a604d437c2d2",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s3"
+                  }
+                }, {
+                  "response": {
+                    "@match": "*",
+                    "@score": "0",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Incorrect. Induction/refinement is a learning process associated with learning rules. ",
+                            "@id": "ae5db3a5b40b041c0a192dcc1300c60cd",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s3"
+                  }
+                }, {
+                  "explanation": {
+                    "#array": []
+                  }
+                }]
+              }
+            }, {
+              "part": {
+                "@id": "p4",
+                "@targets": "",
+                "#array": [{
+                  "title": {
+                    "#text": ""
+                  }
+                }, {
+                  "response": {
+                    "@match": "sm_under",
+                    "@score": "1",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Correct. Sense-making/Understanding processes produce higher level thinking skills that involve reasoning and self-efficacy and are associated with the learning of principles.",
+                            "@id": "aeee7918e35c947bf8cbc778629a36137",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s4"
+                  }
+                }, {
+                  "response": {
+                    "@match": "*",
+                    "@score": "0",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Incorrect. Sense-making/Understanding processes produce higher level thinking skills that involve reasoning and self-efficacy and are associated with the learning of principles. ",
+                            "@id": "ad1cfebdb5853439c83f5f02cb22110e5",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s4"
+                  }
+                }, {
+                  "explanation": {
+                    "#array": []
+                  }
+                }]
+              }
+            }, {
+              "part": {
+                "@id": "p5",
+                "@targets": "",
+                "#array": [{
+                  "title": {
+                    "#text": ""
+                  }
+                }, {
+                  "response": {
+                    "@match": "sm_under",
+                    "@score": "1",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Correct. Sense-making/Understanding processes produce higher level thinking skills that involve reasoning and self-efficacy and are associated with the learning of principles.",
+                            "@id": "ac90f0cca49d048d4ba771fc724090299",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s5"
+                  }
+                }, {
+                  "response": {
+                    "@match": "*",
+                    "@score": "0",
+                    "@name": "",
+                    "#array": [{
+                      "feedback": {
+                        "#array": [{
+                          "p": {
+                            "#text": "Incorrect. Sense-making/Understanding processes produce higher level thinking skills that involve reasoning and self-efficacy and are associated with the learning of principles. ",
+                            "@id": "ae7805312371545578dcc5a73f8d6ddc7",
+                            "@title": ""
+                          }
+                        }],
+                        "@targets": ""
+                      }
+                    }],
+                    "@input": "s5"
+                  }
+                }, {
+                  "explanation": {
+                    "#array": []
+                  }
+                }]
+              }
+            }, {
+              "explanation": {
+                "#array": []
+              }
+            }]
+          }
+        }]
+      }
+    }]
+  }
+}
