@@ -329,18 +329,14 @@ public class SVNSyncController {
 
                 doProcessLDmodelFiles(packageGuid, base.toPath().resolve("ldmodel"));
                 if (!update.isEmpty()) {
-                    edgesController.validateNonValidatedEdges(packageGuid);
+                    edgesController.validateEdgesAsync(packageGuid);
                 }
 
             } catch (SVNException ex) {
                 log.error("SVN Update Error: ", ex);
             }
             try {
-                String commitMessage = "Publisher: committing changes to svn repository " + base.getName();
-                log.info("Committing changes to svn " + base.getName());
-                repos.put(base.getAbsolutePath(), Boolean.FALSE);
-                svnManager.commit(base, commitMessage);
-
+                svnCommit(base, svnManager);
             } catch (SVNException ex) {
                 log.error("SVN Commit Error: ", ex);
             }
@@ -353,6 +349,13 @@ public class SVNSyncController {
                 updateSvnRepo(base, packageGuid);
             }
         }
+    }
+
+    private void svnCommit(File base, SVNManager svnManager) throws SVNException {
+        String commitMessage = "Publisher: committing changes to svn repository " + base.getName();
+        log.info("Committing changes to svn " + base.getName());
+        repos.put(base.getAbsolutePath(), Boolean.FALSE);
+        svnManager.commit(base, commitMessage);
     }
 
     private void parseResource(File base, String crud, String packageId, Path file) {
@@ -524,7 +527,6 @@ public class SVNSyncController {
             return;
         }
         em.merge(contentPackage);
-//        packageFileController.updatePackgeJson(packageId, contentPackage);
     }
 
     private void processResourceFile(String crud, String packageId, Path resourceFile, JsonObject resourceTypeDefinition) {

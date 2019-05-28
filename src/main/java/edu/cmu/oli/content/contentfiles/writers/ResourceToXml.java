@@ -181,21 +181,12 @@ public class ResourceToXml {
             }
             if (el.getName().equalsIgnoreCase("question")) {
                 el.removeAttribute("grading");
-                IteratorIterable<Element> inputRef = el.getDescendants(new ElementFilter("input_ref"));
+
+                // Move any hints (if any) found at the question level into the very first question part
+                // Assumes question level hints not supported
                 IteratorIterable<Element> part = el.getDescendants(new ElementFilter("part"));
-                while (inputRef.hasNext() && part.hasNext()) {
-                    String ival = inputRef.next().getAttributeValue("input");
-                    Element next = part.next();
-                    List<Element> responses = next.getChildren("response");
-                    responses.forEach(e -> {
-                        e.setAttribute("input", ival);
-                    });
-                }
-                part = el.getDescendants(new ElementFilter("part"));
                 List<Element> hints = el.getChildren("hint");
-                hints.forEach(h -> {
-                    log.info("hints in question ------------------------- " + h.getText());
-                });
+
                 List<Element> removal = new ArrayList<>();
                 removal.addAll(hints);
                 if (part.hasNext()) {
@@ -286,10 +277,17 @@ public class ResourceToXml {
             if (el.getName().equalsIgnoreCase("explanation")) {
                 if (el.getValue().isEmpty()) {
                     el.detach();
+                } else {
+                    Parent parent = el.getParent();
+                    if (parent.indexOf(el) != parent.getContentSize() - 1) {
+                        el.detach();
+                        parent.addContent(el);
+                    }
                 }
+
             }
         }
-        query = "//response";
+        query = "//response | //match";
         xexpression = XPathFactory.instance().compile(query, Filters.element());
         kids = xexpression.evaluate(rootElement);
         for (Element el : kids) {
@@ -458,7 +456,7 @@ public class ResourceToXml {
                 }
             }
         }
-        query = "//response";
+        query = "//response | //match";
         xexpression = XPathFactory.instance().compile(query, Filters.element());
         kids = xexpression.evaluate(rootElement);
         for (Element el : kids) {
@@ -497,7 +495,7 @@ public class ResourceToXml {
         String query = "//*[@id] | //*[@lang] | //*[@src] | //*[@title] | //objref[@idref] | //*[@name] | //*[@alt] | //table "
                 + "| //*[@orient] | //section | //video | //audio | //cite | //*[@targets] | //title | //content "
                 + "| //pullout | //example | //codeblock | //iframe | //youtube | //definition | //math | //link | //alternate"
-                + "| //short_title";
+                + "| //short_title | //sym";
         XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
         List<Element> kids = xexpression.evaluate(document.getRootElement());
         for (Element el : kids) {
@@ -570,8 +568,13 @@ public class ResourceToXml {
                     }
                 }
             }
-            if (el.getAttribute("targets") != null && el.getAttribute("targets").getValue().isEmpty()) {
-                el.getAttribute("targets").detach();
+            if (el.getAttribute("targets") != null) {
+                Attribute targets = el.getAttribute("targets");
+                if (targets.getValue().isEmpty()) {
+                    targets.detach();
+                } else if (Character.isDigit(targets.getValue().charAt(0))) {
+                    el.setAttribute("targets", "i" + targets.getValue());
+                }
             }
 
             if (el.getAttribute("alt") != null) {
@@ -800,6 +803,16 @@ public class ResourceToXml {
             if (el.getName().equalsIgnoreCase("content")) {
                 if ((el.getValue().isEmpty()) && el.getChildren().size() == 0) {
                     el.detach();
+                }
+            }
+
+            if (el.getName().equalsIgnoreCase("sym")) {
+                if (!el.getValue().isEmpty()) {
+                    String value = el.getValue();
+                    Parent parent = el.getParent();
+                    parent.addContent(parent.indexOf(el), new Text(value));
+                    el.detach();
+
                 }
             }
 
