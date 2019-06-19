@@ -49,15 +49,15 @@ public class DeveloperResource {
     AppSecurityContextFactory appSecurityContextFactory;
 
     @GET
-    @Path("v1/{packageId}/developers")
-    public void all(@Suspended AsyncResponse response, @PathParam("packageId") String packageId) {
-        if (packageId == null) {
+    @Path("v1/{packageIdOrGuid}/developers")
+    public void all(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid) {
+        if (packageIdOrGuid == null) {
             String message = "Parameters missing";
             response.resume(ExceptionHandler.errorResponse(message, Response.Status.BAD_REQUEST));
             return;
         }
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture.supplyAsync(() -> pm.all(appSecurityContext, packageId), mes).thenApply(this::all)
+        CompletableFuture.supplyAsync(() -> pm.all(appSecurityContext, packageIdOrGuid), mes).thenApply(this::all)
                 .exceptionally(ExceptionHandler::handleExceptions).thenAccept(response::resume);
     }
 
@@ -68,11 +68,12 @@ public class DeveloperResource {
     }
 
     @POST
-    @Path("v1/{packageId}/developers/registration")
-    public void registration(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
-            @QueryParam("action") String action, JsonArray users) {
+    @Path("v1/{packageIdOrGuidOrGuid}/developers/registration")
+    public void registration(@Suspended AsyncResponse response,
+            @PathParam("packageIdOrGuidOrGuid") String packageIdOrGuidOrGuid, @QueryParam("action") String action,
+            JsonArray users) {
 
-        if (packageId == null || users == null || action == null) {
+        if (packageIdOrGuidOrGuid == null || users == null || action == null) {
             String message = "Parameters missing";
             response.resume(ExceptionHandler.errorResponse(message, Response.Status.BAD_REQUEST));
             return;
@@ -85,7 +86,7 @@ public class DeveloperResource {
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
         JsonParser jsonParser = new JsonParser();
         CompletableFuture
-                .supplyAsync(() -> pm.registration(appSecurityContext, packageId, action,
+                .supplyAsync(() -> pm.registration(appSecurityContext, packageIdOrGuidOrGuid, action,
                         jsonParser.parse(AppUtils.toString(users)).getAsJsonArray()), mes)
                 .thenApply(this::registration).exceptionally(ExceptionHandler::handleExceptions)
                 .thenAccept(response::resume);

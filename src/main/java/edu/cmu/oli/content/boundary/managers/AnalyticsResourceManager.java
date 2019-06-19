@@ -226,19 +226,34 @@ public class AnalyticsResourceManager {
         return resultList;
     }
 
-    private ContentPackage findContentPackage(String packageGuid) {
+    // packageIdentifier is db guid or packageId-version combo
+    private ContentPackage findContentPackage(String packageIdOrGuid) {
         ContentPackage contentPackage = null;
+        Boolean isIdAndVersion = packageIdOrGuid.contains("-");
         try {
-            contentPackage = em.find(ContentPackage.class, packageGuid);
-            if (contentPackage == null) {
-                String message = "Error: package requested was not found " + packageGuid;
-                log.error(message);
-                throw new ResourceException(Response.Status.NOT_FOUND, packageGuid, message);
+            if (isIdAndVersion) {
+                String pkgId = packageIdOrGuid.substring(0, packageIdOrGuid.lastIndexOf("-"));
+                String version = packageIdOrGuid.substring(packageIdOrGuid.lastIndexOf("-") + 1);
+                TypedQuery<ContentPackage> q = em
+                        .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                        .setParameter("id", pkgId).setParameter("version", version);
+
+                contentPackage = q.getResultList().isEmpty() ? null : q.getResultList().get(0);
+            } else {
+                String packageGuid = packageIdOrGuid;
+                contentPackage = em.find(ContentPackage.class, packageGuid);
             }
+
+            if (contentPackage == null) {
+                String message = "Error: package requested was not found " + packageIdOrGuid;
+                log.error(message);
+                throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
+            }
+
         } catch (IllegalArgumentException e) {
-            String message = "Server Error while locating package " + packageGuid;
+            String message = "Server Error while locating package " + packageIdOrGuid;
             log.error(message);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageGuid, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageIdOrGuid, message);
         }
         return contentPackage;
     }

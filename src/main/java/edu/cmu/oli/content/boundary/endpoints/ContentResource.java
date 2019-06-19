@@ -61,24 +61,24 @@ public class ContentResource {
     AppSecurityContextFactory appSecurityContextFactory;
 
     @GET
-    @Path("v1/{packageId}/resources/{resourceId}")
-    public void fetchResource(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    @Path("v1/{packageIdOrGuid}/resources/{resourceId}")
+    public void fetchResource(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @PathParam("resourceId") String resourceId) {
-        if (packageId == null || resourceId == null) {
+        if (packageIdOrGuid == null || resourceId == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture.supplyAsync(() -> pm.fetchResource(appSecurityContext, packageId, resourceId), mes)
+        CompletableFuture.supplyAsync(() -> pm.fetchResource(appSecurityContext, packageIdOrGuid, resourceId), mes)
                 .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
                 .thenAccept(response::resume);
     }
 
     @POST
-    @Path("v1/{packageId}/resources")
-    public void createResource(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    @Path("v1/{packageIdOrGuid}/resources")
+    public void createResource(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @QueryParam("resourceType") String resourceType, JsonObject content) {
-        if (packageId == null || resourceType == null || content == null) {
+        if (packageIdOrGuid == null || resourceType == null || content == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
@@ -86,32 +86,33 @@ public class ContentResource {
         JsonParser jsonParser = new JsonParser();
         com.google.gson.JsonObject jsonObject = jsonParser.parse(AppUtils.toString(content)).getAsJsonObject();
         CompletableFuture
-                .supplyAsync(() -> createResource(appSecurityContext, packageId, resourceType, jsonObject, 0), mes)
+                .supplyAsync(() -> createResource(appSecurityContext, packageIdOrGuid, resourceType, jsonObject, 0),
+                        mes)
                 .thenAccept(response::resume);
     }
 
     @POST
-    @Path("v1/{packageId}/resources/bulk")
-    public void fetchResourcesByFilter(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
-            @QueryParam("action") String action, JsonArray body) {
-        if (packageId == null || action == null || body == null) {
+    @Path("v1/{packageIdOrGuid}/resources/bulk")
+    public void fetchResourcesByFilter(@Suspended AsyncResponse response,
+            @PathParam("packageIdOrGuid") String packageIdOrGuid, @QueryParam("action") String action, JsonArray body) {
+        if (packageIdOrGuid == null || action == null || body == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
         JsonParser jsonParser = new JsonParser();
         CompletableFuture
-                .supplyAsync(() -> pm.fetchResourcesByFilter(appSecurityContext, packageId, action,
+                .supplyAsync(() -> pm.fetchResourcesByFilter(appSecurityContext, packageIdOrGuid, action,
                         jsonParser.parse(AppUtils.toString(body)).getAsJsonArray()), mes)
                 .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
                 .thenAccept(response::resume);
     }
 
     @PUT
-    @Path("v1/{packageId}/resources/{resourceId}")
-    public void updateResource(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    @Path("v1/{packageIdOrGuid}/resources/{resourceId}")
+    public void updateResource(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @PathParam("resourceId") String resourceId, JsonObject body) {
-        if (packageId == null || resourceId == null || body == null) {
+        if (packageIdOrGuid == null || resourceId == null || body == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
@@ -119,16 +120,16 @@ public class ContentResource {
         JsonParser jsonParser = new JsonParser();
         com.google.gson.JsonObject jsonObject = jsonParser.parse(AppUtils.toString(body)).getAsJsonObject();
         CompletableFuture
-                .supplyAsync(() -> updateResource(appSecurityContext, packageId, resourceId, jsonObject, 0), mes)
+                .supplyAsync(() -> updateResource(appSecurityContext, packageIdOrGuid, resourceId, jsonObject, 0), mes)
                 .thenAccept(response::resume);
     }
 
     @PUT
-    @Path("v1/{packageId}/resources/{resourceId}/{baseRevisionId}/{nextRevisionId}")
-    public void updateResource(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    @Path("v1/{packageIdOrGuid}/resources/{resourceId}/{baseRevisionId}/{nextRevisionId}")
+    public void updateResource(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @PathParam("resourceId") String resourceId, @PathParam("baseRevisionId") String baseRevisionId,
             @PathParam("nextRevisionId") String nextRevisionId, JsonObject body) {
-        if (packageId == null || resourceId == null || baseRevisionId == null || nextRevisionId == null
+        if (packageIdOrGuid == null || resourceId == null || baseRevisionId == null || nextRevisionId == null
                 || body == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
@@ -136,33 +137,33 @@ public class ContentResource {
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
         JsonParser jsonParser = new JsonParser();
         com.google.gson.JsonObject jsonObject = jsonParser.parse(AppUtils.toString(body)).getAsJsonObject();
-        CompletableFuture.supplyAsync(() -> updateRevisionBasedResource(appSecurityContext, packageId, resourceId,
+        CompletableFuture.supplyAsync(() -> updateRevisionBasedResource(appSecurityContext, packageIdOrGuid, resourceId,
                 baseRevisionId, nextRevisionId, jsonObject, 0), mes).thenAccept(response::resume);
     }
 
     @DELETE
-    @Path("v1/{packageId}/resources/{resourceId}")
-    public void deleteResource(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    @Path("v1/{packageIdOrGuid}/resources/{resourceId}")
+    public void deleteResource(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @PathParam("resourceId") String resourceId) {
-        if (packageId == null || resourceId == null) {
+        if (packageIdOrGuid == null || resourceId == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture.supplyAsync(() -> softDelete(appSecurityContext, packageId, resourceId, 0), mes)
+        CompletableFuture.supplyAsync(() -> softDelete(appSecurityContext, packageIdOrGuid, resourceId, 0), mes)
                 .thenAccept(response::resume);
     }
 
     @GET
-    @Path("v1/{packageId}/resources/edges/{resourceId}")
-    public void fetchResourceEdges(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
-            @PathParam("resourceId") String resourceId) {
-        if (packageId == null || resourceId == null) {
+    @Path("v1/{packageIdOrGuid}/resources/edges/{resourceId}")
+    public void fetchResourceEdges(@Suspended AsyncResponse response,
+            @PathParam("packageIdOrGuid") String packageIdOrGuid, @PathParam("resourceId") String resourceId) {
+        if (packageIdOrGuid == null || resourceId == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture.supplyAsync(() -> pm.fetchResourceEdges(appSecurityContext, packageId, resourceId), mes)
+        CompletableFuture.supplyAsync(() -> pm.fetchResourceEdges(appSecurityContext, packageIdOrGuid, resourceId), mes)
                 .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
                 .thenAccept(response::resume);
     }
@@ -173,10 +174,10 @@ public class ContentResource {
                 .build();
     }
 
-    private Response createResource(AppSecurityContext appSecurityContext, String packageId, String resourceType,
+    private Response createResource(AppSecurityContext appSecurityContext, String packageIdOrGuid, String resourceType,
             com.google.gson.JsonObject jsonObject, int retryCounter) {
         try {
-            JsonElement resource = pm.createResource(appSecurityContext, packageId, resourceType, jsonObject);
+            JsonElement resource = pm.createResource(appSecurityContext, packageIdOrGuid, resourceType, jsonObject);
             Gson gson = AppUtils.gsonBuilder().serializeNulls().create();
             return Response.status(Response.Status.OK).entity(gson.toJson(resource)).type(MediaType.APPLICATION_JSON)
                     .build();
@@ -185,16 +186,16 @@ public class ContentResource {
                     && retryCounter < configuration.get().getTransactionRetrys()) {
                 retryCounter++;
                 log.error("LockResource acquisition exception detected on resource create; retrying transaction");
-                return createResource(appSecurityContext, packageId, resourceType, jsonObject, retryCounter);
+                return createResource(appSecurityContext, packageIdOrGuid, resourceType, jsonObject, retryCounter);
             }
             return ExceptionHandler.handleExceptions(t);
         }
     }
 
-    private Response updateResource(AppSecurityContext appSecurityContext, String packageId, String resourceId,
+    private Response updateResource(AppSecurityContext appSecurityContext, String packageIdOrGuid, String resourceId,
             com.google.gson.JsonObject jsonObject, int retryCounter) {
         try {
-            JsonElement resourceJson = pm.updateResource(appSecurityContext, packageId, resourceId, jsonObject);
+            JsonElement resourceJson = pm.updateResource(appSecurityContext, packageIdOrGuid, resourceId, jsonObject);
             Gson gson = AppUtils.gsonBuilder().serializeNulls().create();
             return Response.status(Response.Status.OK).entity(gson.toJson(resourceJson))
                     .type(MediaType.APPLICATION_JSON).build();
@@ -202,18 +203,18 @@ public class ContentResource {
             if (ExceptionHandler.checkForDBLockExceptions(t)
                     && retryCounter < configuration.get().getTransactionRetrys()) {
                 log.error("LockResource acquisition exception detected on resource update; retrying transaction");
-                return updateResource(appSecurityContext, packageId, resourceId, jsonObject, ++retryCounter);
+                return updateResource(appSecurityContext, packageIdOrGuid, resourceId, jsonObject, ++retryCounter);
             }
             return ExceptionHandler.handleExceptions(t);
         }
     }
 
-    private Response updateRevisionBasedResource(AppSecurityContext appSecurityContext, String packageId,
+    private Response updateRevisionBasedResource(AppSecurityContext appSecurityContext, String packageIdOrGuid,
             String resourceId, String baseRevisionId, String nextRevision, com.google.gson.JsonObject jsonObject,
             int retryCounter) {
         try {
-            JsonElement resourceJson = pm.updateResource(appSecurityContext, packageId, resourceId, baseRevisionId,
-                    nextRevision, jsonObject);
+            JsonElement resourceJson = pm.updateResource(appSecurityContext, packageIdOrGuid, resourceId,
+                    baseRevisionId, nextRevision, jsonObject);
             Gson gson = AppUtils.gsonBuilder().serializeNulls().create();
             return Response.status(Response.Status.OK).entity(gson.toJson(resourceJson))
                     .type(MediaType.APPLICATION_JSON).build();
@@ -221,17 +222,17 @@ public class ContentResource {
             if (ExceptionHandler.checkForDBLockExceptions(t)
                     && retryCounter < configuration.get().getTransactionRetrys()) {
                 log.error("LockResource acquisition exception detected on resource update; retrying transaction");
-                return updateRevisionBasedResource(appSecurityContext, packageId, resourceId, baseRevisionId,
+                return updateRevisionBasedResource(appSecurityContext, packageIdOrGuid, resourceId, baseRevisionId,
                         nextRevision, jsonObject, ++retryCounter);
             }
             return ExceptionHandler.handleExceptions(t);
         }
     }
 
-    private Response softDelete(AppSecurityContext appSecurityContext, String packageId, String resourceId,
+    private Response softDelete(AppSecurityContext appSecurityContext, String packageIdOrGuid, String resourceId,
             int retryCounter) {
         try {
-            JsonElement resourceJson = pm.softDelete(appSecurityContext, packageId, resourceId);
+            JsonElement resourceJson = pm.softDelete(appSecurityContext, packageIdOrGuid, resourceId);
             Gson gson = AppUtils.gsonBuilder().serializeNulls().create();
             return Response.status(Response.Status.OK).entity(gson.toJson(resourceJson))
                     .type(MediaType.APPLICATION_JSON).build();
@@ -239,7 +240,7 @@ public class ContentResource {
             if (ExceptionHandler.checkForDBLockExceptions(t)
                     && retryCounter < configuration.get().getTransactionRetrys()) {
                 log.error("LockResource acquisition exception detected on resource delete; retrying transaction");
-                return softDelete(appSecurityContext, packageId, resourceId, ++retryCounter);
+                return softDelete(appSecurityContext, packageIdOrGuid, resourceId, ++retryCounter);
             }
             return ExceptionHandler.handleExceptions(t);
         }

@@ -108,9 +108,10 @@ public class ContentResourceManager {
     @Dedicated("svnExecutor")
     ExecutorService svnExecutor;
 
-    public JsonElement fetchResource(AppSecurityContext session, String packageId, String resourceId) {
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
+    public JsonElement fetchResource(AppSecurityContext session, String packageIdOrGuid, String resourceId) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
         TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
         q.setParameter("guid", resourceId);
         List<Resource> resultList = q.getResultList();
@@ -276,8 +277,7 @@ public class ContentResourceManager {
                             builder.setExpandEntities(false);
                             Document document = builder.build(new StringReader(layoutXml));
 
-                            JsonElement layoutElement = new Xml2Json().toJson(document.getRootElement(),
-                                    false);
+                            JsonElement layoutElement = new Xml2Json().toJson(document.getRootElement(), false);
 
                             contentItem.getAsJsonObject().get("custom").getAsJsonObject().getAsJsonObject()
                                     .add("layoutData", layoutElement);
@@ -401,13 +401,14 @@ public class ContentResourceManager {
         return false;
     }
 
-    public JsonElement createResource(AppSecurityContext session, String packageId, String resourceTypeId,
+    public JsonElement createResource(AppSecurityContext session, String packageIdOrGuid, String resourceTypeId,
             JsonElement resourceContent) {
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
-        Resource resource = doCreate(packageId, resourceTypeId, resourceContent, session.getPreferredUsername(),
-                session.getTokenString(), true);
+        Resource resource = doCreate(contentPackage.getGuid(), resourceTypeId, resourceContent,
+                session.getPreferredUsername(), session.getTokenString(), true);
 
         Gson gson = AppUtils.gsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create();
         JsonObject resourceJson = (JsonObject) gson.toJsonTree(resource);
@@ -419,26 +420,17 @@ public class ContentResourceManager {
         return resourceJson;
     }
 
-    public Resource doCreate(String packageId, String resourceTypeId, JsonElement resourceContent, String author,
-                             String lockId, boolean throwErrors) {
+    public Resource doCreate(String packageIdOrGuid, String resourceTypeId, JsonElement resourceContent, String author,
+            String lockId, boolean throwErrors) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         Configurations serviceConfig = this.configuration.get();
         JsonObject resourceTypeDefinition = serviceConfig.getResourceTypeById(resourceTypeId);
         if (resourceTypeDefinition == null) {
             String message = "ContentResource type not supported  " + resourceTypeId;
             log.error(message);
-            throw new ResourceException(Response.Status.BAD_REQUEST, packageId, message);
+            throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(), message);
         }
 
-        TypedQuery<ContentPackage> q = em.createNamedQuery("ContentPackage.findByGuid", ContentPackage.class);
-        q.setParameter("guid", packageId);
-        List<ContentPackage> resultList = q.getResultList();
-        if (resultList.isEmpty()) {
-            String message = "Content Package not found " + packageId;
-            log.error(message);
-            throw new ResourceException(Response.Status.NOT_FOUND, packageId, message);
-        }
-
-        ContentPackage contentPackage = resultList.get(0);
         boolean jsonCapable = resourceTypeDefinition.get(JSON_CAPABLE).getAsBoolean();
         Resource resource = new Resource();
         resource.setType(resourceTypeDefinition.get("id").getAsString());
@@ -466,12 +458,12 @@ public class ContentResourceManager {
         TypedQuery<Resource> query = em.createQuery(
                 "select r from Resource r where r.contentPackage.guid = :pkgGuid and r.id = :id", Resource.class);
         query.setParameter("id", resource.getId());
-        query.setParameter("pkgGuid", packageId);
+        query.setParameter("pkgGuid", contentPackage.getGuid());
         if (!query.getResultList().isEmpty()) {
             String message = "ContentResource Id already used in package " + contentPackage.getId() + " Id: "
                     + resource.getId();
             log.error(message);
-            throw new ResourceException(Response.Status.PRECONDITION_FAILED, packageId, message);
+            throw new ResourceException(Response.Status.PRECONDITION_FAILED, contentPackage.getGuid(), message);
         }
 
         // Parse update payload into final xml and json documents
@@ -483,7 +475,7 @@ public class ContentResourceManager {
                 jsonCapable ? "application/json" : "text/xml");
         resource.setFileNode(fileNode);
         resource.setContentPackage(contentPackage);
-        validateXmlContent(contentPackage.getId(), resource, contentValues.get("xmlContent"), throwErrors);
+        validateXmlContent(contentPackage.getGuid(), resource, contentValues.get("xmlContent"), throwErrors);
 
         RevisionBlob revisionBlob = jsonCapable
                 ? new RevisionBlob(new JsonWrapper(new JsonParser().parse(contentValues.get("content"))))
@@ -504,10 +496,11 @@ public class ContentResourceManager {
         return resource;
     }
 
-    public JsonElement updateResource(AppSecurityContext session, String packageId, String resourceId,
+    public JsonElement updateResource(AppSecurityContext session, String packageIdOrGuid, String resourceId,
             JsonElement resourceContent) {
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
         this.lockController.checkLockPermission(session, resourceId, true);
 
@@ -518,7 +511,8 @@ public class ContentResourceManager {
         }
 
         String lockId = this.lockController.getLockForResource(session, resourceId, false).getLockId();
-        doUpdate(packageId, resource, resourceContent, session.getPreferredUsername(), lockId, null, true);
+        doUpdate(contentPackage.getGuid(), resource, resourceContent, session.getPreferredUsername(), lockId, null,
+                true);
 
         Gson gson = AppUtils.gsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create();
 
@@ -534,10 +528,11 @@ public class ContentResourceManager {
         return resourceJson;
     }
 
-    public JsonElement updateResource(AppSecurityContext session, String packageId, String resourceId,
+    public JsonElement updateResource(AppSecurityContext session, String packageIdOrGuid, String resourceId,
             String baseRevision, String nextRevision, JsonElement resourceContent) {
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
         Resource resource = findContentResource(resourceId);
         if (resource.getResourceState() == ResourceState.DELETED) {
@@ -548,7 +543,8 @@ public class ContentResourceManager {
         System.err.println("Supplied revision: " + baseRevision);
 
         if (resource.getLastRevision().getGuid().equals(baseRevision)) {
-            doUpdate(packageId, resource, resourceContent, session.getPreferredUsername(), null, nextRevision, true);
+            doUpdate(contentPackage.getGuid(), resource, resourceContent, session.getPreferredUsername(), null,
+                    nextRevision, true);
         } else {
             String message = "Conflict detected " + resourceId;
             throw new ResourceException(Response.Status.CONFLICT, resourceId, message);
@@ -568,8 +564,9 @@ public class ContentResourceManager {
         return resourceJson;
     }
 
-    public Resource doUpdate(String packageId, Resource resource, JsonElement resourceContent, String author,
-                             String lockId, String nextRevision, boolean throwErrors) {
+    public Resource doUpdate(String packageIdOrGuid, Resource resource, JsonElement resourceContent, String author,
+            String lockId, String nextRevision, boolean throwErrors) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         JsonObject resourceTypeDefinition = null;
         if (((JsonObject) resourceContent).has("type")) {
             String type = ((JsonObject) resourceContent).get("type").getAsString();
@@ -577,8 +574,6 @@ public class ContentResourceManager {
             resourceTypeDefinition = serviceConfig.getResourceTypeById(type);
         }
         resource.getContentPackage().getEdges();
-
-        ContentPackage contentPackage = resource.getContentPackage();
 
         String p = contentPackage.getSourceLocation() + File.separator + resource.getFileNode().getPathFrom();
         Path oldPathFromResourceFile = FileSystems.getDefault().getPath(p);
@@ -643,7 +638,8 @@ public class ContentResourceManager {
         // Parse update payload into final xml and json documents
         Map<String, String> contentValues = contentValues(resourceContent, resource, jsonCapable);
 
-        Document document = validateXmlContent(packageId, resource, contentValues.get("xmlContent"), throwErrors);
+        Document document = validateXmlContent(contentPackage.getGuid(), resource, contentValues.get("xmlContent"),
+                throwErrors);
 
         Gson gson = AppUtils.gsonBuilder().setPrettyPrinting().create();
         if (jsonCapable && document != null && !resource.getType().equalsIgnoreCase("x-oli-learning_objectives")
@@ -704,10 +700,11 @@ public class ContentResourceManager {
         return resource;
     }
 
-    public JsonElement softDelete(AppSecurityContext session, String packageId, String resourceId) {
+    public JsonElement softDelete(AppSecurityContext session, String packageIdOrGuid, String resourceId) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         this.lockController.checkLockPermission(session, resourceId, false);
-        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
+        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
         TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
         q.setParameter("guid", resourceId);
@@ -718,7 +715,6 @@ public class ContentResourceManager {
             throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
         }
         Resource resource = resultList.get(0);
-        ContentPackage contentPackage = resource.getContentPackage();
         Path xmlSourceFilePath = FileSystems.getDefault()
                 .getPath(contentPackage.getSourceLocation() + File.separator + resource.getFileNode().getPathFrom());
 
@@ -765,14 +761,15 @@ public class ContentResourceManager {
         return resourceJson;
     }
 
-    public JsonElement fetchResourcesByFilter(AppSecurityContext session, String packageId, String action,
+    public JsonElement fetchResourcesByFilter(AppSecurityContext session, String packageIdOrGuid, String action,
             JsonArray items) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         if (!action.equalsIgnoreCase("byIds") && !action.equalsIgnoreCase("byTypes")) {
             String message = "Wrong action parameter; value should be either 'byIds' or 'byTypes' " + action;
             throw new ResourceException(Response.Status.BAD_REQUEST, null, message);
         }
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
         // Query q;
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Resource> criteria = cb.createQuery(Resource.class);
@@ -788,7 +785,7 @@ public class ContentResourceManager {
             }
 
             criteria.select(resourceRoot)
-                    .where(cb.and(cb.equal(resourceRoot.get("contentPackage").get("guid"), packageId),
+                    .where(cb.and(cb.equal(resourceRoot.get("contentPackage").get("guid"), contentPackage.getGuid()),
                             resourceRoot.get("type").in(types)));
 
         } else {
@@ -801,7 +798,7 @@ public class ContentResourceManager {
                 throw new ResourceException(Response.Status.BAD_REQUEST, null, message);
             }
             criteria.select(resourceRoot)
-                    .where(cb.and(cb.equal(resourceRoot.get("contentPackage").get("guid"), packageId),
+                    .where(cb.and(cb.equal(resourceRoot.get("contentPackage").get("guid"), contentPackage.getGuid()),
                             resourceRoot.get("guid").in(guids)));
 
         }
@@ -813,9 +810,10 @@ public class ContentResourceManager {
         return resourcesArray;
     }
 
-    public JsonElement fetchResourceEdges(AppSecurityContext session, String packageId, String resourceId) {
-        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
+    public JsonElement fetchResourceEdges(AppSecurityContext session, String packageIdOrGuid, String resourceId) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
         TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
         q.setParameter("guid", resourceId);
@@ -826,7 +824,6 @@ public class ContentResourceManager {
             throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
         }
         Resource resource = resultList.get(0);
-        ContentPackage contentPackage = resource.getContentPackage();
 
         List<Edge> edges = edgesController.edgesForResource(contentPackage, resource, false, true);
 
@@ -842,7 +839,7 @@ public class ContentResourceManager {
             Root<Resource> resourceRoot = criteria.from(Resource.class);
 
             criteria.select(resourceRoot)
-                    .where(cb.and(cb.equal(resourceRoot.get("contentPackage").get("guid"), packageId),
+                    .where(cb.and(cb.equal(resourceRoot.get("contentPackage").get("guid"), contentPackage.getGuid()),
                             resourceRoot.get("id").in(sourceIds.keySet())));
 
             List<Resource> sources = em.createQuery(criteria).getResultList();
@@ -954,7 +951,9 @@ public class ContentResourceManager {
         return resourceContent;
     }
 
-    private Document validateXmlContent(String packageId, Resource resource, String xmlContent, boolean throwErrors) {
+    private Document validateXmlContent(String packageIdOrGuid, Resource resource, String xmlContent,
+            boolean throwErrors) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         // Validate xmlContent
         SAXBuilder builder = AppUtils.validatingSaxBuilder();
         builder.setExpandEntities(false);
@@ -992,10 +991,11 @@ public class ContentResourceManager {
         } catch (JDOMException | RuntimeException e) {
             log.error("\n\nValidation issues file=" + resource.getFileNode().getPathFrom() + "\n" + e.getMessage()
                     + "\n" + xmlContent, e);
-            throw new ResourceException(Response.Status.BAD_REQUEST, packageId, e.getMessage());
+            throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(), e.getMessage());
         } catch (Throwable e) {
             log.error("Validation issues file=" + resource.getFileNode().getPathFrom() + "\n" + e.getMessage(), e);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, e.getMessage());
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(),
+                    e.getMessage());
         }
     }
 
@@ -1068,7 +1068,7 @@ public class ContentResourceManager {
             resourceToXml.setConfig(configuration.get());
             try {
                 xmlContent = resourceToXml.resourceToXml(resource.getType(), content);
-            }catch (Exception e){
+            } catch (Exception e) {
                 log.error(content);
                 throw e;
             }
@@ -1097,5 +1097,37 @@ public class ContentResourceManager {
             throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, resourceGuid, message);
         }
         return resource;
+    }
+
+    // packageIdentifier is db guid or packageId-version combo
+    private ContentPackage findContentPackage(String packageIdOrGuid) {
+        ContentPackage contentPackage = null;
+        Boolean isIdAndVersion = packageIdOrGuid.contains("-");
+        try {
+            if (isIdAndVersion) {
+                String pkgId = packageIdOrGuid.substring(0, packageIdOrGuid.lastIndexOf("-"));
+                String version = packageIdOrGuid.substring(packageIdOrGuid.lastIndexOf("-") + 1);
+                TypedQuery<ContentPackage> q = em
+                        .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                        .setParameter("id", pkgId).setParameter("version", version);
+
+                contentPackage = q.getResultList().isEmpty() ? null : q.getResultList().get(0);
+            } else {
+                String packageGuid = packageIdOrGuid;
+                contentPackage = em.find(ContentPackage.class, packageGuid);
+            }
+
+            if (contentPackage == null) {
+                String message = "Error: package requested was not found " + packageIdOrGuid;
+                log.error(message);
+                throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
+            }
+
+        } catch (IllegalArgumentException e) {
+            String message = "Server Error while locating package " + packageIdOrGuid;
+            log.error(message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageIdOrGuid, message);
+        }
+        return contentPackage;
     }
 }

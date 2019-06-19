@@ -23,6 +23,7 @@ import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import java.io.ByteArrayOutputStream;
@@ -64,12 +65,10 @@ public class LDModelResourceManager {
     @ConfigurationCache
     Instance<Configurations> config;
 
-    public JsonElement importLDModel(AppSecurityContext session, List<InputPart> inputParts, String packageId) {
-        securityManager.authorize(session,
-                Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
-
-        ContentPackage contentPackage = findContentPackage(packageId);
+    public JsonElement importLDModel(AppSecurityContext session, List<InputPart> inputParts, String packageIdOrGuid) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
 
         Map<String, String> conts = new HashMap<>();
 
@@ -77,10 +76,11 @@ public class LDModelResourceManager {
             for (InputPart part : inputParts) {
                 Optional<String> fileNameOption = getFileName(part.getHeaders());
                 if (!fileNameOption.isPresent()) {
-                    String message = "Error uploading file(s) to course package " +
-                            contentPackage.getId() + "_" + contentPackage.getVersion() + " " + part.getHeaders().getFirst("content-disposition");
+                    String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_"
+                            + contentPackage.getVersion() + " " + part.getHeaders().getFirst("content-disposition");
                     log.error(message);
-                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(),
+                            message);
                 }
 
                 String fileName = fileNameOption.get();
@@ -88,7 +88,8 @@ public class LDModelResourceManager {
                         || fileName.toLowerCase().endsWith("los.tsv"))) {
                     String message = "Error: filenames must end with 'skills.tsv', 'problems.tsv' or 'los.tsv' ";
                     log.error(message);
-                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(),
+                            message);
                 }
                 fileName = fileName.replaceAll(" ", "_");
 
@@ -100,15 +101,16 @@ public class LDModelResourceManager {
                 log.debug(content);
             }
         } catch (IOException e) {
-            String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_" + contentPackage.getVersion();
+            String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_"
+                    + contentPackage.getVersion();
             log.error(message, e);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(), message);
         }
 
-
         try {
-            List<String> messages = this.ldModelController.importLDModel(contentPackage, Optional.ofNullable(conts.get("skills.tsv")),
-                    Optional.ofNullable(conts.get("problems.tsv")), Optional.ofNullable(conts.get("los.tsv")));
+            List<String> messages = this.ldModelController.importLDModel(contentPackage,
+                    Optional.ofNullable(conts.get("skills.tsv")), Optional.ofNullable(conts.get("problems.tsv")),
+                    Optional.ofNullable(conts.get("los.tsv")));
 
             conts.entrySet().forEach(e -> {
                 try {
@@ -126,7 +128,8 @@ public class LDModelResourceManager {
 
                     saveFile(e.getValue(), uploadPath);
 
-                    String uploadToSourceLocation = contentPackage.getSourceLocation() + File.separator + "content" + File.separator + fileName;
+                    String uploadToSourceLocation = contentPackage.getSourceLocation() + File.separator + "content"
+                            + File.separator + fileName;
 
                     directoryUtils.createDirectories(uploadToSourceLocation);
 
@@ -134,9 +137,11 @@ public class LDModelResourceManager {
                     saveFile(e.getValue(), FileSystems.getDefault().getPath(uploadToSourceLocation));
 
                 } catch (IOException ex) {
-                    String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_" + contentPackage.getVersion();
+                    String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_"
+                            + contentPackage.getVersion();
                     log.error(message, e);
-                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(),
+                            message);
                 }
             });
 
@@ -146,22 +151,22 @@ public class LDModelResourceManager {
             return ldModelUpload;
         } catch (ContentServiceException e) {
             log.error(e.getMessage(), e);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, e.getMessage());
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(),
+                    e.getMessage());
         }
     }
 
-    public ByteArrayOutputStream exportLDModel(AppSecurityContext session, String packageId) {
-        securityManager.authorize(session,
-                Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
-
-        ContentPackage pkg = findContentPackage(packageId);
+    public ByteArrayOutputStream exportLDModel(AppSecurityContext session, String packageIdOrGuid) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
 
         try {
-            return this.ldModelController.exportLDModel(pkg);
+            return this.ldModelController.exportLDModel(contentPackage);
         } catch (ContentServiceException e) {
             log.error(e.getMessage(), e);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, e.getMessage());
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(),
+                    e.getMessage());
         }
 
     }
@@ -190,19 +195,34 @@ public class LDModelResourceManager {
         Files.write(webcontentLocation, data.getBytes());
     }
 
-    private ContentPackage findContentPackage(String packageId) {
+    // packageIdentifier is db guid or packageId-version combo
+    private ContentPackage findContentPackage(String packageIdOrGuid) {
         ContentPackage contentPackage = null;
+        Boolean isIdAndVersion = packageIdOrGuid.contains("-");
         try {
-            contentPackage = em.find(ContentPackage.class, packageId);
-            if (contentPackage == null) {
-                String message = "Error: package requested was not found " + packageId;
-                log.error(message);
-                throw new ResourceException(Response.Status.NOT_FOUND, packageId, message);
+            if (isIdAndVersion) {
+                String pkgId = packageIdOrGuid.substring(0, packageIdOrGuid.lastIndexOf("-"));
+                String version = packageIdOrGuid.substring(packageIdOrGuid.lastIndexOf("-") + 1);
+                TypedQuery<ContentPackage> q = em
+                        .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                        .setParameter("id", pkgId).setParameter("version", version);
+
+                contentPackage = q.getResultList().isEmpty() ? null : q.getResultList().get(0);
+            } else {
+                String packageGuid = packageIdOrGuid;
+                contentPackage = em.find(ContentPackage.class, packageGuid);
             }
+
+            if (contentPackage == null) {
+                String message = "Error: package requested was not found " + packageIdOrGuid;
+                log.error(message);
+                throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
+            }
+
         } catch (IllegalArgumentException e) {
-            String message = "Server Error while locating package " + packageId;
+            String message = "Server Error while locating package " + packageIdOrGuid;
             log.error(message);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageIdOrGuid, message);
         }
         return contentPackage;
     }

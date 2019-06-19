@@ -40,7 +40,8 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
     RealmResource realmResource;
 
     @Override
-    public Set<String> authorize(AppSecurityContext session, List<Roles> authRoles, String packageId, String filter, List<Scopes> authScopes) {
+    public Set<String> authorize(AppSecurityContext session, List<Roles> authRoles, String packageGuid, String filter,
+            List<Scopes> authScopes) {
         Set<String> roles = new HashSet<>();
         if (authRoles != null) {
             authRoles.forEach(e -> {
@@ -65,7 +66,8 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
             throw new ResourceException(Response.Status.FORBIDDEN, null, message);
         }
 
-        // Assume Role based authorization (RBA) is desired if scopes or filters not supplied
+        // Assume Role based authorization (RBA) is desired if scopes or filters not
+        // supplied
         if (scopes == null || scopes.isEmpty() || filter == null) {
             log.info("role based");
             // Don't trust roles from browser, do a direct fetch from Keycloak server
@@ -87,16 +89,16 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
             return permittedPkgs;
         }
 
-        if (packageId != null) {
-            log.info("Auth with packageId");
+        if (packageGuid != null) {
+            log.info("Auth with packageGuid");
             // Check if resource is edit locked
             if (scopes.contains(Scopes.EDIT_MATERIAL_ACTION.toString())) {
-                log.info("Auth with packageId 2");
+                log.info("Auth with packageGuid 2");
                 boolean lockedUp = false;
                 try {
-                    ContentPackageLockLookup contentPackageLockLookup = (ContentPackageLockLookup)
-                            new InitialContext().lookup("java:global/content-service/ContentPackageLockLookup");
-                    lockedUp = contentPackageLockLookup.lockLookup(packageId);
+                    ContentPackageLockLookup contentPackageLockLookup = (ContentPackageLockLookup) new InitialContext()
+                            .lookup("java:global/content-service/ContentPackageLockLookup");
+                    lockedUp = contentPackageLockLookup.lockLookup(packageGuid);
                     log.info("Package Locked=" + lockedUp);
 
                 } catch (Throwable e) {
@@ -108,7 +110,7 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
             }
             boolean permitted = false;
             for (String permittedPkg : permittedPkgs) {
-                if (permittedPkg.contains(packageId)) {
+                if (permittedPkg.contains(packageGuid)) {
                     permitted = true;
                     break;
                 }
@@ -139,7 +141,8 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
         newResource.setType(type);
         newResource.setUris(Collections.singleton(uri));
 
-        Set<ScopeRepresentation> collect = scopes.stream().map(scope -> new ScopeRepresentation(scope.toString())).collect(Collectors.toSet());
+        Set<ScopeRepresentation> collect = scopes.stream().map(scope -> new ScopeRepresentation(scope.toString()))
+                .collect(Collectors.toSet());
         newResource.setScopes(collect);
 
         ProtectedResource resourceClient = authzClient.protection().resource();
@@ -186,7 +189,7 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
         RoleScopeResource roleScopeResource = userResource.roles().realmLevel();
         List<RoleRepresentation> roleRepresentations = roleScopeResource.listAll();
 
-        final boolean[] realmAdmin = {false};
+        final boolean[] realmAdmin = { false };
         roleRepresentations.forEach((e) -> {
             if (e.getName().equalsIgnoreCase(ADMIN.toString())) {
                 realmAdmin[0] = true;
@@ -194,7 +197,8 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
         });
         // Grant all permissions for 'admin' role
         if (realmAdmin[0]) {
-            //  For efficiency's sake use shorthand 'all' as a flag to represent 'all permissions have been grant'
+            // For efficiency's sake use shorthand 'all' as a flag to represent 'all
+            // permissions have been grant'
             return new HashSet<>(Arrays.asList("all"));
         }
         Set<String> resourceNames = new HashSet<>();
@@ -221,8 +225,8 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
                 String keycloaksecret = System.getenv().get("keycloaksecret");
                 Map<String, Object> credentials = new HashMap<>();
                 credentials.put("secret", keycloaksecret);
-                Configuration configuration = new Configuration(serverurl + "/auth", keycloakrealm,
-                        keycloakresource, credentials, null);
+                Configuration configuration = new Configuration(serverurl + "/auth", keycloakrealm, keycloakresource,
+                        credentials, null);
                 authzClient = AuthzClient.create(configuration);
             } catch (Exception e) {
                 throw new RuntimeException("Could not create authorization client.", e);
@@ -234,13 +238,10 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
     RealmResource getRealmResource() {
         if (realmResource == null) {
             String serverurl = System.getenv().get("SERVER_URL");
-            Keycloak kc = KeycloakBuilder.builder()
-                    .serverUrl(serverurl + "/auth")
-                    .realm("master")
-                    .username(System.getenv().get("keycloakadmin"))
-                    .password(System.getenv().get("keycloakpass"))
-                    .clientId("admin-cli")
-                    .resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10).register(new CustomJacksonProvider()).build())
+            Keycloak kc = KeycloakBuilder.builder().serverUrl(serverurl + "/auth").realm("master")
+                    .username(System.getenv().get("keycloakadmin")).password(System.getenv().get("keycloakpass"))
+                    .clientId("admin-cli").resteasyClient(new ResteasyClientBuilder().connectionPoolSize(10)
+                            .register(new CustomJacksonProvider()).build())
                     .build();
             realmResource = kc.realm(REALM);
         }
@@ -254,7 +255,7 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
 
     @Override
     public void createUser(String userName, String firstName, String lastName, String email, String password,
-                           Set<Roles> realmRoles) {
+            Set<Roles> realmRoles) {
         List<UserRepresentation> users = getRealmResource().users().search(userName);
         if (!users.isEmpty()) {
             return;
@@ -327,7 +328,8 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
     }
 
     @Override
-    public void updateUserAttributes(String userId, Map<String, List<String>> addAttributes, Set<String> removeAttributes) {
+    public void updateUserAttributes(String userId, Map<String, List<String>> addAttributes,
+            Set<String> removeAttributes) {
         List<UserRepresentation> users = getRealmResource().users().search(userId);
         if (users.isEmpty()) {
             return;
@@ -342,13 +344,15 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
         UsersResource consumerUsers = getRealmResource().users();
         List<UserRepresentation> users = consumerUsers.search("", 0, consumerUsers.count());
         return users.stream().map(uRep -> {
-            return new UserInfo(uRep.getId(), uRep.getUsername(), uRep.isEnabled(), uRep.isEmailVerified(), uRep.getFirstName(),
-                    uRep.getLastName(), uRep.getEmail(), uRep.getServiceAccountClientId(), uRep.getAttributes());
+            return new UserInfo(uRep.getId(), uRep.getUsername(), uRep.isEnabled(), uRep.isEmailVerified(),
+                    uRep.getFirstName(), uRep.getLastName(), uRep.getEmail(), uRep.getServiceAccountClientId(),
+                    uRep.getAttributes());
         }).collect(Collectors.toList());
     }
 
     @Override
-    public Set<UserInfo> updateUsersAttributes(Set<String> userIds, Map<String, List<String>> addAttributes, Set<String> removeAttributes) {
+    public Set<UserInfo> updateUsersAttributes(Set<String> userIds, Map<String, List<String>> addAttributes,
+            Set<String> removeAttributes) {
         UsersResource consumerUsers = getRealmResource().users();
         List<UserRepresentation> users = consumerUsers.search("", 0, consumerUsers.count());
         Set<UserInfo> usersProcessed = new HashSet<>();
@@ -359,14 +363,16 @@ public class KeyCloakSecurityProxy implements AppSecurityController {
         for (UserRepresentation uRep : users) {
             if (userIds.contains(uRep.getUsername())) {
                 setUserAttributes(uRep, addAttributes, removeAttributes);
-                usersProcessed.add(new UserInfo(uRep.getId(), uRep.getUsername(), uRep.isEnabled(), uRep.isEmailVerified(), uRep.getFirstName(),
-                        uRep.getLastName(), uRep.getEmail(), uRep.getServiceAccountClientId(), uRep.getAttributes()));
+                usersProcessed.add(new UserInfo(uRep.getId(), uRep.getUsername(), uRep.isEnabled(),
+                        uRep.isEmailVerified(), uRep.getFirstName(), uRep.getLastName(), uRep.getEmail(),
+                        uRep.getServiceAccountClientId(), uRep.getAttributes()));
             }
         }
         return usersProcessed;
     }
 
-    private void setUserAttributes(UserRepresentation userRepresentation, Map<String, List<String>> addAttributes, Set<String> removeAttributes) {
+    private void setUserAttributes(UserRepresentation userRepresentation, Map<String, List<String>> addAttributes,
+            Set<String> removeAttributes) {
         Map<String, List<String>> attributes = userRepresentation.getAttributes();
         if (attributes == null) {
             attributes = new HashMap<>();

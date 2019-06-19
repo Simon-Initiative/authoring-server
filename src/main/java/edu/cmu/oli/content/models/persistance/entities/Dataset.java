@@ -165,7 +165,7 @@ public class Dataset implements Serializable {
     this.message = message;
   }
 
-  public Dataset cloneDataset(String packageId) {
+  public Dataset cloneDataset(String packageGuid) {
     Dataset datasetClone = new Dataset();
     datasetClone.contentPackage = this.contentPackage;
     datasetClone.body = this.body;
