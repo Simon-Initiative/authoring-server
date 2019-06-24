@@ -51,8 +51,8 @@ public class DbConnector {
                 Statement statement = connection.createStatement()) {
             Class.forName("com.mysql.jdbc.Driver");
 
-            // Terminate if query takes longer than 4 minutes
-            statement.setQueryTimeout(60 * 4);
+            // 60 minutes
+            statement.setQueryTimeout(60 * 60);
             log.info("Executing query: " + query);
 
             ResultSet result = statement.executeQuery(query);
