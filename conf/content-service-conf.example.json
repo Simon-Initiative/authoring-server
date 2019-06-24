@@ -36,12 +36,16 @@
     {
       "id": "whirlwind-1.4",
       "location": "/oli/repository/presentation/whirlwind-1.4",
-      "default": true
+      "default": true,
+      "thumbnail": "assets/whirl_thumb.png",
+      "image": "assets/whirl.png"
     },
     {
       "id": "chaperone-1.0",
       "location": "/oli/repository/presentation/chaperone-1.0",
-      "default": false
+      "default": false,
+      "thumbnail": "assets/chaperone_thumb.png",
+      "image": "assets/chaperone.png"
     }
   ],
   "namespaces": {
