@@ -213,6 +213,7 @@ public class ContentResourceManager {
         }
         resourceJson.add("lock",
                 gson.toJsonTree(this.lockController.getLockForResource(session, resource.getGuid(), false)));
+        resourceJson.addProperty("packageGuid", resource.getContentPackage().getGuid());
 
         return resourceJson;
     }
