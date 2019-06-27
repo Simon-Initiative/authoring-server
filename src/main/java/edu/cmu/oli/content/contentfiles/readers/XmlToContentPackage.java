@@ -183,7 +183,7 @@ public class XmlToContentPackage {
     }
 
     public void walkContentFolder(final Path packageFolder) {
-        log.debug("Content folder processing started " + contentPackage.getId());
+        log.debug("Content folder processing started packageId=" + contentPackage.getId() + " PackageFolder="+packageFolder.toString());
         try {
             Files.walkFileTree(packageFolder, new SimpleFileVisitor<Path>() {
                 @Override
@@ -193,17 +193,22 @@ public class XmlToContentPackage {
                             return FileVisitResult.CONTINUE;
                         }
                         String pathString = file.toString();
-                        if (pathString.contains("/webcontent/")) {
-                            processWebcontentFile(packageFolder, file);
-                        } else if (pathString.contains("/organizations/")) {
-                            Configurations configurations = config.get();
-                            processResourceFile(packageFolder, file, configurations.getResourceTypeById("x-oli-organization"));
-                        } else {
+                        if (pathString.contains(packageFolder.toString()+"/content/")) {
+                            if(pathString.contains("/webcontent/")) {
+                                processWebcontentFile(packageFolder, file);
+                                return FileVisitResult.CONTINUE;
+                            }
                             Configurations configurations = config.get();
                             final Set<String> resourceTypesIds = configurations.getResourceTypes().keySet();
                             resourceTypesIds.stream().filter(id -> pathString.contains("/" + id + "/")).map(
                                     configurations::getResourceTypeById).findFirst().ifPresent(resourceType -> processResourceFile(
                                     packageFolder, file, resourceType));
+                            return FileVisitResult.CONTINUE;
+                        }
+
+                        if (pathString.contains(packageFolder.toString()+"/organizations/")) {
+                            Configurations configurations = config.get();
+                            processResourceFile(packageFolder, file, configurations.getResourceTypeById("x-oli-organization"));
                         }
                     }
                     return FileVisitResult.CONTINUE;
@@ -333,19 +338,23 @@ public class XmlToContentPackage {
             fileFNodes.add(new FNode(webContent, webContent.getFileNode()));
         }
         for (FNode fileFNode : fileFNodes) {
-
             String pathString = fileFNode.fileNode.getPathFrom();
-            final Path file = packageFolder.resolve(pathString);
-            if (pathString.contains("/webcontent/")) {
-                log.info(file.toString());
-                parseWebContentFile(contentPackage, fileFNode, file);
-            } else if (pathString.contains("organizations/")) {
-                parseResourceFile(contentPackage, fileFNode, file);
-            } else {
+            final Path fullPathPkgFolder = packageFolder.resolve(pathString);
+            if (fullPathPkgFolder.toString().contains(packageFolder.toString()+"/content/")) {
+                if (pathString.contains("/webcontent/")) {
+                    log.info(fullPathPkgFolder.toString());
+                    parseWebContentFile(contentPackage, fileFNode, fullPathPkgFolder);
+                    continue;
+                }
                 Configurations configurations = config.get();
                 final Set<String> resourceTypesIds = configurations.getResourceTypes().keySet();
                 resourceTypesIds.stream().filter(id -> pathString.contains("/" + id + "/")).map(
-                        configurations::getResourceTypeById).findFirst().ifPresent(resourceType -> parseResourceFile(contentPackage, fileFNode, file));
+                        configurations::getResourceTypeById).findFirst().ifPresent(resourceType -> parseResourceFile(contentPackage, fileFNode, fullPathPkgFolder));
+                continue;
+            }
+
+            if (fullPathPkgFolder.toString().contains(packageFolder.toString()+"/organizations/")) {
+                parseResourceFile(contentPackage, fileFNode, fullPathPkgFolder);
             }
         }
 
@@ -365,24 +374,6 @@ public class XmlToContentPackage {
             fileFNodes.add(new FNode(webContent, webContent.getFileNode()));
         }
         return fileFNodes;
-    }
-
-    public void processContentBatch(Path packageFolder, Set<FNode> fileFNodes) {
-        for (FNode fileFNode : fileFNodes) {
-
-            String pathString = fileFNode.fileNode.getPathFrom();
-            final Path file = packageFolder.resolve(pathString);
-            if (pathString.contains("/webcontent/")) {
-                parseWebContentFile(contentPackage, fileFNode, file);
-            } else if (pathString.contains("organizations/")) {
-                parseResourceFile(contentPackage, fileFNode, file);
-            } else {
-                Configurations configurations = config.get();
-                final Set<String> resourceTypesIds = configurations.getResourceTypes().keySet();
-                resourceTypesIds.stream().filter(id -> pathString.contains("/" + id + "/")).map(
-                        configurations::getResourceTypeById).findFirst().ifPresent(resourceType -> parseResourceFile(contentPackage, fileFNode, file));
-            }
-        }
     }
 
     private void parseWebContentFile(ContentPackage contentPackage, FNode fileFNode, Path file) {
