@@ -18,7 +18,7 @@ keycloakpass=admin
 keycloakrestauthz=false
 keycloakrealm=oli_security
 keycloakresource=content_service
-keycloaksecret=5672ab4e-5196-4b8b-83fb-c0f9e4b3fc83
+keycloaksecret=057dc479-59af-44d9-9912-6f7e0603ca8e
 
 # SVN configuration
 svn_user=xxxxxxx
