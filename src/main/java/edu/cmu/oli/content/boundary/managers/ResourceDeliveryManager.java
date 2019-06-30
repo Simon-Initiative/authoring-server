@@ -17,6 +17,7 @@ import edu.cmu.oli.content.logging.Logging;
 import edu.cmu.oli.content.models.ServerName;
 import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
 import edu.cmu.oli.content.models.persistance.entities.Resource;
+import edu.cmu.oli.content.models.persistance.entities.ResourceState;
 import edu.cmu.oli.content.security.AppSecurityContext;
 import edu.cmu.oli.content.security.AppSecurityController;
 import edu.cmu.oli.content.security.Scopes;
@@ -90,27 +91,20 @@ public class ResourceDeliveryManager {
             previewServer = ServerName.prod;
         }
 
-        return deployController.deployPackage(session, resourceId, previewServer, redeploy);
+        Resource resource = findContentResource(resourceId, contentPackage);
+        System.out.println("Resource - " + resource.toString());
+        return deployController.deployPackage(session, resource.getGuid(), previewServer, redeploy);
     }
 
     public String quickPreview(AppSecurityContext session, String packageIdOrGuid, String resourceId) {
-        // ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         // this.securityManager.authorize(session,
         // Arrays.asList(ADMIN, CONTENT_DEVELOPER),
         // contentPackage.getGuid(), "name=" + contentPackage.getGuid(),
         // Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
 
-        TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
-        q.setParameter("guid", resourceId);
-        List<Resource> resultList = q.getResultList();
-
-        if (resultList.isEmpty()) {
-            String message = "ContentResource not found " + resourceId;
-            throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
-        }
-
-        Resource resource = resultList.get(0);
-        String pkgTheme = resource.getContentPackage().getTheme();
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        Resource resource = findContentResource(resourceId, contentPackage);
+        String pkgTheme = contentPackage.getTheme();
 
         if (pkgTheme == null) {
             pkgTheme = "none";
@@ -131,7 +125,7 @@ public class ResourceDeliveryManager {
 
         if (pkgThemeMissing) {
             pkgTheme = defaulTheme;
-            resource.getContentPackage().setTheme(pkgTheme);
+            contentPackage.setTheme(pkgTheme);
         }
 
         String serverurl = System.getenv().get("SERVER_URL") + "/";
@@ -322,6 +316,29 @@ public class ResourceDeliveryManager {
         contentPackage.setTheme(themeFound);
         em.merge(contentPackage);
         return new JsonPrimitive("Theme updated successfully");
+    }
+
+    private Resource findContentResource(String resourceId, ContentPackage contentPackage) {
+        Resource resource = null;
+        try {
+            resource = em.find(Resource.class, resourceId);
+            if (resource != null) {
+                return resource;
+            }
+            TypedQuery<Resource> q = em.createNamedQuery("Resource.findByIdAndPackage", Resource.class)
+                    .setParameter("id", resourceId).setParameter("package", contentPackage);
+            List<Resource> resultList = q.getResultList();
+
+            if (resultList.isEmpty() || resultList.get(0).getResourceState() == ResourceState.DELETED) {
+                String message = "ContentResource not found " + resourceId;
+                throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
+            }
+            return resultList.get(0);
+        } catch (IllegalArgumentException e) {
+            String message = "Server Error while locating resource " + resourceId;
+            log.error(message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, resourceId, message);
+        }
     }
 
     // packageIdentifier is db guid or packageId-version combo

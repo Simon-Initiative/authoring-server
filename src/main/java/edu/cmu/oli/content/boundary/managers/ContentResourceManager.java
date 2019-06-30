@@ -112,14 +112,7 @@ public class ContentResourceManager {
         ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
                 "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
-        TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
-        q.setParameter("guid", resourceId);
-        List<Resource> resultList = q.getResultList();
-        if (resultList.isEmpty() || resultList.get(0).getResourceState() == ResourceState.DELETED) {
-            String message = "ContentResource not found " + resourceId;
-            throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
-        }
-        Resource resource = resultList.get(0);
+        Resource resource = findContentResource(resourceId, contentPackage);
 
         JsonObject resourceJson = serializeEditResource(resource, session);
 
@@ -503,15 +496,10 @@ public class ContentResourceManager {
         securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
                 "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
-        this.lockController.checkLockPermission(session, resourceId, true);
+        Resource resource = findContentResource(resourceId, contentPackage);
+        this.lockController.checkLockPermission(session, resource.getGuid(), true);
 
-        Resource resource = findContentResource(resourceId);
-        if (resource.getResourceState() == ResourceState.DELETED) {
-            String message = "ContentResource not found " + resourceId;
-            throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
-        }
-
-        String lockId = this.lockController.getLockForResource(session, resourceId, false).getLockId();
+        String lockId = this.lockController.getLockForResource(session, resource.getGuid(), false).getLockId();
         doUpdate(contentPackage.getGuid(), resource, resourceContent, session.getPreferredUsername(), lockId, null,
                 true);
 
@@ -535,11 +523,7 @@ public class ContentResourceManager {
         securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
                 "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
-        Resource resource = findContentResource(resourceId);
-        if (resource.getResourceState() == ResourceState.DELETED) {
-            String message = "ContentResource not found " + resourceId;
-            throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
-        }
+        Resource resource = findContentResource(resourceId, contentPackage);
         System.err.println("Last revision: " + resource.getLastRevision().getGuid());
         System.err.println("Supplied revision: " + baseRevision);
 
@@ -703,19 +687,11 @@ public class ContentResourceManager {
 
     public JsonElement softDelete(AppSecurityContext session, String packageIdOrGuid, String resourceId) {
         ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
-        this.lockController.checkLockPermission(session, resourceId, false);
         this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
                 "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
-        TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
-        q.setParameter("guid", resourceId);
-        List<Resource> resultList = q.getResultList();
-
-        if (resultList.isEmpty()) {
-            String message = "ContentResource not found " + resourceId;
-            throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
-        }
-        Resource resource = resultList.get(0);
+        Resource resource = findContentResource(resourceId, contentPackage);
+        this.lockController.checkLockPermission(session, resource.getGuid(), false);
         Path xmlSourceFilePath = FileSystems.getDefault()
                 .getPath(contentPackage.getSourceLocation() + File.separator + resource.getFileNode().getPathFrom());
 
@@ -816,16 +792,7 @@ public class ContentResourceManager {
         this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
                 "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
 
-        TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
-        q.setParameter("guid", resourceId);
-        List<Resource> resultList = q.getResultList();
-
-        if (resultList.isEmpty()) {
-            String message = "ContentResource not found " + resourceId;
-            throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
-        }
-        Resource resource = resultList.get(0);
-
+        Resource resource = findContentResource(resourceId, contentPackage);
         List<Edge> edges = edgesController.edgesForResource(contentPackage, resource, false, true);
 
         if (!edges.isEmpty()) {
@@ -1083,21 +1050,27 @@ public class ContentResourceManager {
         return values;
     }
 
-    private Resource findContentResource(String resourceGuid) {
+    private Resource findContentResource(String resourceId, ContentPackage contentPackage) {
         Resource resource = null;
         try {
-            resource = em.find(Resource.class, resourceGuid);
-            if (resource == null) {
-                String message = "Error: resource requested was not found " + resourceGuid;
-                log.error(message);
-                throw new ResourceException(Response.Status.NOT_FOUND, resourceGuid, message);
+            resource = em.find(Resource.class, resourceId);
+            if (resource != null) {
+                return resource;
             }
+            TypedQuery<Resource> q = em.createNamedQuery("Resource.findByIdAndPackage", Resource.class)
+                    .setParameter("id", resourceId).setParameter("package", contentPackage);
+            List<Resource> resultList = q.getResultList();
+
+            if (resultList.isEmpty() || resultList.get(0).getResourceState() == ResourceState.DELETED) {
+                String message = "ContentResource not found " + resourceId;
+                throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
+            }
+            return resultList.get(0);
         } catch (IllegalArgumentException e) {
-            String message = "Server Error while locating resource " + resourceGuid;
+            String message = "Server Error while locating resource " + resourceId;
             log.error(message);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, resourceGuid, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, resourceId, message);
         }
-        return resource;
     }
 
     // packageIdentifier is db guid or packageId-version combo

@@ -9,6 +9,8 @@ import edu.cmu.oli.content.controllers.LockController;
 import edu.cmu.oli.content.logging.Logging;
 import edu.cmu.oli.content.models.ResourceEditLock;
 import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
+import edu.cmu.oli.content.models.persistance.entities.Resource;
+import edu.cmu.oli.content.models.persistance.entities.ResourceState;
 import edu.cmu.oli.content.security.AppSecurityContext;
 import edu.cmu.oli.content.security.AppSecurityController;
 import edu.cmu.oli.content.security.Scopes;
@@ -22,6 +24,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static edu.cmu.oli.content.security.Roles.ADMIN;
 import static edu.cmu.oli.content.security.Roles.CONTENT_DEVELOPER;
@@ -63,19 +66,43 @@ public class LockResourceManager {
             String message = "Action not supported " + action;
             throw new ResourceException(BAD_REQUEST, null, message);
         }
+        Resource resource = findContentResource(resourceId, contentPackage);
         switch (act) {
         case AQUIRE:
-            ResourceEditLock resourceEditLock = lockController.aquire(session, resourceId);
+            ResourceEditLock resourceEditLock = lockController.aquire(session, resource.getGuid());
             Gson gson = AppUtils.gsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create();
             JsonElement lockJson = gson.toJsonTree(resourceEditLock);
             return lockJson;
         case RELEASE:
-            return new JsonPrimitive(lockController.release(session, resourceId));
+            return new JsonPrimitive(lockController.release(session, resource.getGuid()));
         case STATUS:
-            return new JsonPrimitive(lockController.status(resourceId));
+            return new JsonPrimitive(lockController.status(resource.getGuid()));
         default:
             String message = "Action not supported " + action;
             throw new ResourceException(BAD_REQUEST, null, message);
+        }
+    }
+
+    private Resource findContentResource(String resourceId, ContentPackage contentPackage) {
+        Resource resource = null;
+        try {
+            resource = em.find(Resource.class, resourceId);
+            if (resource != null) {
+                return resource;
+            }
+            TypedQuery<Resource> q = em.createNamedQuery("Resource.findByIdAndPackage", Resource.class)
+                    .setParameter("id", resourceId).setParameter("package", contentPackage);
+            List<Resource> resultList = q.getResultList();
+
+            if (resultList.isEmpty() || resultList.get(0).getResourceState() == ResourceState.DELETED) {
+                String message = "ContentResource not found " + resourceId;
+                throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
+            }
+            return resultList.get(0);
+        } catch (IllegalArgumentException e) {
+            String message = "Server Error while locating resource " + resourceId;
+            log.error(message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, resourceId, message);
         }
     }
 

@@ -26,23 +26,21 @@ import java.util.*;
  * @author Raphael Gachuhi
  */
 @Entity
-@Table(name = "resource", indexes = {
-        @Index(columnList = "id", name = "resource_id_idx")
-})
+@Table(name = "resource", indexes = { @Index(columnList = "id", name = "resource_id_idx") })
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
-@NamedQueries({
-        @NamedQuery(name = "Resource.findAll", query = "SELECT r FROM Resource r"),
+@NamedQueries({ @NamedQuery(name = "Resource.findAll", query = "SELECT r FROM Resource r"),
         @NamedQuery(name = "Resource.findByGuid", query = "SELECT r FROM Resource r WHERE r.guid = :guid"),
         @NamedQuery(name = "Resource.findById", query = "SELECT r FROM Resource r WHERE r.id = :id"),
+        @NamedQuery(name = "Resource.findByIdAndPackage", query = "SELECT r FROM Resource r WHERE r.id = :id AND r.contentPackage = :package"),
         @NamedQuery(name = "Resource.findByType", query = "SELECT r FROM Resource r WHERE r.type = :type"),
         @NamedQuery(name = "Resource.findByTitle", query = "SELECT r FROM Resource r WHERE r.title = :title"),
         @NamedQuery(name = "Resource.findByShortTitle", query = "SELECT r FROM Resource r WHERE r.shortTitle = :shortTitle"),
         @NamedQuery(name = "Resource.findByDateCreated", query = "SELECT r FROM Resource r WHERE r.dateCreated = :dateCreated"),
         @NamedQuery(name = "Resource.findByDateUpdated", query = "SELECT r FROM Resource r WHERE r.dateUpdated = :dateUpdated"),
         @NamedQuery(name = "Resource.findByLastRevision", query = "SELECT r FROM Resource r WHERE r.lastRevision = :lastRevision"),
-        @NamedQuery(name = "Resource.findByLastSession", query = "SELECT r FROM Resource r WHERE r.lastSession = :lastSession")})
-//@Audited
+        @NamedQuery(name = "Resource.findByLastSession", query = "SELECT r FROM Resource r WHERE r.lastSession = :lastSession") })
+// @Audited
 public class Resource implements Serializable {
 
     private static final long serialVersionUID = 1L;
@@ -110,12 +108,12 @@ public class Resource implements Serializable {
     @Column(name = "resource_state")
     private ResourceState resourceState = ResourceState.ACTIVE;
 
-    //@NotAudited
+    // @NotAudited
     @JoinColumn(name = "content_package_guid", referencedColumnName = "guid")
     @ManyToOne(fetch = FetchType.LAZY)
     private ContentPackage contentPackage;
 
-    //@NotAudited
+    // @NotAudited
     @Expose()
     @JoinColumn(name = "file_guid", referencedColumnName = "guid")
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
@@ -125,7 +123,7 @@ public class Resource implements Serializable {
     @Column(name = "build_status")
     private BuildStatus buildStatus = BuildStatus.PROCESSING;
 
-    //@Expose()
+    // @Expose()
     @Column(name = "errors", columnDefinition = "json")
     @Type(type = "json")
     private JsonWrapper errors;
@@ -249,7 +247,6 @@ public class Resource implements Serializable {
         this.fileNode = fileNode;
     }
 
-
     public BuildStatus getBuildStatus() {
         return buildStatus;
     }
@@ -257,7 +254,6 @@ public class Resource implements Serializable {
     public void setBuildStatus(BuildStatus buildStatus) {
         this.buildStatus = buildStatus;
     }
-
 
     public JsonWrapper getErrors() {
         return errors;
@@ -290,7 +286,8 @@ public class Resource implements Serializable {
         versionClone.title = this.title;
         versionClone.shortTitle = this.shortTitle;
         if (this.type.equals("x-oli-organization")) {
-            JsonObject metadata = this.metadata == null ? new JsonObject() : this.metadata.getJsonObject().getAsJsonObject();
+            JsonObject metadata = this.metadata == null ? new JsonObject()
+                    : this.metadata.getJsonObject().getAsJsonObject();
             metadata.addProperty("version", "1.0");
             versionClone.metadata = new JsonWrapper(metadata);
         } else {
@@ -302,8 +299,8 @@ public class Resource implements Serializable {
         versionClone.errors = this.errors;
 
         if (this.lastRevision == null) {
-            throw new RuntimeException("Package does not yet support revisions: packageid=" + contentPackage.getId() +
-                    " version=" + contentPackage.getVersion());
+            throw new RuntimeException("Package does not yet support revisions: packageid=" + contentPackage.getId()
+                    + " version=" + contentPackage.getVersion());
         }
 
         versionClone.transientRev = this.lastRevision.getGuid();
@@ -336,10 +333,6 @@ public class Resource implements Serializable {
 
     @Override
     public String toString() {
-        return "Resource{" +
-                "guid='" + guid + '\'' +
-                ", id='" + id + '\'' +
-                ", type='" + type + '\'' +
-                '}';
+        return "Resource{" + "guid='" + guid + '\'' + ", id='" + id + '\'' + ", type='" + type + '\'' + '}';
     }
 }
