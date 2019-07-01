@@ -92,7 +92,6 @@ public class ResourceDeliveryManager {
         }
 
         Resource resource = findContentResource(resourceId, contentPackage);
-        System.out.println("Resource - " + resource.toString());
         return deployController.deployPackage(session, resource.getGuid(), previewServer, redeploy);
     }
 
