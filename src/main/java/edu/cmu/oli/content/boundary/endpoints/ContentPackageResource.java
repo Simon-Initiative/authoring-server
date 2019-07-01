@@ -107,7 +107,7 @@ public class ContentPackageResource {
         }
 
         @GET
-        @Path("v1/packages/{packageId}/details")
+        @Path("v1/packages/{packageIdOrGuid}/details")
         @Operation(summary = "Fetch package details by GUID", description = "Returns details for a single course content package (includes summary info for resources and webcontent)", responses = {
                         @ApiResponse(responseCode = "200", description = "Successful response for the content package details requested", content = {
                                         @Content(mediaType = "application/json", schema = @Schema(implementation = ContentPackage.class)) }),
@@ -116,8 +116,8 @@ public class ContentPackageResource {
                         @ApiResponse(responseCode = "404", description = "Package not found"),
                         @ApiResponse(responseCode = "403", description = "Request not authorized") })
         public void packageDetails(@Suspended AsyncResponse response,
-                        @Parameter(description = "GUID of package details to return") @PathParam("packageId") String packageId) {
-                if (packageId == null) {
+                        @Parameter(description = "Id-Vers/Guid of package details to return") @PathParam("packageIdOrGuid") String packageIdOrGuid) {
+                if (packageIdOrGuid == null) {
                         response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING,
                                         Response.Status.BAD_REQUEST));
                         return;
@@ -125,18 +125,18 @@ public class ContentPackageResource {
 
                 AppSecurityContext appSecurityContext = appSecurityContextFactory
                                 .extractSecurityContext(httpServletRequest);
-                CompletableFuture.supplyAsync(() -> cm.loadPackage(appSecurityContext, packageId), executor)
+                CompletableFuture.supplyAsync(() -> cm.loadPackage(appSecurityContext, packageIdOrGuid), executor)
                                 .thenApply(this::serializeResponse).exceptionally(ExceptionHandler::handleExceptions)
                                 .thenAccept(response::resume);
         }
 
         @Operation(summary = "Update package by GUID", description = "Updates course content package")
         @PUT
-        @Path("v1/packages/{packageId}")
+        @Path("v1/packages/{packageIdOrGuid}")
         public void updatePackage(@Suspended AsyncResponse response,
-                        @Parameter(description = "GUID of package to update") @PathParam("packageId") String packageId,
+                        @Parameter(description = "ID-Vers/GUID of package to update") @PathParam("packageIdOrGuid") String packageIdOrGuid,
                         @Parameter(description = "Updated package payload in JSON format") JsonObject payload) {
-                if (packageId == null || payload == null) {
+                if (packageIdOrGuid == null || payload == null) {
                         response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING,
                                         Response.Status.BAD_REQUEST));
                         return;
@@ -146,14 +146,17 @@ public class ContentPackageResource {
                 JsonParser jsonParser = new JsonParser();
                 com.google.gson.JsonObject updatePayload = jsonParser.parse(AppUtils.toString(payload))
                                 .getAsJsonObject();
-                CompletableFuture.supplyAsync(() -> updatePackage(appSecurityContext, packageId, updatePayload, 0),
-                                executor).thenAccept(response::resume);
+                CompletableFuture
+                                .supplyAsync(() -> updatePackage(appSecurityContext, packageIdOrGuid, updatePayload, 0),
+                                                executor)
+                                .thenAccept(response::resume);
         }
 
-        private Response updatePackage(AppSecurityContext appSecurityContext, String packageId,
+        private Response updatePackage(AppSecurityContext appSecurityContext, String packageIdOrGuid,
                         com.google.gson.JsonObject updatePayload, int retryCounter) {
                 try {
-                        JsonElement contentPkgJson = cm.updatePackage(appSecurityContext, packageId, updatePayload);
+                        JsonElement contentPkgJson = cm.updatePackage(appSecurityContext, packageIdOrGuid,
+                                        updatePayload);
                         Gson gson = AppUtils.gsonBuilder().serializeNulls().create();
                         return Response.status(Response.Status.OK).entity(gson.toJson(contentPkgJson))
                                         .type(MediaType.APPLICATION_JSON).build();
@@ -161,7 +164,8 @@ public class ContentPackageResource {
                         if (ExceptionHandler.checkForDBLockExceptions(t)
                                         && retryCounter < configuration.get().getTransactionRetrys()) {
                                 log.error("LockResource acquisition exception detected on package update; retrying transaction");
-                                return updatePackage(appSecurityContext, packageId, updatePayload, ++retryCounter);
+                                return updatePackage(appSecurityContext, packageIdOrGuid, updatePayload,
+                                                ++retryCounter);
                         }
                         return ExceptionHandler.handleExceptions(t);
                 }
@@ -256,9 +260,9 @@ public class ContentPackageResource {
 
         @Operation(summary = "Deploy content package", description = "Request a deploy of the content package to delivery system such as 'QA', 'Production' etc ")
         @POST
-        @Path("v1/packages/{packageId}/deploy")
+        @Path("v1/packages/{packageIdOrGuid}/deploy")
         public void deployPkg(@Suspended AsyncResponse response,
-                        @Parameter(description = "GUID of package to deploy") @PathParam("packageId") String packageId,
+                        @Parameter(description = "ID-Vers/GUID of package to deploy") @PathParam("packageIdOrGuid") String packageIdOrGuid,
                         @Parameter(description = "Json payload example {'stage':'qa', 'redeploy':'true'}") JsonObject payload) {
 
                 if (payload == null || !payload.containsKey("stage") || !payload.containsKey("redeploy")) {
@@ -278,7 +282,7 @@ public class ContentPackageResource {
                 AppSecurityContext appSecurityContext = appSecurityContextFactory
                                 .extractSecurityContext(httpServletRequest);
                 CompletableFuture
-                                .supplyAsync(() -> cm.deployPkg(appSecurityContext, packageId, deployStage,
+                                .supplyAsync(() -> cm.deployPkg(appSecurityContext, packageIdOrGuid, deployStage,
                                                 payload.getBoolean("redeploy")), executor)
                                 .thenApply(this::serializeResponse).exceptionally(ExceptionHandler::handleExceptions)
                                 .thenAccept(response::resume);
@@ -286,9 +290,9 @@ public class ContentPackageResource {
 
         @Operation(summary = "Version a package", description = "Creates a new version of the content package")
         @POST
-        @Path("v1/packages/{packageId}/new/version")
+        @Path("v1/packages/{packageIdOrGuid}/new/version")
         public void newVersion(@Suspended AsyncResponse response,
-                        @Parameter(description = "GUID of package to update") @PathParam("packageId") String packageId,
+                        @Parameter(description = "ID-Vers/GUID of package to update") @PathParam("packageIdOrGuid") String packageIdOrGuid,
                         @Parameter(description = "Json payload example: {'version':'3.4'}") JsonObject payload) {
                 if (payload == null || !payload.containsKey("version")) {
                         response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING,
@@ -320,17 +324,17 @@ public class ContentPackageResource {
                 AppSecurityContext appSecurityContext = appSecurityContextFactory
                                 .extractSecurityContext(httpServletRequest);
                 CompletableFuture
-                                .supplyAsync(() -> cm.newVersionOrClone(appSecurityContext, packageId, null, version),
-                                                executor)
+                                .supplyAsync(() -> cm.newVersionOrClone(appSecurityContext, packageIdOrGuid, null,
+                                                version), executor)
                                 .thenApply(this::serializeResponse).exceptionally(ExceptionHandler::handleExceptions)
                                 .thenAccept(response::resume);
         }
 
         @Operation(summary = "Clone and Own a package", description = "Creates a new clone of an existing package ")
         @POST
-        @Path("v1/packages/{packageId}/new/clone")
+        @Path("v1/packages/{packageIdOrGuid}/new/clone")
         public void cloneAndOwn(@Suspended AsyncResponse response,
-                        @Parameter(description = "GUID of package to clone") @PathParam("packageId") String packageId,
+                        @Parameter(description = "GUID of package to clone") @PathParam("packageIdOrGuid") String packageIdOrGuid,
                         @Parameter(description = "Json payload example {'id':'value'}") JsonObject payload) {
 
                 if (payload == null || !payload.containsKey("id")) {
@@ -342,7 +346,7 @@ public class ContentPackageResource {
                 AppSecurityContext appSecurityContext = appSecurityContextFactory
                                 .extractSecurityContext(httpServletRequest);
                 CompletableFuture
-                                .supplyAsync(() -> cm.newVersionOrClone(appSecurityContext, packageId,
+                                .supplyAsync(() -> cm.newVersionOrClone(appSecurityContext, packageIdOrGuid,
                                                 payload.getString("id"), null), executor)
                                 .thenApply(this::serializeResponse).exceptionally(ExceptionHandler::handleExceptions)
                                 .thenAccept(response::resume);
@@ -362,8 +366,9 @@ public class ContentPackageResource {
 
         @Operation(summary = "Update a package deployment status", description = "Management interface for updating a package deployment status")
         @PUT
-        @Path("v1/packages/{packageId}/status/{status}")
-        public void updateDeploymentStatus(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+        @Path("v1/packages/{packageIdOrGuid}/status/{status}")
+        public void updateDeploymentStatus(@Suspended AsyncResponse response,
+                        @PathParam("packageIdOrGuid") String packageIdOrGuid,
                         @Parameter(description = "Status") @PathParam("status") String status) {
 
                 try {
@@ -371,9 +376,10 @@ public class ContentPackageResource {
                                         .extractSecurityContext(httpServletRequest);
                         ContentPackage.DeploymentStatus newStatus = ContentPackage.DeploymentStatus
                                         .valueOf(status.trim().toUpperCase());
-                        CompletableFuture.supplyAsync(
-                                        () -> cm.updateDeploymentStatus(appSecurityContext, packageId, newStatus),
-                                        executor).thenAccept(response::resume);
+                        CompletableFuture
+                                        .supplyAsync(() -> cm.updateDeploymentStatus(appSecurityContext,
+                                                        packageIdOrGuid, newStatus), executor)
+                                        .thenAccept(response::resume);
                 } catch (Exception e) {
                         response.resume(ExceptionHandler.errorResponse("Invalid status parameter",
                                         Response.Status.BAD_REQUEST));

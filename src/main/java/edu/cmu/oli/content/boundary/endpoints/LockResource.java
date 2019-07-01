@@ -49,16 +49,16 @@ public class LockResource {
     AppSecurityContextFactory appSecurityContextFactory;
 
     @GET
-    @Path("v1/{packageId}/locks")
-    public void lock(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    @Path("v1/{packageIdOrGuid}/locks")
+    public void lock(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @QueryParam("resourceId") String resourceId, @QueryParam("action") String action) {
-        if (packageId == null || resourceId == null || action == null) {
+        if (packageIdOrGuid == null || resourceId == null || action == null) {
             String message = "Parameters missing";
             response.resume(ExceptionHandler.errorResponse(message, Response.Status.BAD_REQUEST));
             return;
         }
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture.supplyAsync(() -> lm.lock(appSecurityContext, packageId, resourceId, action), mes)
+        CompletableFuture.supplyAsync(() -> lm.lock(appSecurityContext, packageIdOrGuid, resourceId, action), mes)
                 .thenApply(this::lock).exceptionally(ExceptionHandler::handleExceptions).thenAccept(response::resume);
     }
 

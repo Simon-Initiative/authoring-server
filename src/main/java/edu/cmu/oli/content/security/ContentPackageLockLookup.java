@@ -48,10 +48,10 @@ public class ContentPackageLockLookup {
     @PersistenceContext
     EntityManager em;
 
-    public boolean lockLookup(String packageId) {
+    public boolean lockLookup(String packageGuid) {
         log.info("lockLookup");
         TypedQuery<ContentPackage> q = em.createNamedQuery("ContentPackage.findByGuid", ContentPackage.class);
-        q.setParameter("guid", packageId);
+        q.setParameter("guid", packageGuid);
 
         List<ContentPackage> resultList = q.getResultList();
         return resultList.isEmpty() ? false : !resultList.get(0).getEditable();

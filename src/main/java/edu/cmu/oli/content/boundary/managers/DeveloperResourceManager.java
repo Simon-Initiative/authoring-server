@@ -13,6 +13,7 @@ import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.ws.rs.core.Response;
 import java.util.*;
 
@@ -36,16 +37,16 @@ public class DeveloperResourceManager {
     @Secure
     AppSecurityController securityManager;
 
-    public JsonElement all(AppSecurityContext session, String packageId) {
-        securityManager.authorize(session,
-                Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.VIEW_MATERIAL_ACTION));
+    public JsonElement all(AppSecurityContext session, String packageIdOrGuid) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.VIEW_MATERIAL_ACTION));
         List<UserInfo> allUsers = securityManager.getAllUsers();
         allUsers.sort((o1, o2) -> {
             Map<String, List<String>> attributes = o1.getAttributes();
-            Boolean isDev01 = attributes != null && attributes.containsKey(packageId);
+            Boolean isDev01 = attributes != null && attributes.containsKey(contentPackage.getGuid());
             attributes = o2.getAttributes();
-            Boolean isDev02 = attributes != null && attributes.containsKey(packageId);
+            Boolean isDev02 = attributes != null && attributes.containsKey(contentPackage.getGuid());
             return isDev02.compareTo(isDev01);
         });
         JsonArray users = new JsonArray();
@@ -59,16 +60,17 @@ public class DeveloperResourceManager {
             userOb.addProperty("firstName", ur.getFirstName());
             userOb.addProperty("lastName", ur.getLastName());
             userOb.addProperty("email", ur.getEmail());
-            userOb.addProperty("isDeveloper", attributes != null && attributes.containsKey(packageId));
+            userOb.addProperty("isDeveloper", attributes != null && attributes.containsKey(contentPackage.getGuid()));
             users.add(userOb);
         }
         return users;
     }
 
-    public JsonElement registration(AppSecurityContext session, String packageId, String action, JsonArray users) {
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
-        ContentPackage contentPackage = findContentPackage(packageId);
+    public JsonElement registration(AppSecurityContext session, String packageIdOrGuid, String action,
+            JsonArray users) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
 
         Map<String, List<String>> userPermission = new HashMap<>();
         userPermission.put(contentPackage.getGuid(), Arrays.asList(Scopes.VIEW_MATERIAL_ACTION.toString(),
@@ -80,7 +82,8 @@ public class DeveloperResourceManager {
         Set<UserInfo> userRepresentations;
 
         if (action.equalsIgnoreCase("add")) {
-            userNames.forEach(val -> securityManager.addUserRoles(val, new HashSet<>(Arrays.asList(CONTENT_DEVELOPER))));
+            userNames
+                    .forEach(val -> securityManager.addUserRoles(val, new HashSet<>(Arrays.asList(CONTENT_DEVELOPER))));
             userRepresentations = securityManager.updateUsersAttributes(userNames, userPermission, null);
         } else {
             userRepresentations = securityManager.updateUsersAttributes(userNames, null, userPermission.keySet());
@@ -88,9 +91,9 @@ public class DeveloperResourceManager {
         List<UserInfo> userList = new ArrayList<>(userRepresentations);
         userList.sort((o1, o2) -> {
             Map<String, List<String>> attributes = o1.getAttributes();
-            Boolean isDev01 = attributes != null && attributes.containsKey(packageId);
+            Boolean isDev01 = attributes != null && attributes.containsKey(contentPackage.getGuid());
             attributes = o2.getAttributes();
-            Boolean isDev02 = attributes != null && attributes.containsKey(packageId);
+            Boolean isDev02 = attributes != null && attributes.containsKey(contentPackage.getGuid());
             return isDev02.compareTo(isDev01);
         });
         JsonArray registeredUsers = new JsonArray();
@@ -104,25 +107,40 @@ public class DeveloperResourceManager {
             userOb.addProperty("firstName", ur.getFirstName());
             userOb.addProperty("lastName", ur.getLastName());
             userOb.addProperty("email", ur.getEmail());
-            userOb.addProperty("isDeveloper", attributes != null && attributes.containsKey(packageId));
+            userOb.addProperty("isDeveloper", attributes != null && attributes.containsKey(contentPackage.getGuid()));
             registeredUsers.add(userOb);
         }
         return registeredUsers;
     }
 
-    private ContentPackage findContentPackage(String packageId) {
+    // packageIdentifier is db guid or packageId-version combo
+    private ContentPackage findContentPackage(String packageIdOrGuid) {
         ContentPackage contentPackage = null;
+        Boolean isIdAndVersion = packageIdOrGuid.contains("-");
         try {
-            contentPackage = em.find(ContentPackage.class, packageId);
-            if (contentPackage == null) {
-                String message = "Error: package requested was not found " + packageId;
-                log.error(message);
-                throw new ResourceException(Response.Status.NOT_FOUND, packageId, message);
+            if (isIdAndVersion) {
+                String pkgId = packageIdOrGuid.substring(0, packageIdOrGuid.lastIndexOf("-"));
+                String version = packageIdOrGuid.substring(packageIdOrGuid.lastIndexOf("-") + 1);
+                TypedQuery<ContentPackage> q = em
+                        .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                        .setParameter("id", pkgId).setParameter("version", version);
+
+                contentPackage = q.getResultList().isEmpty() ? null : q.getResultList().get(0);
+            } else {
+                String packageGuid = packageIdOrGuid;
+                contentPackage = em.find(ContentPackage.class, packageGuid);
             }
+
+            if (contentPackage == null) {
+                String message = "Error: package requested was not found " + packageIdOrGuid;
+                log.error(message);
+                throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
+            }
+
         } catch (IllegalArgumentException e) {
-            String message = "Server Error while locating package " + packageId;
+            String message = "Server Error while locating package " + packageIdOrGuid;
             log.error(message);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageIdOrGuid, message);
         }
         return contentPackage;
     }

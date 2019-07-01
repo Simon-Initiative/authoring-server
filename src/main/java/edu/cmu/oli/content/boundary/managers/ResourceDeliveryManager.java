@@ -17,6 +17,7 @@ import edu.cmu.oli.content.logging.Logging;
 import edu.cmu.oli.content.models.ServerName;
 import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
 import edu.cmu.oli.content.models.persistance.entities.Resource;
+import edu.cmu.oli.content.models.persistance.entities.ResourceState;
 import edu.cmu.oli.content.security.AppSecurityContext;
 import edu.cmu.oli.content.security.AppSecurityController;
 import edu.cmu.oli.content.security.Scopes;
@@ -76,10 +77,11 @@ public class ResourceDeliveryManager {
     @Inject
     ThinPreviewController thinPreviewController;
 
-    public JsonElement previewResource(AppSecurityContext session, String packageId, String resourceId,
-                                       boolean redeploy) {
-        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
+    public JsonElement previewResource(AppSecurityContext session, String packageIdOrGuid, String resourceId,
+            boolean redeploy) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
 
         String serverurl = System.getenv().get("SERVER_URL");
         ServerName previewServer;
@@ -89,26 +91,19 @@ public class ResourceDeliveryManager {
             previewServer = ServerName.prod;
         }
 
-        return deployController.deployPackage(session, resourceId, previewServer, redeploy);
+        Resource resource = findContentResource(resourceId, contentPackage);
+        return deployController.deployPackage(session, resource.getGuid(), previewServer, redeploy);
     }
 
-    public String quickPreview(AppSecurityContext session, String packageId, String resourceId) {
+    public String quickPreview(AppSecurityContext session, String packageIdOrGuid, String resourceId) {
         // this.securityManager.authorize(session,
         // Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-        // packageId, "name=" + packageId,
+        // contentPackage.getGuid(), "name=" + contentPackage.getGuid(),
         // Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
 
-        TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
-        q.setParameter("guid", resourceId);
-        List<Resource> resultList = q.getResultList();
-
-        if (resultList.isEmpty()) {
-            String message = "ContentResource not found " + resourceId;
-            throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
-        }
-
-        Resource resource = resultList.get(0);
-        String pkgTheme = resource.getContentPackage().getTheme();
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        Resource resource = findContentResource(resourceId, contentPackage);
+        String pkgTheme = contentPackage.getTheme();
 
         if (pkgTheme == null) {
             pkgTheme = "none";
@@ -122,14 +117,14 @@ public class ResourceDeliveryManager {
             if (theme.has("default") && theme.get("default").getAsBoolean()) {
                 defaulTheme = id;
             }
-            if(id.equalsIgnoreCase(pkgTheme)){
+            if (id.equalsIgnoreCase(pkgTheme)) {
                 pkgThemeMissing = false;
             }
         }
 
-        if(pkgThemeMissing){
+        if (pkgThemeMissing) {
             pkgTheme = defaulTheme;
-            resource.getContentPackage().setTheme(pkgTheme);
+            contentPackage.setTheme(pkgTheme);
         }
 
         String serverurl = System.getenv().get("SERVER_URL") + "/";
@@ -197,7 +192,7 @@ public class ResourceDeliveryManager {
     }
 
     public JsonElement inlineAssessmentNextPageContext(String resourceId, String userGuid, int attemptNumber,
-                                                       int pageNumber, String requestMode, boolean start, String serverUrl) {
+            int pageNumber, String requestMode, boolean start, String serverUrl) {
 
         TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
         q.setParameter("guid", resourceId);
@@ -248,7 +243,7 @@ public class ResourceDeliveryManager {
     }
 
     public JsonElement inlineAssessmentResponsesContext(String resourceId, String userGuid, int attemptNumber,
-                                                        String questionId, boolean start, JsonObject responses, String serverUrl) {
+            String questionId, boolean start, JsonObject responses, String serverUrl) {
         TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
         q.setParameter("guid", resourceId);
         List<Resource> resultList = q.getResultList();
@@ -290,14 +285,16 @@ public class ResourceDeliveryManager {
         return evalResponse;
     }
 
-    public JsonElement availableThemes(AppSecurityContext session, String packageId) {
-        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
+    public JsonElement availableThemes(AppSecurityContext session, String packageIdOrGuid) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
 
         return this.configuration.get().getThemes();
     }
 
-    public JsonElement updatePackageTheme(AppSecurityContext appSecurityContext, String packageId, String themeId) {
+    public JsonElement updatePackageTheme(AppSecurityContext appSecurityContext, String packageIdOrGuid,
+            String themeId) {
         String themeFound = null;
         JsonArray themes = configuration.get().getThemes();
         Iterator<JsonElement> it = themes.iterator();
@@ -311,28 +308,66 @@ public class ResourceDeliveryManager {
         if (themeFound == null) {
             String message = "Unable to locate theme " + themeId;
             log.error(message);
-            throw new ResourceException(Response.Status.NOT_FOUND, packageId, message);
+            throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
         }
 
-        ContentPackage contentPackage = findContentPackage(packageId);
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         contentPackage.setTheme(themeFound);
         em.merge(contentPackage);
         return new JsonPrimitive("Theme updated successfully");
     }
 
-    private ContentPackage findContentPackage(String packageId) {
-        ContentPackage contentPackage = null;
+    private Resource findContentResource(String resourceId, ContentPackage contentPackage) {
+        Resource resource = null;
         try {
-            contentPackage = em.find(ContentPackage.class, packageId);
-            if (contentPackage == null) {
-                String message = "Error: package requested was not found " + packageId;
-                log.error(message);
-                throw new ResourceException(Response.Status.NOT_FOUND, packageId, message);
+            resource = em.find(Resource.class, resourceId);
+            if (resource != null) {
+                return resource;
             }
+            TypedQuery<Resource> q = em.createNamedQuery("Resource.findByIdAndPackage", Resource.class)
+                    .setParameter("id", resourceId).setParameter("package", contentPackage);
+            List<Resource> resultList = q.getResultList();
+
+            if (resultList.isEmpty() || resultList.get(0).getResourceState() == ResourceState.DELETED) {
+                String message = "ContentResource not found " + resourceId;
+                throw new ResourceException(Response.Status.NOT_FOUND, resourceId, message);
+            }
+            return resultList.get(0);
         } catch (IllegalArgumentException e) {
-            String message = "Server Error while locating package " + packageId;
+            String message = "Server Error while locating resource " + resourceId;
             log.error(message);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, resourceId, message);
+        }
+    }
+
+    // packageIdentifier is db guid or packageId-version combo
+    private ContentPackage findContentPackage(String packageIdOrGuid) {
+        ContentPackage contentPackage = null;
+        Boolean isIdAndVersion = packageIdOrGuid.contains("-");
+        try {
+            if (isIdAndVersion) {
+                String pkgId = packageIdOrGuid.substring(0, packageIdOrGuid.lastIndexOf("-"));
+                String version = packageIdOrGuid.substring(packageIdOrGuid.lastIndexOf("-") + 1);
+                TypedQuery<ContentPackage> q = em
+                        .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                        .setParameter("id", pkgId).setParameter("version", version);
+
+                contentPackage = q.getResultList().isEmpty() ? null : q.getResultList().get(0);
+            } else {
+                String packageGuid = packageIdOrGuid;
+                contentPackage = em.find(ContentPackage.class, packageGuid);
+            }
+
+            if (contentPackage == null) {
+                String message = "Error: package requested was not found " + packageIdOrGuid;
+                log.error(message);
+                throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
+            }
+
+        } catch (IllegalArgumentException e) {
+            String message = "Server Error while locating package " + packageIdOrGuid;
+            log.error(message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageIdOrGuid, message);
         }
         return contentPackage;
     }

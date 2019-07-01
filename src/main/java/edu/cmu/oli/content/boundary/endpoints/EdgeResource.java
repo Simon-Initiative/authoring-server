@@ -80,13 +80,13 @@ public class EdgeResource {
             @ApiResponse(responseCode = "404", description = "Package not found"),
             @ApiResponse(responseCode = "404", description = "Package not found") })
     @GET
-    @Path("v1/{packageId}/edges")
-    public void listEdges(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    @Path("v1/{packageIdOrGuid}/edges")
+    public void listEdges(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @QueryParam("relationship") String relationship, @QueryParam("purpose") String purpose,
             @QueryParam("sourceId") String sourceId, @QueryParam("sourceType") String sourceType,
             @QueryParam("destinationId") String destinationId, @QueryParam("destinationType") String destinationType,
             @QueryParam("referenceType") String referenceType, @QueryParam("status") String status) {
-        if (packageId == null) {
+        if (packageIdOrGuid == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
@@ -109,8 +109,8 @@ public class EdgeResource {
 
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
         CompletableFuture
-                .supplyAsync(() -> wcm.listEdges(appSecurityContext, packageId, relationship, purpose, finalSourceIds,
-                        sourceType, finalDestinationIds, destinationType, referenceType, status), mes)
+                .supplyAsync(() -> wcm.listEdges(appSecurityContext, packageIdOrGuid, relationship, purpose,
+                        finalSourceIds, sourceType, finalDestinationIds, destinationType, referenceType, status), mes)
                 .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
                 .thenAccept(response::resume);
     }
@@ -127,9 +127,9 @@ public class EdgeResource {
             @ApiResponse(responseCode = "404", description = "Package not found"),
             @ApiResponse(responseCode = "404", description = "Package not found") })
     @POST
-    @Path("v1/{packageId}/edges/by-ids")
+    @Path("v1/{packageIdOrGuid}/edges/by-ids")
     @Consumes("application/json")
-    public void edgesByIds(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
+    public void edgesByIds(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
             @QueryParam("relationship") String relationship, @QueryParam("purpose") String purpose,
             @QueryParam("sourceType") String sourceType, @QueryParam("destinationType") String destinationType,
             @QueryParam("referenceType") String referenceType, @QueryParam("status") String status,
@@ -137,13 +137,14 @@ public class EdgeResource {
 
         EdgesByIdsRequestBody body = AppUtils.toClassObject(payload, EdgesByIdsRequestBody.class);
 
-        if (packageId == null) {
+        if (packageIdOrGuid == null) {
             response.resume(ExceptionHandler.errorResponse(PARAMETERS_MISSING, Response.Status.BAD_REQUEST));
             return;
         }
         AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture.supplyAsync(() -> wcm.listEdges(appSecurityContext, packageId, relationship,
-                purpose, body.sourceIds, sourceType, body.destinationIds, destinationType, referenceType, status), mes)
+        CompletableFuture
+                .supplyAsync(() -> wcm.listEdges(appSecurityContext, packageIdOrGuid, relationship, purpose,
+                        body.sourceIds, sourceType, body.destinationIds, destinationType, referenceType, status), mes)
                 .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
                 .thenAccept(response::resume);
     }

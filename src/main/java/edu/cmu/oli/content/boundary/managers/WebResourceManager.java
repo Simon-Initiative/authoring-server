@@ -76,13 +76,12 @@ public class WebResourceManager {
     @ConfigurationCache
     Instance<Configurations> config;
 
-    public JsonElement webcontents(AppSecurityContext session, String packageId, int offset, int limit,
-                                   String order, String orderBy, String guidFilter, String mimeFilter,
-                                   String pathFilter, String searchText) {
+    public JsonElement webcontents(AppSecurityContext session, String packageIdOrGuid, int offset, int limit,
+            String order, String orderBy, String guidFilter, String mimeFilter, String pathFilter, String searchText) {
         // verify that the session is authorized for this operation
-        securityManager.authorize(session,
-                Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.VIEW_MATERIAL_ACTION));
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.VIEW_MATERIAL_ACTION));
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
 
@@ -90,16 +89,11 @@ public class WebResourceManager {
         CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
         Root<WebContent> from = countQuery.from(WebContent.class);
         CriteriaQuery<Long> countSelect = countQuery.select(cb.count(from));
-        countSelect
-                .where(
-                        cb.and(
-                                cb.equal(from.get("contentPackage").get("guid"), packageId),
-                                cb.like(from.get("guid"), guidFilter + "%"),
-                                cb.like(from.get("fileNode").get("mimeType"), mimeFilter + "%"),
-                                cb.like(from.get("fileNode").get("pathTo"), "%" + pathFilter + "%"),
-                                cb.like(from.get("fileNode").get("fileName"), "%" + searchText + "%")
-                        )
-                );
+        countSelect.where(cb.and(cb.equal(from.get("contentPackage").get("guid"), contentPackage.getGuid()),
+                cb.like(from.get("guid"), guidFilter + "%"),
+                cb.like(from.get("fileNode").get("mimeType"), mimeFilter + "%"),
+                cb.like(from.get("fileNode").get("pathTo"), "%" + pathFilter + "%"),
+                cb.like(from.get("fileNode").get("fileName"), "%" + searchText + "%")));
         TypedQuery<Long> typedQuery = em.createQuery(countSelect);
         Long totalResults = typedQuery.getSingleResult();
 
@@ -107,19 +101,14 @@ public class WebResourceManager {
         CriteriaQuery<WebContent> webContentQuery = cb.createQuery(WebContent.class);
         Root<WebContent> webContentQueryRoot = webContentQuery.from(WebContent.class);
         CriteriaQuery<WebContent> webContentSelect = webContentQuery.select(webContentQueryRoot)
-                // all records that belong to content package with packageId
-                .where(
-                        cb.and(
-                                cb.equal(webContentQueryRoot.get("contentPackage").get("guid"), packageId),
-                                cb.like(from.get("guid"), guidFilter + "%"),
-                                cb.like(webContentQueryRoot.get("fileNode").get("mimeType"), mimeFilter + "%"),
-                                cb.like(from.get("fileNode").get("pathTo"), "%" + pathFilter + "%"),
-                                cb.like(webContentQueryRoot.get("fileNode").get("fileName"), "%" + searchText + "%")
-                        )
-                )
+                // all records that belong to content package with packageGuid
+                .where(cb.and(cb.equal(webContentQueryRoot.get("contentPackage").get("guid"), contentPackage.getGuid()),
+                        cb.like(from.get("guid"), guidFilter + "%"),
+                        cb.like(webContentQueryRoot.get("fileNode").get("mimeType"), mimeFilter + "%"),
+                        cb.like(from.get("fileNode").get("pathTo"), "%" + pathFilter + "%"),
+                        cb.like(webContentQueryRoot.get("fileNode").get("fileName"), "%" + searchText + "%")))
                 // set sort ordering accordingly
-                .orderBy(order.toLowerCase().equals("desc")
-                        ? cb.desc(webContentQueryRoot.get("fileNode").get(orderBy))
+                .orderBy(order.toLowerCase().equals("desc") ? cb.desc(webContentQueryRoot.get("fileNode").get(orderBy))
                         : cb.asc(webContentQueryRoot.get("fileNode").get(orderBy)));
         TypedQuery<WebContent> query = em.createQuery(webContentSelect);
         query.setFirstResult(offset);
@@ -132,10 +121,10 @@ public class WebResourceManager {
         return gson.toJsonTree(new PaginatedResponse(offset, limit, order, orderBy, totalResults, webContents));
     }
 
-    public JsonElement deleteWebcontent(AppSecurityContext session, String packageId, String webcontentId) {
-        securityManager.authorize(session,
-                Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
+    public JsonElement deleteWebcontent(AppSecurityContext session, String packageIdOrGuid, String webcontentId) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
         TypedQuery<WebContent> q = em.createNamedQuery("WebContent.findByGuid", WebContent.class);
         q.setParameter("guid", webcontentId);
         WebContent webcontent = null;
@@ -145,8 +134,6 @@ public class WebResourceManager {
             String message = "Webcontent not found " + webcontentId;
             throw new ResourceException(Response.Status.NOT_FOUND, webcontentId, message);
         }
-
-        ContentPackage contentPackage = webcontent.getContentPackage();
 
         FileNode fileNode = webcontent.getFileNode();
 
@@ -173,7 +160,6 @@ public class WebResourceManager {
             log.debug(String.format("Error deleting webcontent file %s", oldPathToWebContentFile));
         }
 
-
         JsonObject je = new JsonObject();
         je.addProperty("deleted", "webcontent");
         je.addProperty("guid", webcontent.getGuid());
@@ -182,24 +168,21 @@ public class WebResourceManager {
 
     }
 
-    public JsonElement uploadWebcontent(AppSecurityContext session, List<InputPart> inParts, String packageId) {
-        securityManager.authorize(session,
-                Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
-        TypedQuery<ContentPackage> q = em.createNamedQuery("ContentPackage.findByGuid", ContentPackage.class);
-        q.setParameter("guid", packageId);
-        ContentPackage contentPackage = null;
-        contentPackage = getContentPackage(packageId, q);
+    public JsonElement uploadWebcontent(AppSecurityContext session, List<InputPart> inParts, String packageIdOrGuid) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.EDIT_MATERIAL_ACTION));
 
         List<WebContent> webContents = new ArrayList<>();
         try {
             for (InputPart part : inParts) {
                 Optional<String> fileNameOption = getFileName(part.getHeaders());
                 if (!fileNameOption.isPresent()) {
-                    String message = "Error uploading file(s) to course package " +
-                            contentPackage.getId() + "_" + contentPackage.getVersion() + " " + part.getHeaders().getFirst("content-disposition");
+                    String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_"
+                            + contentPackage.getVersion() + " " + part.getHeaders().getFirst("content-disposition");
                     log.error(message);
-                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+                    throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(),
+                            message);
                 }
                 String fileName = fileNameOption.get();
                 fileName = fileName.replaceAll(" ", "_");
@@ -220,7 +203,8 @@ public class WebResourceManager {
                 InputStream inputStream = part.getBody(InputStream.class, null);
                 saveFile(inputStream, uploadPath);
 
-                String uploadToSourceLocation = contentPackage.getSourceLocation() + File.separator + "content" + File.separator + fileName;
+                String uploadToSourceLocation = contentPackage.getSourceLocation() + File.separator + "content"
+                        + File.separator + fileName;
                 directoryUtils.createDirectories(uploadToSourceLocation);
 
                 // Saves the file to local working copy
@@ -235,16 +219,18 @@ public class WebResourceManager {
                 String contentType = "undetermined";
                 contentType = AppUtils.getFileType(uploadPath, contentType);
 
-                FileNode resourceNode = new FileNode(contentPackage.getWebContentVolume(), "content" + File.separator + fileName, fileName, contentType);
+                FileNode resourceNode = new FileNode(contentPackage.getWebContentVolume(),
+                        "content" + File.separator + fileName, fileName, contentType);
                 resourceNode.setFileSize(size);
                 webContent.setFileNode(resourceNode);
                 contentPackage.addWebContent(webContent);
                 webContents.add(webContent);
             }
         } catch (IOException e) {
-            String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_" + contentPackage.getVersion();
+            String message = "Error uploading file(s) to course package " + contentPackage.getId() + "_"
+                    + contentPackage.getVersion();
             log.error(message);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, contentPackage.getGuid(), message);
         }
         em.merge(contentPackage);
         em.flush();
@@ -257,7 +243,9 @@ public class WebResourceManager {
     }
 
     private void removeWebContent(ContentPackage contentPackage, String fileName) {
-        TypedQuery<FileNode> query = em.createQuery("select r from FileNode r where r.volumeLocation = :volumeLocation and r.pathTo = :toPath", FileNode.class);
+        TypedQuery<FileNode> query = em.createQuery(
+                "select r from FileNode r where r.volumeLocation = :volumeLocation and r.pathTo = :toPath",
+                FileNode.class);
         query.setParameter("volumeLocation", contentPackage.getWebContentVolume());
         query.setParameter("toPath", fileName);
         List<FileNode> fileNodes = query.getResultList();
@@ -283,15 +271,10 @@ public class WebResourceManager {
         });
     }
 
-    public File getWebcontentFile(AppSecurityContext session, String packageId, String filePath) {
-        securityManager.authorize(session,
-                Arrays.asList(ADMIN, CONTENT_DEVELOPER),
-                packageId, "name=" + packageId, Arrays.asList(Scopes.VIEW_MATERIAL_ACTION));
-
-        TypedQuery<ContentPackage> q = em.createNamedQuery("ContentPackage.findByGuid", ContentPackage.class);
-        q.setParameter("guid", packageId);
-        ContentPackage contentPackage = null;
-        contentPackage = getContentPackage(packageId, q);
+    public File getWebcontentFile(AppSecurityContext session, String packageIdOrGuid, String filePath) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Arrays.asList(Scopes.VIEW_MATERIAL_ACTION));
 
         String uploadPath = contentPackage.getWebContentVolume() + File.separator + filePath;
         Path path = FileSystems.getDefault().getPath(uploadPath);
@@ -304,14 +287,34 @@ public class WebResourceManager {
         return file;
     }
 
-    private ContentPackage getContentPackage(String packageId, TypedQuery<ContentPackage> q) {
-        ContentPackage contentPackage;
+    // packageIdentifier is db guid or packageId-version combo
+    private ContentPackage findContentPackage(String packageIdOrGuid) {
+        ContentPackage contentPackage = null;
+        Boolean isIdAndVersion = packageIdOrGuid.contains("-");
         try {
-            contentPackage = q.getSingleResult();
-        } catch (NoResultException e) {
-            String message = "Content Package not found " + packageId;
+            if (isIdAndVersion) {
+                String pkgId = packageIdOrGuid.substring(0, packageIdOrGuid.lastIndexOf("-"));
+                String version = packageIdOrGuid.substring(packageIdOrGuid.lastIndexOf("-") + 1);
+                TypedQuery<ContentPackage> q = em
+                        .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                        .setParameter("id", pkgId).setParameter("version", version);
+
+                contentPackage = q.getResultList().isEmpty() ? null : q.getResultList().get(0);
+            } else {
+                String packageGuid = packageIdOrGuid;
+                contentPackage = em.find(ContentPackage.class, packageGuid);
+            }
+
+            if (contentPackage == null) {
+                String message = "Error: package requested was not found " + packageIdOrGuid;
+                log.error(message);
+                throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
+            }
+
+        } catch (IllegalArgumentException e) {
+            String message = "Server Error while locating package " + packageIdOrGuid;
             log.error(message);
-            throw new ResourceException(Response.Status.NOT_FOUND, packageId, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageIdOrGuid, message);
         }
         return contentPackage;
     }
