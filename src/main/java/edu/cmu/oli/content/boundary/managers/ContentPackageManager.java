@@ -961,7 +961,6 @@ public class ContentPackageManager {
 
     // packageIdentifier is db guid or packageId-version combo
     private ContentPackage findContentPackage(String packageIdOrGuid) {
-        System.out.println("PackageIdOrGuid " + packageIdOrGuid);
         ContentPackage contentPackage = null;
         Boolean isIdAndVersion = packageIdOrGuid.contains("-");
         try {
