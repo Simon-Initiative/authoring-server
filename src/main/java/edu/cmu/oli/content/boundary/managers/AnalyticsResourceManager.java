@@ -55,10 +55,11 @@ public class AnalyticsResourceManager {
     AppSecurityController securityManager;
 
     public JsonElement getPackageDatasets(AppSecurityContext session, String packageGuid) {
-        authorizePackagePrivileges(session, packageGuid);
+        ContentPackage contentPackage = findContentPackage(packageGuid);
+        authorizePackagePrivileges(session, contentPackage.getGuid());
 
         Gson gson = AppUtils.gsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create();
-        return gson.toJsonTree(findDatasets(packageGuid), new TypeToken<ArrayList<ContentPackage>>() {
+        return gson.toJsonTree(findDatasets(contentPackage.getGuid()), new TypeToken<ArrayList<ContentPackage>>() {
         }.getType());
     }
 
@@ -80,16 +81,16 @@ public class AnalyticsResourceManager {
     }
 
     public JsonElement createDataset(AppSecurityContext session, final String packageGuid) {
-        authorizePackagePrivileges(session, packageGuid);
+        ContentPackage contentPackage = findContentPackage(packageGuid);
+        authorizePackagePrivileges(session, contentPackage.getGuid());
 
         // Return if already currently processing a dataset request for this packageGuid
-        List<Dataset> processingDatasets = getProcessingDatasets(packageGuid);
+        List<Dataset> processingDatasets = getProcessingDatasets(contentPackage.getGuid());
         if (!processingDatasets.isEmpty()) {
             return setDatasetInfo(processingDatasets.get(0), "Already processing dataset");
         }
 
         Dataset dataset = new Dataset();
-        ContentPackage contentPackage = findContentPackage(packageGuid);
         dataset.setContentPackage(contentPackage);
         contentPackage.setActiveDataset(dataset);
         em.flush();
