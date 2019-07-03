@@ -797,10 +797,16 @@ public class ContentResourceManager {
 
         if (!edges.isEmpty()) {
 
-            Map<String, Edge> sourceIds = edges.stream().collect(Collectors.toMap(e -> {
-                String[] split = e.getSourceId().split(":");
-                return split[2];
-            }, Function.identity()));
+            // Create a map of the source id of the edge to the edge, but
+            // careful to handle duplicate keys. This can exist if, for instance,
+            // an org includes the same workbookpage twice.
+            Map<String, Edge> sourceIds = new HashMap<>();
+            for (Edge e : edges) {
+                final String id = e.getSourceId().split(":")[2];
+                if (!sourceIds.containsKey(id)) {
+                    sourceIds.put(id, e);
+                }
+            }
 
             CriteriaBuilder cb = em.getCriteriaBuilder();
             CriteriaQuery<Resource> criteria = cb.createQuery(Resource.class);
