@@ -9,22 +9,22 @@ import java.util.Set;
  */
 public interface AppSecurityController {
 
-    Set<String> authorize(AppSecurityContext session, List<Roles> roles, String packageId, String filter,
-                          List<Scopes> scopes);
+    Set<String> authorize(AppSecurityContext session, List<Roles> roles, String packageGuid, String filter,
+            List<Scopes> scopes);
 
     void updateUserAttributes(String userId, Map<String, List<String>> addAttributes, Set<String> removeAttributes);
 
     List<UserInfo> getAllUsers();
 
     Set<UserInfo> updateUsersAttributes(Set<String> userIds, Map<String, List<String>> addAttributes,
-                                        Set<String> removeAttributes);
+            Set<String> removeAttributes);
 
     void updateAllUsersAttributes(Map<String, List<String>> addAttributes, Set<String> removeAttributes);
 
     void clearAllUsersAttributes(String searchString);
 
     void createUser(String userName, String firstName, String lastName, String email, String password,
-                    Set<Roles> realmRoles);
+            Set<Roles> realmRoles);
 
     void addUserRoles(String userName, Set<Roles> realmRoles);
 

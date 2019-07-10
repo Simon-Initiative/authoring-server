@@ -37,197 +37,212 @@ import java.util.concurrent.ExecutorService;
 @Path("/")
 public class ResourceDelivery {
 
-    @Inject
-    @Logging
-    Logger log;
+        @Inject
+        @Logging
+        Logger log;
 
-    @Inject
-    private ResourceDeliveryManager pm;
+        @Inject
+        private ResourceDeliveryManager pm;
 
-    @Inject
-    @Dedicated("resourcesApiExecutor")
-    ExecutorService mes;
+        @Inject
+        @Dedicated("resourcesApiExecutor")
+        ExecutorService mes;
 
-    @Inject
-    @ConfigurationCache
-    Instance<Configurations> configuration;
+        @Inject
+        @ConfigurationCache
+        Instance<Configurations> configuration;
 
-    @Context
-    private HttpServletRequest httpServletRequest;
+        @Context
+        private HttpServletRequest httpServletRequest;
 
-    @Inject
-    AppSecurityContextFactory appSecurityContextFactory;
+        @Inject
+        AppSecurityContextFactory appSecurityContextFactory;
 
-    @GET
-    @Path("v1/{packageId}/themes/available")
-    public void availableThemes(@Suspended AsyncResponse response, @PathParam("packageId") String packageId) {
-        AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
+        @GET
+        @Path("v1/{packageIdOrGuid}/themes/available")
+        public void availableThemes(@Suspended AsyncResponse response,
+                        @PathParam("packageIdOrGuid") String packageIdOrGuid) {
+                AppSecurityContext appSecurityContext = appSecurityContextFactory
+                                .extractSecurityContext(httpServletRequest);
 
-        CompletableFuture.supplyAsync(() -> pm.availableThemes(appSecurityContext, packageId), mes)
-                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
-    }
-
-    @Operation(summary = "Update package default theme", description = "Updates course content package default theme")
-    @PUT
-    @Path("v1/packages/{packageId}/theme")
-    public void updatePackageTheme(@Suspended AsyncResponse response,
-            @Parameter(description = "GUID of package to update") @PathParam("packageId") String packageId,
-            @Parameter(description = "Updated package payload in JSON format") JsonObject themeId) {
-        if (packageId == null || themeId == null) {
-            response.resume(ExceptionHandler.errorResponse("Parameters missing", Response.Status.BAD_REQUEST));
-            return;
+                CompletableFuture.supplyAsync(() -> pm.availableThemes(appSecurityContext, packageIdOrGuid), mes)
+                                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
+                                .thenAccept(response::resume);
         }
-        JsonParser jsonParser = new JsonParser();
-        com.google.gson.JsonObject jsonObject = jsonParser.parse(AppUtils.toString(themeId)).getAsJsonObject();
-        AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture
-                .supplyAsync(() -> pm.updatePackageTheme(appSecurityContext, packageId,
-                        jsonObject.get("theme").getAsString()), mes)
-                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
-    }
 
-    @GET
-    @Path("v1/{packageId}/resources/preview/{resourceId}")
-    public void preview(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
-            @PathParam("resourceId") String resourceId, @QueryParam("server") String server,
-            @QueryParam("redeploy") String redeploy) {
-        if (packageId == null || resourceId == null) {
-            response.resume(ExceptionHandler.errorResponse("Parameters missing", Response.Status.BAD_REQUEST));
-            return;
+        @Operation(summary = "Update package default theme", description = "Updates course content package default theme")
+        @PUT
+        @Path("v1/packages/{packageIdOrGuid}/theme")
+        public void updatePackageTheme(@Suspended AsyncResponse response,
+                        @Parameter(description = "GUID of package to update") @PathParam("packageIdOrGuid") String packageIdOrGuid,
+                        @Parameter(description = "Updated package payload in JSON format") JsonObject themeId) {
+                if (packageIdOrGuid == null || themeId == null) {
+                        response.resume(ExceptionHandler.errorResponse("Parameters missing",
+                                        Response.Status.BAD_REQUEST));
+                        return;
+                }
+                JsonParser jsonParser = new JsonParser();
+                com.google.gson.JsonObject jsonObject = jsonParser.parse(AppUtils.toString(themeId)).getAsJsonObject();
+                AppSecurityContext appSecurityContext = appSecurityContextFactory
+                                .extractSecurityContext(httpServletRequest);
+                CompletableFuture
+                                .supplyAsync(() -> pm.updatePackageTheme(appSecurityContext, packageIdOrGuid,
+                                                jsonObject.get("theme").getAsString()), mes)
+                                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
+                                .thenAccept(response::resume);
         }
-        AppSecurityContext appSecurityContext = appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture
-                .supplyAsync(() -> pm.previewResource(appSecurityContext, packageId, resourceId,
-                        redeploy != null ? Boolean.parseBoolean(redeploy) : false), mes)
-                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
-    }
 
-    @GET
-    @Path("{packageId}/resources/quick_preview/{resourceId}")
-    public void quickPreview(@Suspended AsyncResponse response, @PathParam("packageId") String packageId,
-            @PathParam("resourceId") String resourceId) {
-        if (packageId == null || resourceId == null) {
-            response.resume(ExceptionHandler.errorResponse("Parameters missing", Response.Status.BAD_REQUEST));
-            return;
+        @GET
+        @Path("v1/{packageIdOrGuid}/resources/preview/{resourceId}")
+        public void preview(@Suspended AsyncResponse response, @PathParam("packageIdOrGuid") String packageIdOrGuid,
+                        @PathParam("resourceId") String resourceId, @QueryParam("server") String server,
+                        @QueryParam("redeploy") String redeploy) {
+                if (packageIdOrGuid == null || resourceId == null) {
+                        response.resume(ExceptionHandler.errorResponse("Parameters missing",
+                                        Response.Status.BAD_REQUEST));
+                        return;
+                }
+                AppSecurityContext appSecurityContext = appSecurityContextFactory
+                                .extractSecurityContext(httpServletRequest);
+                CompletableFuture
+                                .supplyAsync(() -> pm.previewResource(appSecurityContext, packageIdOrGuid, resourceId,
+                                                redeploy != null ? Boolean.parseBoolean(redeploy) : false), mes)
+                                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
+                                .thenAccept(response::resume);
         }
-        // AppSecurityContext appSecurityContext =
-        // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        CompletableFuture.supplyAsync(() -> pm.quickPreview(null, packageId, resourceId), mes)
-                .thenApply(this::toThinPreviewResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
 
-        // NewCookie cookie = new NewCookie("session",
-        // appSecurityContext.getTokenString(), "/", null, null, -1, true);
+        @GET
+        @Path("{packageIdOrGuid}/resources/quick_preview/{resourceId}")
+        public void quickPreview(@Suspended AsyncResponse response,
+                        @PathParam("packageIdOrGuid") String packageIdOrGuid,
+                        @PathParam("resourceId") String resourceId) {
+                if (packageIdOrGuid == null || resourceId == null) {
+                        response.resume(ExceptionHandler.errorResponse("Parameters missing",
+                                        Response.Status.BAD_REQUEST));
+                        return;
+                }
+                // AppSecurityContext appSecurityContext =
+                // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
+                CompletableFuture.supplyAsync(() -> pm.quickPreview(null, packageIdOrGuid, resourceId), mes)
+                                .thenApply(this::toThinPreviewResponse)
+                                .exceptionally(ExceptionHandler::handleExceptions).thenAccept(response::resume);
+
+                // NewCookie cookie = new NewCookie("session",
+                // appSecurityContext.getTokenString(), "/", null, null, -1, true);
+                //
+                // String redirectUrl = httpServletRequest.getScheme() + "://" +
+                // httpServletRequest.getServerName() + "/content-service/api/"
+                // + packageIdOrGuid + "/resources/do_quick_preview/" + resourceId;
+                //
+                // CompletableFuture.supplyAsync(() -> redirectPreview(redirectUrl, cookie),
+                // mes)
+                // .exceptionally(ExceptionHandler::handleExceptions).thenAccept(response::resume);
+        }
+
+        // private Response redirectPreview(String redirectUrl, NewCookie cookie) {
+        // try {
+        // return Response.seeOther(new
+        // URI(redirectUrl)).cookie(cookie).type(MediaType.APPLICATION_JSON).build();
+        // } catch (URISyntaxException e) {
+        // throw new RuntimeException(e);
+        // }
+        // }
         //
-        // String redirectUrl = httpServletRequest.getScheme() + "://" +
-        // httpServletRequest.getServerName() + "/content-service/api/"
-        // + packageId + "/resources/do_quick_preview/" + resourceId;
+        // @GET
+        // @Path("{packageIdOrGuid}/resources/do_quick_preview/{resourceId}")
+        // public void doQuickPreview(@Suspended AsyncResponse response,
+        // @CookieParam("session") String authToken,
+        // @PathParam("packageIdOrGuid") String packageIdOrGuid,
+        // @PathParam("resourceId") String resourceId) {
         //
-        // CompletableFuture.supplyAsync(() -> redirectPreview(redirectUrl, cookie),
-        // mes)
-        // .exceptionally(ExceptionHandler::handleExceptions).thenAccept(response::resume);
-    }
+        //
+        // String serverUrl = httpServletRequest.getScheme() + "://" +
+        // httpServletRequest.getServerName() + "/";
+        // CompletableFuture.supplyAsync(() -> pm.quickPreview(null, packageIdOrGuid,
+        // resourceId, serverUrl), mes)
+        // .thenApply(this::toThinPreviewResponse).exceptionally(ExceptionHandler::handleExceptions).thenAccept(response::resume);
+        // }
 
-    // private Response redirectPreview(String redirectUrl, NewCookie cookie) {
-    // try {
-    // return Response.seeOther(new
-    // URI(redirectUrl)).cookie(cookie).type(MediaType.APPLICATION_JSON).build();
-    // } catch (URISyntaxException e) {
-    // throw new RuntimeException(e);
-    // }
-    // }
-    //
-    // @GET
-    // @Path("{packageId}/resources/do_quick_preview/{resourceId}")
-    // public void doQuickPreview(@Suspended AsyncResponse response,
-    // @CookieParam("session") String authToken,
-    // @PathParam("packageId") String packageId,
-    // @PathParam("resourceId") String resourceId) {
-    //
-    //
-    // String serverUrl = httpServletRequest.getScheme() + "://" +
-    // httpServletRequest.getServerName() + "/";
-    // CompletableFuture.supplyAsync(() -> pm.quickPreview(null, packageId,
-    // resourceId, serverUrl), mes)
-    // .thenApply(this::toThinPreviewResponse).exceptionally(ExceptionHandler::handleExceptions).thenAccept(response::resume);
-    // }
+        @POST
+        @Path("jcourse/a2/rest/{context}/{user}/{attempt}/bulk_pages_context")
+        public void inlineAssessmentBulkPageContext(@Suspended AsyncResponse response,
+                        @CookieParam("session") String authToken, @PathParam("user") String userGuid,
+                        JsonObject pageContext) {
+                // AppSecurityContext appSecurityContext =
+                // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
+                String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
+                JsonParser jsonParser = new JsonParser();
+                com.google.gson.JsonObject pageContextJson = jsonParser.parse(AppUtils.toString(pageContext))
+                                .getAsJsonObject();
+                CompletableFuture
+                                .supplyAsync(() -> pm.inlineAssessmentBulkPageContext(userGuid, pageContextJson,
+                                                serverUrl), mes)
+                                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
+                                .thenAccept(response::resume);
+        }
 
-    @POST
-    @Path("jcourse/a2/rest/{context}/{user}/{attempt}/bulk_pages_context")
-    public void inlineAssessmentBulkPageContext(@Suspended AsyncResponse response,
-            @CookieParam("session") String authToken, @PathParam("user") String userGuid, JsonObject pageContext) {
-        // AppSecurityContext appSecurityContext =
-        // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
-        JsonParser jsonParser = new JsonParser();
-        com.google.gson.JsonObject pageContextJson = jsonParser.parse(AppUtils.toString(pageContext)).getAsJsonObject();
-        CompletableFuture
-                .supplyAsync(() -> pm.inlineAssessmentBulkPageContext(userGuid, pageContextJson, serverUrl), mes)
-                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
-    }
+        @POST
+        @Path("jcourse/a2/rest/{context}/{user}/{attempt}/next_attempt")
+        public void inlineAssessmentNextAttempt(@Suspended AsyncResponse response,
+                        @CookieParam("session") String authToken, @PathParam("context") String contextGuid,
+                        @PathParam("user") String userGuid, @PathParam("attempt") int attemptNumber,
+                        @QueryParam("mode") String requestMode, String password) {
+                // AppSecurityContext appSecurityContext =
+                // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
+                String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
+                CompletableFuture
+                                .supplyAsync(() -> pm.inlineAssessmentNextPageContext(contextGuid, userGuid,
+                                                attemptNumber, 1, requestMode, true, serverUrl), mes)
+                                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
+                                .thenAccept(response::resume);
+        }
+        // @Path("/{context}/{user}/{attempt}")
 
-    @POST
-    @Path("jcourse/a2/rest/{context}/{user}/{attempt}/next_attempt")
-    public void inlineAssessmentNextAttempt(@Suspended AsyncResponse response, @CookieParam("session") String authToken,
-            @PathParam("context") String contextGuid, @PathParam("user") String userGuid,
-            @PathParam("attempt") int attemptNumber, @QueryParam("mode") String requestMode, String password) {
-        // AppSecurityContext appSecurityContext =
-        // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
-        CompletableFuture
-                .supplyAsync(() -> pm.inlineAssessmentNextPageContext(contextGuid, userGuid, attemptNumber, 1,
-                        requestMode, true, serverUrl), mes)
-                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
-    }
-    // @Path("/{context}/{user}/{attempt}")
+        @GET
+        @Path("jcourse/a2/rest/{context}/{user}/{attempt}/pages_context/{page}")
+        public void inlineAssessmentNextPage(@Suspended AsyncResponse response,
+                        @CookieParam("session") String authToken, @PathParam("context") String contextGuid,
+                        @PathParam("user") String userGuid, @PathParam("attempt") int attemptNumber,
+                        @PathParam("page") int pageNumber, @QueryParam("mode") String requestMode,
+                        @QueryParam("start") boolean start) {
+                // AppSecurityContext appSecurityContext =
+                // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
+                String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
 
-    @GET
-    @Path("jcourse/a2/rest/{context}/{user}/{attempt}/pages_context/{page}")
-    public void inlineAssessmentNextPage(@Suspended AsyncResponse response, @CookieParam("session") String authToken,
-            @PathParam("context") String contextGuid, @PathParam("user") String userGuid,
-            @PathParam("attempt") int attemptNumber, @PathParam("page") int pageNumber,
-            @QueryParam("mode") String requestMode, @QueryParam("start") boolean start) {
-        // AppSecurityContext appSecurityContext =
-        // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
+                CompletableFuture
+                                .supplyAsync(() -> pm.inlineAssessmentNextPageContext(contextGuid, userGuid,
+                                                attemptNumber, pageNumber, requestMode, start, serverUrl), mes)
+                                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
+                                .thenAccept(response::resume);
+        }
 
-        CompletableFuture
-                .supplyAsync(() -> pm.inlineAssessmentNextPageContext(contextGuid, userGuid, attemptNumber, pageNumber,
-                        requestMode, start, serverUrl), mes)
-                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
-    }
+        @POST
+        @Path("jcourse/a2/rest/{context}/{user}/{attempt}/responses_context/{questionId}")
+        public void inlineAssessmentResponsesContext(@Suspended AsyncResponse response,
+                        @CookieParam("session") String authToken, @PathParam("context") String contextGuid,
+                        @PathParam("user") String userGuid, @PathParam("attempt") int attemptNumber,
+                        @PathParam("questionId") String questionId, @QueryParam("start") boolean start,
+                        JsonObject responses) {
+                // AppSecurityContext appSecurityContext =
+                // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
+                String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
+                JsonParser jsonParser = new JsonParser();
+                com.google.gson.JsonObject responsesJson = jsonParser.parse(AppUtils.toString(responses))
+                                .getAsJsonObject();
+                CompletableFuture
+                                .supplyAsync(() -> pm.inlineAssessmentResponsesContext(contextGuid, userGuid,
+                                                attemptNumber, questionId, start, responsesJson, serverUrl), mes)
+                                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
+                                .thenAccept(response::resume);
+        }
 
-    @POST
-    @Path("jcourse/a2/rest/{context}/{user}/{attempt}/responses_context/{questionId}")
-    public void inlineAssessmentResponsesContext(@Suspended AsyncResponse response,
-            @CookieParam("session") String authToken, @PathParam("context") String contextGuid,
-            @PathParam("user") String userGuid, @PathParam("attempt") int attemptNumber,
-            @PathParam("questionId") String questionId, @QueryParam("start") boolean start, JsonObject responses) {
-        // AppSecurityContext appSecurityContext =
-        // appSecurityContextFactory.extractSecurityContext(httpServletRequest);
-        String serverUrl = httpServletRequest.getScheme() + "://" + httpServletRequest.getServerName() + "/";
-        JsonParser jsonParser = new JsonParser();
-        com.google.gson.JsonObject responsesJson = jsonParser.parse(AppUtils.toString(responses)).getAsJsonObject();
-        CompletableFuture
-                .supplyAsync(() -> pm.inlineAssessmentResponsesContext(contextGuid, userGuid, attemptNumber, questionId,
-                        start, responsesJson, serverUrl), mes)
-                .thenApply(this::toResponse).exceptionally(ExceptionHandler::handleExceptions)
-                .thenAccept(response::resume);
-    }
+        private Response toThinPreviewResponse(String content) {
+                return Response.status(Response.Status.OK).entity(content).type(MediaType.TEXT_HTML).build();
+        }
 
-    private Response toThinPreviewResponse(String content) {
-        return Response.status(Response.Status.OK).entity(content).type(MediaType.TEXT_HTML).build();
-    }
-
-    private Response toResponse(JsonElement resourceJson) {
-        Gson gson = AppUtils.gsonBuilder().serializeNulls().create();
-        return Response.status(Response.Status.OK).entity(gson.toJson(resourceJson)).type(MediaType.APPLICATION_JSON)
-                .build();
-    }
+        private Response toResponse(JsonElement resourceJson) {
+                Gson gson = AppUtils.gsonBuilder().serializeNulls().create();
+                return Response.status(Response.Status.OK).entity(gson.toJson(resourceJson))
+                                .type(MediaType.APPLICATION_JSON).build();
+        }
 }

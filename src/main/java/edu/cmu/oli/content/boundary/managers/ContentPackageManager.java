@@ -173,66 +173,64 @@ public class ContentPackageManager {
         return query.getResultList();
     }
 
-    public JsonElement setPackageEditable(AppSecurityContext session, boolean editable, JsonArray packageIds) {
+    public JsonElement setPackageEditable(AppSecurityContext session, boolean editable, JsonArray packageGuids) {
         securityManager.authorize(session, Collections.singletonList(ADMIN), null, null, null);
 
-        Set<String> packageGuids = new HashSet<>();
-        packageIds.forEach(id -> {
+        Set<String> packageGuidSet = new HashSet<>();
+        packageGuids.forEach(id -> {
             if (!id.isJsonNull()) {
-                packageGuids.add(id.getAsString());
+                packageGuidSet.add(id.getAsString());
             }
         });
 
-        fetchPackagesByGuids(packageGuids, false).forEach(contentPackage -> contentPackage.setEditable(editable));
+        fetchPackagesByGuids(packageGuidSet, false).forEach(contentPackage -> contentPackage.setEditable(editable));
 
         JsonObject locked = new JsonObject();
         locked.addProperty("editable", editable);
-        locked.add("packages", packageIds);
+        locked.add("packages", packageGuids);
 
         return locked;
     }
 
-    public JsonElement setPackageVisible(AppSecurityContext session, boolean visible, JsonArray packageIds) {
+    public JsonElement setPackageVisible(AppSecurityContext session, boolean visible, JsonArray packageGuids) {
         securityManager.authorize(session, Collections.singletonList(ADMIN), null, null, null);
 
-        Set<String> packageGuids = new HashSet<>();
-        packageIds.forEach(id -> {
+        Set<String> packageGuidSet = new HashSet<>();
+        packageGuids.forEach(id -> {
             if (!id.isJsonNull()) {
-                packageGuids.add(id.getAsString());
+                packageGuidSet.add(id.getAsString());
             }
         });
 
-        fetchPackagesByGuids(packageGuids, false).forEach(contentPackage -> contentPackage.setVisible(visible));
+        fetchPackagesByGuids(packageGuidSet, false).forEach(contentPackage -> contentPackage.setVisible(visible));
 
         JsonObject hidden = new JsonObject();
         hidden.addProperty("visible", visible);
-        hidden.add("packages", packageIds);
+        hidden.add("packages", packageGuids);
 
         return hidden;
     }
 
-    public JsonElement loadPackage(AppSecurityContext session, String packageId) {
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
-
-        ContentPackage contentPackage = findContentPackage(packageId);
+    public JsonElement loadPackage(AppSecurityContext session, String packageIdOrGuid) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
 
         JsonObject contentPkgJson = (JsonObject) detailedPackage(contentPackage);
 
         contentPkgJson.add("lock",
                 this.lockController.getJsonLockForResource(session, contentPackage.getGuid(), false));
 
-        fireResourceChangeEvent(packageId, ResourceEventType.RESOURCE_REQUESTED, null);
+        fireResourceChangeEvent(contentPackage.getGuid(), ResourceEventType.RESOURCE_REQUESTED, null);
 
         return contentPkgJson;
     }
 
-    public JsonElement updatePackage(AppSecurityContext session, String packageId, JsonObject body) {
-        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
-        this.lockController.checkLockPermission(session, packageId, true);
-
-        ContentPackage contentPackage = findContentPackage(packageId);
+    public JsonElement updatePackage(AppSecurityContext session, String packageIdOrGuid, JsonObject body) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
+        this.lockController.checkLockPermission(session, contentPackage.getGuid(), true);
 
         JsonArray docs = body.getAsJsonArray("doc");
         body = ((JsonObject) docs.get(0)).getAsJsonObject("package");
@@ -254,7 +252,7 @@ public class ContentPackageManager {
 
         JsonElement jsonElement = gson.toJsonTree(contentPackage);
 
-        fireResourceChangeEvent(packageId, ResourceEventType.RESOURCE_UPDATED, jsonElement);
+        fireResourceChangeEvent(contentPackage.getGuid(), ResourceEventType.RESOURCE_UPDATED, jsonElement);
 
         JsonObject contentPkgJson = (JsonObject) detailedPackage(contentPackage);
         contentPkgJson.add("lock",
@@ -540,11 +538,11 @@ public class ContentPackageManager {
 
     }
 
-    public JsonElement deployPkg(AppSecurityContext session, String packageId, DeployStage deployStage,
+    public JsonElement deployPkg(AppSecurityContext session, String packageIdOrGuid, DeployStage deployStage,
             boolean redeploy) {
-        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), packageId, "name=" + packageId,
-                Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
-        ContentPackage contentPackage = findContentPackage(packageId);
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        this.securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
+                "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.VIEW_MATERIAL_ACTION));
         if (contentPackage.getDeploymentStatus() == null) {
             contentPackage.setDeploymentStatus(ContentPackage.DeploymentStatus.DEVELOPMENT);
         }
@@ -604,10 +602,10 @@ public class ContentPackageManager {
     }
 
     @TransactionTimeout(unit = TimeUnit.MINUTES, value = 50L)
-    public JsonElement newVersionOrClone(AppSecurityContext session, String packageId, String newPkgId,
+    public JsonElement newVersionOrClone(AppSecurityContext session, String packageIdOrGuid, String newPkgId,
             String version) {
+        ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         securityManager.authorize(session, Collections.singletonList(ADMIN), null, null, null);
-        ContentPackage contentPackage = findContentPackage(packageId);
         // Assume clone and own if newPkgId is not null;
         String pkgId = contentPackage.getId();
         if (newPkgId != null) {
@@ -732,12 +730,12 @@ public class ContentPackageManager {
         return message;
     }
 
-    public boolean updateDeploymentStatus(AppSecurityContext session, String packageId,
+    public boolean updateDeploymentStatus(AppSecurityContext session, String packageIdOrGuid,
             ContentPackage.DeploymentStatus newStatus) {
         // Admin only action
         securityManager.authorize(session, Collections.singletonList(ADMIN), null, null, null);
 
-        ContentPackage pkg = findContentPackage(packageId);
+        ContentPackage pkg = findContentPackage(packageIdOrGuid);
         pkg.setDeploymentStatus(newStatus);
 
         String serverUrl = System.getenv().get("SERVER_URL");
@@ -874,8 +872,8 @@ public class ContentPackageManager {
         resourceChange.fire(new ResourceChangeEvent(resourceId, eventType, payload));
     }
 
-    private void doDeletePackage(String packageId) {
-        ContentPackage contentPackage = findContentPackage(packageId);
+    private void doDeletePackage(String packageGuid) {
+        ContentPackage contentPackage = findContentPackage(packageGuid);
 
         em.remove(contentPackage);
 
@@ -961,19 +959,34 @@ public class ContentPackageManager {
         return contentPkgJson;
     }
 
-    private ContentPackage findContentPackage(String packageGuid) {
+    // packageIdentifier is db guid or packageId-version combo
+    private ContentPackage findContentPackage(String packageIdOrGuid) {
         ContentPackage contentPackage = null;
+        Boolean isIdAndVersion = packageIdOrGuid.contains("-");
         try {
-            contentPackage = em.find(ContentPackage.class, packageGuid);
-            if (contentPackage == null) {
-                String message = "Error: package requested was not found " + packageGuid;
-                log.error(message);
-                throw new ResourceException(Response.Status.NOT_FOUND, packageGuid, message);
+            if (isIdAndVersion) {
+                String pkgId = packageIdOrGuid.substring(0, packageIdOrGuid.lastIndexOf("-"));
+                String version = packageIdOrGuid.substring(packageIdOrGuid.lastIndexOf("-") + 1);
+                TypedQuery<ContentPackage> q = em
+                        .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                        .setParameter("id", pkgId).setParameter("version", version);
+
+                contentPackage = q.getResultList().isEmpty() ? null : q.getResultList().get(0);
+            } else {
+                String packageGuid = packageIdOrGuid;
+                contentPackage = em.find(ContentPackage.class, packageGuid);
             }
+
+            if (contentPackage == null) {
+                String message = "Error: package requested was not found " + packageIdOrGuid;
+                log.error(message);
+                throw new ResourceException(Response.Status.NOT_FOUND, packageIdOrGuid, message);
+            }
+
         } catch (IllegalArgumentException e) {
-            String message = "Server Error while locating package " + packageGuid;
+            String message = "Server Error while locating package " + packageIdOrGuid;
             log.error(message);
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageGuid, message);
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageIdOrGuid, message);
         }
         return contentPackage;
     }

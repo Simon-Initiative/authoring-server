@@ -83,8 +83,8 @@ public class DeployControllerImpl implements DeployController {
     LDModelController ldModelController;
 
     @Override
-    public JsonElement deployPackage(AppSecurityContext session, String resourceId,
-                                     ServerName previewServer, boolean redeploy) {
+    public JsonElement deployPackage(AppSecurityContext session, String resourceId, ServerName previewServer,
+            boolean redeploy) {
 
         String previewLaunchUrl = "";
         JsonArray servers = configuration.get().getPreviewServers();
@@ -120,7 +120,7 @@ public class DeployControllerImpl implements DeployController {
     }
 
     private Optional<Response> getPreviewResponse(AppSecurityContext session, String resourceId, WebTarget target,
-                                                  boolean redeploy) {
+            boolean redeploy) {
         TypedQuery<Resource> q = em.createNamedQuery("Resource.findByGuid", Resource.class);
         q.setParameter("guid", resourceId);
         List<Resource> resultList = q.getResultList();
@@ -201,47 +201,47 @@ public class DeployControllerImpl implements DeployController {
         userInfo.addProperty("userName", session.getPreferredUsername());
         previewUrlInfo.add("userInfo", userInfo);
 
-        return Optional
-                .of(target.request(MediaType.APPLICATION_JSON).post(Entity.json(AppUtils.gsonBuilder().create().toJson(previewUrlInfo))));
+        return Optional.of(target.request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(AppUtils.gsonBuilder().create().toJson(previewUrlInfo))));
 
     }
 
     @Override
-    public void sendRequestDeployEmail(AppSecurityContext session, ContentPackage pkg, String action,
-                                       String server, String svnLocation) {
+    public void sendRequestDeployEmail(AppSecurityContext session, ContentPackage pkg, String action, String server,
+            String svnLocation) {
 
         String serverUrl = System.getenv().get("SERVER_URL");
         String serverName = serverUrl.substring(serverUrl.indexOf("/") + 2);
 
         JsonArray techTeamEmailsJ = new JsonArray();
         Set<String> techTeamEmails = this.techTeamEmails(pkg.getId());
-        techTeamEmails.forEach(m->techTeamEmailsJ.add(m));
+        techTeamEmails.forEach(m -> techTeamEmailsJ.add(m));
 
         JsonArray authorEmailsj = new JsonArray();
         Set<String> authorEmails = this.authorEmails(pkg.getGuid());
         authorEmails.forEach(email -> {
-            if(!techTeamEmails.contains((email))){
+            if (!techTeamEmails.contains((email))) {
                 authorEmailsj.add(email);
             }
         });
 
         log.info("Sending deploy/update request email for course " + pkg.getTitle());
 
-        String subject = (serverName.contains("dev.local") ? "TESTING: PLEASE IGNORE THIS - " : "") + "OLI course " +
-                pkg.getTitle() + " is ready for " + action + " to " + server;
+        String subject = (serverName.contains("dev.local") ? "TESTING: PLEASE IGNORE THIS - " : "") + "OLI course "
+                + pkg.getTitle() + " is ready for " + action + " to " + server;
 
         StringBuilder sb = new StringBuilder();
         sb.append("The user ").append(session.getFirstName()).append(" ").append(session.getLastName()).append(" (")
-                .append(session.getEmail()).append(") has requested a ").append(action).append(" of the course content package (id=")
-                .append(pkg.getId()).append(" and version=").append(pkg.getVersion())
-                .append(") to ").append(server).append(".\n\n");
+                .append(session.getEmail()).append(") has requested a ").append(action)
+                .append(" of the course content package (id=").append(pkg.getId()).append(" and version=")
+                .append(pkg.getVersion()).append(") to ").append(server).append(".\n\n");
 
         sb.append("Authors: ");
 
-        authorEmailsj.forEach(author ->{
+        authorEmailsj.forEach(author -> {
             sb.append(author.getAsString()).append(";");
         });
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
         sb.append("\n\n");
 
         sb.append(packageDetails(pkg));
@@ -253,12 +253,13 @@ public class DeployControllerImpl implements DeployController {
             sb.append("SVN Location: " + svnLocation + "\n\n");
         }
 
-        sb.append("please update the corresponding package deployment 'status' on ").append(serverName).append(" using the admin app");
+        sb.append("please update the corresponding package deployment 'status' on ").append(serverName)
+                .append(" using the admin app");
 
         Map<String, String> model = ldModelController.extractTabSeparatedModel(pkg);
 
         JsonArray attachments = new JsonArray();
-        model.forEach((k,v)->{
+        model.forEach((k, v) -> {
             JsonObject att = new JsonObject();
             att.addProperty("filename", k);
             att.addProperty("value", v);
@@ -266,11 +267,11 @@ public class DeployControllerImpl implements DeployController {
         });
 
         // Send email to tech team
-        doSendEmail(pkg,techTeamEmailsJ, subject, sb.toString(), Optional.of(attachments));
+        doSendEmail(pkg, techTeamEmailsJ, subject, sb.toString(), Optional.of(attachments));
     }
 
     @Override
-    public void sendStateTransitionEmail(ContentPackage pkg, String subject, String body){
+    public void sendStateTransitionEmail(ContentPackage pkg, String subject, String body) {
 
         Set<String> techTeamEmails = this.techTeamEmails(pkg.getId());
         Set<String> authorEmails = this.authorEmails(pkg.getGuid());
@@ -282,10 +283,10 @@ public class DeployControllerImpl implements DeployController {
 
         sb.append("Authors: ");
 
-        authorEmails.forEach(author ->{
+        authorEmails.forEach(author -> {
             sb.append(author).append(";");
         });
-        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length() - 1);
         sb.append("\n\n");
 
         authorEmails.addAll(techTeamEmails);
@@ -298,24 +299,25 @@ public class DeployControllerImpl implements DeployController {
         doSendEmail(pkg, authorEmailsj, subject, sb.toString(), Optional.empty());
     }
 
-    private Set<String> techTeamEmails(String pkgId){
+    private Set<String> techTeamEmails(String packageId) {
         Set<String> deployRequestEmails = configuration.get().getDeployRequestEmails();
         Set<String> teachTeamEmails = new HashSet<>();
         if (deployRequestEmails.isEmpty()) {
-            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, pkgId, "tech team email list cannot be empty");
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageId,
+                    "tech team email list cannot be empty");
         } else {
             deployRequestEmails.forEach(e -> teachTeamEmails.add(e));
         }
         return teachTeamEmails;
     }
 
-    private Set<String> authorEmails(String pkgGuid){
+    private Set<String> authorEmails(String pkgGuid) {
         List<UserInfo> allUsers = securityManager.getAllUsers();
-//&& !teachTeamEmails.contains(new JsonPrimitive(userInfo.getEmail()))
+        // && !teachTeamEmails.contains(new JsonPrimitive(userInfo.getEmail()))
         Set<String> authorEmails = new HashSet<>();
         allUsers.forEach(userInfo -> {
             final Map<String, List<String>> attributes = userInfo.getAttributes();
-            if(attributes != null && attributes.containsKey(pkgGuid)){
+            if (attributes != null && attributes.containsKey(pkgGuid)) {
                 authorEmails.add(userInfo.getEmail());
             }
         });
@@ -333,20 +335,21 @@ public class DeployControllerImpl implements DeployController {
         return sb.toString();
     }
 
-    private void doSendEmail(ContentPackage contentPackage, JsonArray toEmails, String subject,
-                             String emailBody, Optional<JsonArray> attachments) {
+    private void doSendEmail(ContentPackage contentPackage, JsonArray toEmails, String subject, String emailBody,
+            Optional<JsonArray> attachments) {
         JsonObject payload = new JsonObject();
         payload.addProperty("token", configuration.get().getEmailServerToken());
         payload.addProperty("fromEmail", configuration.get().getEmailFrom());
         payload.add("toEmails", toEmails);
         payload.addProperty("subject", subject);
         payload.addProperty("body", emailBody);
-        if(attachments.isPresent()) {
+        if (attachments.isPresent()) {
             payload.add("attachments", attachments.get());
         }
 
         WebTarget target = ClientBuilder.newClient().target(configuration.get().getEmailServer());
-        Response response = target.request(MediaType.APPLICATION_JSON).post(Entity.json(AppUtils.gsonBuilder().create().toJson(payload)));
+        Response response = target.request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(AppUtils.gsonBuilder().create().toJson(payload)));
         if (response.getStatus() != Response.Status.OK.getStatusCode()) {
             final String message = "Email message sending failed ";
             log.error(message);
