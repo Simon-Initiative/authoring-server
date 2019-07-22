@@ -347,7 +347,7 @@ public class WorkbookPageValidator implements ResourceValidator {
     private void createInlineEdges() {
 
         // Locate all inline content in document
-        XPathExpression<Element> xexpression = xFactory.compile("//wb:inline", Filters.element(), null, workbookNamespaces.values());
+        XPathExpression<Element> xexpression = xFactory.compile("//wb:inline | //activity_report", Filters.element(), null, workbookNamespaces.values());
         List<Element> kids = xexpression.evaluate(doc);
 
         ContentPackage pkg = rsrc.getContentPackage();
