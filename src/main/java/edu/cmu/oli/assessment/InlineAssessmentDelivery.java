@@ -46,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @author Raphael Gachuhi
@@ -72,33 +73,41 @@ public class InlineAssessmentDelivery implements Delivery {
     private XPathFactory xFactory = XPathFactory.instance();
 
     @Override
-    public JsonElement deliver(Resource resource, Document document, String serverUrl, String themeId, JsonElement metaInfo) {
+    public JsonElement deliver(Resource resource, Document document, String serverUrl, String themeId,
+            JsonElement metaInfo) {
         int pageNumber = 1;
         String requestMode = "deliver";
         int attemptNumber = 1;
         if (metaInfo != null) {
             JsonObject deliveryFilters = metaInfo.getAsJsonObject();
             if (deliveryFilters.has("requestMode")) {
-                requestMode = deliveryFilters.get("requestMode") != JsonNull.INSTANCE ? deliveryFilters.get("requestMode").getAsString() : requestMode;
+                requestMode = deliveryFilters.get("requestMode") != JsonNull.INSTANCE
+                        ? deliveryFilters.get("requestMode").getAsString()
+                        : requestMode;
             }
             if (deliveryFilters.has("pageNumber")) {
-                pageNumber = deliveryFilters.get("pageNumber") != JsonNull.INSTANCE ? deliveryFilters.get("pageNumber").getAsInt() : pageNumber;
+                pageNumber = deliveryFilters.get("pageNumber") != JsonNull.INSTANCE
+                        ? deliveryFilters.get("pageNumber").getAsInt()
+                        : pageNumber;
                 if (pageNumber < 1) {
                     pageNumber = 1;
                 }
             }
 
             if (deliveryFilters.has("attemptNumber")) {
-                attemptNumber = deliveryFilters.get("pageNumber") != JsonNull.INSTANCE &&
-                        deliveryFilters.get("attemptNumber").getAsInt() > 0 ? deliveryFilters.get("attemptNumber").getAsInt() : attemptNumber;
+                attemptNumber = deliveryFilters.get("pageNumber") != JsonNull.INSTANCE
+                        && deliveryFilters.get("attemptNumber").getAsInt() > 0
+                                ? deliveryFilters.get("attemptNumber").getAsInt()
+                                : attemptNumber;
             }
 
         }
         AssessmentV2Validator assessmentV2Validator = new AssessmentV2Validator();
         assessmentV2Validator.initValidator(resource, document, false);
         JsonObject assessement = assessmentV2Validator.parseAssessment(document.getRootElement());
-//        Gson gson = AppUtils.gsonBuilder().setPrettyPrinting().serializeNulls().create();
-//        log.info(gson.toJson(assessement));
+        // Gson gson =
+        // AppUtils.gsonBuilder().setPrettyPrinting().serializeNulls().create();
+        // log.info(gson.toJson(assessement));
 
         JsonObject payload = new JsonObject();
         payload.addProperty("id", resource.getId());
@@ -189,8 +198,8 @@ public class InlineAssessmentDelivery implements Delivery {
                 contentNode.addProperty("id", AppUtils.generateUID(5));
                 contentNode.add("questionId", null);
                 contentNode.addProperty("type", "content");
-                contentNode.add("body", AppUtils.createJsonElement(transformBodyContent(resource, content.getAsJsonObject("body")
-                        .get("material").getAsString(), serverUrl, themeId)));
+                contentNode.add("body", AppUtils.createJsonElement(transformBodyContent(resource,
+                        content.getAsJsonObject("body").get("material").getAsString(), serverUrl, themeId)));
                 contentNode.add("number", null);
                 contentNode.add("scoreOutOf", null);
                 contentNode.add("noResponseScore", null);
@@ -216,8 +225,8 @@ public class InlineAssessmentDelivery implements Delivery {
                 questionNode.add("questionId", question.get("id"));
                 questionNode.addProperty("type", "question");
                 JsonObject body = question.getAsJsonObject("body");
-                questionNode.add("body", AppUtils.createJsonElement(transformBodyContent(resource,
-                        body.get("material").getAsString(), serverUrl, themeId)));
+                questionNode.add("body", AppUtils.createJsonElement(
+                        transformBodyContent(resource, body.get("material").getAsString(), serverUrl, themeId)));
                 questionNode.addProperty("number", ++questionNumber);
                 questionNode.add("scoreOutOf", null);
                 questionNode.add("noResponseScore", null);
@@ -242,8 +251,10 @@ public class InlineAssessmentDelivery implements Delivery {
                         interactionNode.addProperty("select", "multiple");
                         interactionNode.addProperty("inputComponent", "checkbox");
                     } else {
-                        interactionNode.addProperty("select", interaction.has("multipleSelect")
-                                && interaction.get("multipleSelect").getAsBoolean()?"multiple":"single");
+                        interactionNode.addProperty("select",
+                                interaction.has("multipleSelect") && interaction.get("multipleSelect").getAsBoolean()
+                                        ? "multiple"
+                                        : "single");
                         interactionNode.addProperty("inputComponent", "default");
                     }
                     interactionNode.add("displayName", interaction.get("displayName"));
@@ -338,7 +349,6 @@ public class InlineAssessmentDelivery implements Delivery {
                     partNode.add("title", part.get("title"));
                     partNode.add("gradingCriteriaList", null);
 
-
                     JsonArray partHints = part.getAsJsonArray("hints");
                     if (partHints.size() < 1)
                         continue;
@@ -352,8 +362,8 @@ public class InlineAssessmentDelivery implements Delivery {
 
                         partHintNode.addProperty("id", inputRef + "_" + AppUtils.generateUID(5));
                         partHintNode.addProperty("targetInputs", inputRef);
-                        partHintNode.add("body", AppUtils.createJsonElement(transformBodyContent(resource, partHint.getAsJsonObject("body")
-                                .get("material").getAsString(), serverUrl, themeId)));
+                        partHintNode.add("body", AppUtils.createJsonElement(transformBodyContent(resource,
+                                partHint.getAsJsonObject("body").get("material").getAsString(), serverUrl, themeId)));
 
                     }
 
@@ -391,14 +401,15 @@ public class InlineAssessmentDelivery implements Delivery {
     }
 
     public JsonElement evaluateResponses(Resource resource, Document document, String serverUrl, String themeId,
-                                         String userGuid, int attemptNumber, String questionId, boolean start, JsonObject inputs) {
+            String userGuid, int attemptNumber, String questionId, boolean start, JsonObject inputs) {
 
         AssessmentV2Validator assessmentV2Validator = new AssessmentV2Validator();
         assessmentV2Validator.initValidator(resource, document, false);
         JsonObject assessement = assessmentV2Validator.parseAssessment(document.getRootElement());
 
-        //Gson gson = AppUtils.gsonBuilder().setPrettyPrinting().serializeNulls().create();
-        //log.info(gson.toJson(assessement));
+        // Gson gson =
+        // AppUtils.gsonBuilder().setPrettyPrinting().serializeNulls().create();
+        // log.info(gson.toJson(assessement));
         Map<String, String> questionToPage = new HashMap<>();
         JsonArray questions = new JsonArray();
         JsonArray pages = assessement.getAsJsonArray("pages");
@@ -410,7 +421,8 @@ public class InlineAssessmentDelivery implements Delivery {
                 for (JsonElement n : nodes) {
                     if (n.getAsJsonObject().has("question")) {
                         questions.add(n);
-                        questionToPage.put(n.getAsJsonObject().getAsJsonObject("question").get("id").getAsString(), String.valueOf(pageIndex));
+                        questionToPage.put(n.getAsJsonObject().getAsJsonObject("question").get("id").getAsString(),
+                                String.valueOf(pageIndex));
                     }
                 }
             }
@@ -431,7 +443,7 @@ public class InlineAssessmentDelivery implements Delivery {
             return new JsonObject();
         }
 
-        //log.info(gson.toJson(matchQuestion));
+        // log.info(gson.toJson(matchQuestion));
 
         JsonArray parts = matchQuestion.getAsJsonArray("parts");
         JsonArray interactions = matchQuestion.getAsJsonArray("interactions");
@@ -469,10 +481,13 @@ public class InlineAssessmentDelivery implements Delivery {
             rs.add(rss);
             parts.forEach(p -> {
                 JsonArray responseConditions = p.getAsJsonObject().getAsJsonArray("responseConditions");
+
                 String id = p.getAsJsonObject().get("id").getAsString();
                 String partGenId = id + "_" + AppUtils.generateUID(5);
-                String inputRef = responseConditions.size() > 0 ? responseConditions.get(0).getAsJsonObject()
-                        .getAsJsonObject("criteria").get("interactionId").getAsString() : null;
+                String inputRef = responseConditions.size() > 0
+                        ? responseConditions.get(0).getAsJsonObject().getAsJsonObject("criteria").get("interactionId")
+                                .getAsString()
+                        : null;
                 JsonObject partAttempt = new JsonObject();
 
                 partAttempt.addProperty("id", partGenId);
@@ -490,55 +505,79 @@ public class InlineAssessmentDelivery implements Delivery {
                 partAttempt.addProperty("hintVisible", false);
 
                 partsAttempt.add(partAttempt);
+                AtomicBoolean alreadyCorrect = new AtomicBoolean(false);
+
                 responseConditions.forEach(c -> {
                     JsonObject criteria = c.getAsJsonObject().getAsJsonObject("criteria");
-                    JsonObject interaction = lookupInteraction(criteria.get("interactionId").getAsString(), interactions);
+                    JsonObject interaction = lookupInteraction(criteria.get("interactionId").getAsString(),
+                            interactions);
                     if (evaluateCondition(criteria, interaction, r)) {
+
                         JsonObject outcome = c.getAsJsonObject().getAsJsonObject("outcome");
-                        boolean correct = outcome.has("score") ? outcome.get("score").getAsDouble() > 0 : false;
-                        partAttempt.addProperty("correct", correct);
-                        partAttempt.addProperty("noResponse", false);
-                        JsonArray feedbacks = new JsonArray();
-                        partAttempt.add("feedbacks", feedbacks);
-                        if (outcome.has("feedbacks")) {
-                            JsonArray oFeedbacks = outcome.getAsJsonArray("feedbacks");
-                            oFeedbacks.forEach(f -> {
-                                JsonObject feedback = new JsonObject();
-                                feedback.addProperty("id", AppUtils.generateUID(5));
-                                JsonObject body = f.getAsJsonObject().getAsJsonObject("body");
-                                feedback.add("body", AppUtils.createJsonElement(transformBodyContent(resource,
-                                        body.get("material").getAsString(), serverUrl, themeId)));
-                                feedback.add("lang", body.get("lang"));
+                        double scoreValue = outcome.has("score") ? outcome.get("score").getAsDouble() : 0;
+                        boolean correct = scoreValue > 0;
 
-                                feedbacks.add(feedback);
-                            });
+                        boolean checkForHigherScore = false;
+                        if (correct) {
+                            if (alreadyCorrect.get()) {
+                                checkForHigherScore = true;
+                            }
+                            alreadyCorrect.set(true);
+                        } else {
+                            if (alreadyCorrect.get()) {
+                                return;
+                            }
                         }
-                        partAttempt.addProperty("feedbackVisible", true);
 
-                        JsonObject score = new JsonObject();
-                        partAttempt.add("score", score);
-                        score.add("scoreOutOf", null);
-                        score.add("value", null);
-                        score.add("percent", null);
-                        score.add("aggregateScore", null);
-                        score.add("percentAggregate", null);
-                        score.add("overrideScore", null);
-                        score.add("percentOverride", null);
-                        score.add("pointsEvaluated", null);
-                        score.add("percentEvaluated", null);
-                        score.add("assignedBy", null);
-                        score.add("explanation", null);
-                        score.add("dateScored", null);
-                        score.addProperty("correct", correct);
-                        score.addProperty("noResponse", false);
+                        if (!checkForHigherScore || (partAttempt.get("score").getAsDouble() < scoreValue)) {
 
-                        JsonElement explanation = p.getAsJsonObject().get("explanation");
-                        if (explanation != null && !explanation.isJsonNull()) {
-                            partAttempt.add("explanationBody", AppUtils.createJsonElement(transformBodyContent(resource,
-                                    explanation.getAsJsonObject().get("material").getAsString(), serverUrl, themeId)));
-                            partAttempt.add("feedbacks", null);
-                            partAttempt.addProperty("feedbackVisible", false);
+                            partAttempt.addProperty("correct", correct);
+                            partAttempt.addProperty("noResponse", false);
+                            JsonArray feedbacks = new JsonArray();
+                            partAttempt.add("feedbacks", feedbacks);
+                            if (outcome.has("feedbacks")) {
+                                JsonArray oFeedbacks = outcome.getAsJsonArray("feedbacks");
+                                oFeedbacks.forEach(f -> {
+                                    JsonObject feedback = new JsonObject();
+                                    feedback.addProperty("id", AppUtils.generateUID(5));
+                                    JsonObject body = f.getAsJsonObject().getAsJsonObject("body");
+                                    feedback.add("body", AppUtils.createJsonElement(transformBodyContent(resource,
+                                            body.get("material").getAsString(), serverUrl, themeId)));
+                                    feedback.add("lang", body.get("lang"));
+
+                                    feedbacks.add(feedback);
+                                });
+                            }
+                            partAttempt.addProperty("feedbackVisible", true);
+
+                            JsonObject score = new JsonObject();
+                            partAttempt.add("score", score);
+                            score.add("scoreOutOf", null);
+                            score.add("value", null);
+                            score.add("percent", null);
+                            score.add("aggregateScore", null);
+                            score.add("percentAggregate", null);
+                            score.add("overrideScore", null);
+                            score.add("percentOverride", null);
+                            score.add("pointsEvaluated", null);
+                            score.add("percentEvaluated", null);
+                            score.add("assignedBy", null);
+                            score.add("explanation", null);
+                            score.add("dateScored", null);
+                            score.addProperty("correct", correct);
+                            score.addProperty("noResponse", false);
+
+                            JsonElement explanation = p.getAsJsonObject().get("explanation");
+                            if (explanation != null && !explanation.isJsonNull()) {
+                                partAttempt.add("explanationBody",
+                                        AppUtils.createJsonElement(transformBodyContent(resource,
+                                                explanation.getAsJsonObject().get("material").getAsString(), serverUrl,
+                                                themeId)));
+                                partAttempt.add("feedbacks", null);
+                                partAttempt.addProperty("feedbackVisible", false);
+                            }
                         }
+
                     }
                 });
 
@@ -563,8 +602,7 @@ public class InlineAssessmentDelivery implements Delivery {
             return false;
         }
         String inputValue = response.getAsJsonObject().get("value").getAsString();
-        if (!criteria.has("match") ||
-                criteria.get("match").isJsonNull()) {
+        if (!criteria.has("match") || criteria.get("match").isJsonNull()) {
             return true;
         }
         String pattern = criteria.get("match").getAsString();
@@ -578,6 +616,7 @@ public class InlineAssessmentDelivery implements Delivery {
         }
 
         try {
+
             ResponseMatcher<Object> m = matcherByType.parseMatchPattern(pattern);
             // Parse input value
             Object value = matcherByType.parseInputValue(inputValue);
@@ -629,7 +668,7 @@ public class InlineAssessmentDelivery implements Delivery {
         RelativePathRewriter r = new RelativePathRewriter(rootPath);
         r.convertToAbsolutePaths(d);
 
-        //log.debug(new XMLOutputter(Format.getPrettyFormat()).outputString(d));
+        // log.debug(new XMLOutputter(Format.getPrettyFormat()).outputString(d));
 
         Templates templates = null;
         try {
@@ -654,7 +693,7 @@ public class InlineAssessmentDelivery implements Delivery {
         }
 
         String fromTransform = new String(byteOut.toByteArray(), StandardCharsets.UTF_8);
-        //log.debug("From Transformation: " + fromTransform);
+        // log.debug("From Transformation: " + fromTransform);
 
         String transformedContent;
         try {
@@ -664,14 +703,14 @@ public class InlineAssessmentDelivery implements Delivery {
             Document srcDoc = builder.build(new StringReader(fromTransform));
             XPathExpression<Element> xexpression = xFactory.compile("//uid", Filters.element());
             List<Element> elementList = xexpression.evaluate(srcDoc);
-            transformedContent = elementList.isEmpty() ? null : new XMLOutputter().outputString(elementList.get(0).getContent());
+            transformedContent = elementList.isEmpty() ? null
+                    : new XMLOutputter().outputString(elementList.get(0).getContent());
         } catch (Exception ex) {
             log.error(ex.getLocalizedMessage(), ex);
             throw new RuntimeException(ex.getLocalizedMessage());
         }
-        //log.debug("String transformed: " + transformedContent);
+        // log.debug("String transformed: " + transformedContent);
         return transformedContent;
     }
 
 }
-
