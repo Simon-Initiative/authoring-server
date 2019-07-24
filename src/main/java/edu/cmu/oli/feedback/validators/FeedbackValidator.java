@@ -148,17 +148,12 @@ public class FeedbackValidator implements ResourceValidator {
         }
     }
 
-    // Size attribute must be an odd integer
     private int parseSize(Element scale) {
         Attribute sizeAttr = scale.getAttribute("size");
         try {
-            int size = sizeAttr.getIntValue();
-            if ((size % 2) == 0) {
-                recordError("Size of likert scale must be an odd integer.", ErrorLevel.ERROR);
-            }
-            return size;
+            return sizeAttr.getIntValue();
         } catch (DataConversionException e) {
-            throw new RuntimeException("Size of likert scale must be an odd integer.");
+            throw new RuntimeException("Size of likert scale must be an integer.");
         }
     }
 
@@ -210,7 +205,7 @@ public class FeedbackValidator implements ResourceValidator {
         Set<Edge> filteredEdges = pkg.getEdges().stream().filter(
                 e -> e.getSourceId().equalsIgnoreCase(pkg.getId() + ":" + pkg.getVersion() + ":" + resource.getId())
                         && (e.getReferenceType().equals("activity") || e.getReferenceType().equals("activity_link")
-                        || e.getReferenceType().equals("alternate")))
+                                || e.getReferenceType().equals("alternate")))
                 .collect(Collectors.toSet());
 
         // For each activity link...

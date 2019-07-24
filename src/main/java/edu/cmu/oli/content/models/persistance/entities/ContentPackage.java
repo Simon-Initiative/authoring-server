@@ -595,9 +595,11 @@ public class ContentPackage implements Serializable {
         versionClone.buildStatus = BuildStatus.PROCESSING;
 
         this.resources.forEach(resource -> {
-            Resource resourceClone = resource.cloneVersion(volumeLocation);
-            resourceClone.setContentPackage(versionClone);
-            versionClone.addResource(resourceClone);
+            if(resource.getResourceState() != ResourceState.DELETED) {
+                Resource resourceClone = resource.cloneVersion(volumeLocation);
+                resourceClone.setContentPackage(versionClone);
+                versionClone.addResource(resourceClone);
+            }
         });
 
         versionClone.objectivesIndex = this.objectivesIndex;
