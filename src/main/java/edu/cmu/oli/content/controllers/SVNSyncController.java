@@ -571,6 +571,9 @@ public class SVNSyncController {
     }
 
     private void createResource(String packageId, Path resourceFile, JsonObject resourceTypeDefinition) {
+        if(Files.isDirectory(resourceFile)){
+            return;
+        }
         TypedQuery<ContentPackage> q = em.createNamedQuery("ContentPackage.findByGuid", ContentPackage.class);
         q.setParameter("guid", packageId);
         List<ContentPackage> resultList = q.getResultList();
