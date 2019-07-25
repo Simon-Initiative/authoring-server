@@ -490,21 +490,45 @@ public class ContentResourceManager {
         return resource;
     }
 
+    private void logElapsed(final long mark, final String desc) {
+        final long delta = System.nanoTime() - mark;
+        final long inMs = delta / 1000000;
+        System.err.println(desc + ": " + inMs);
+    }
+
+    private long mark() {
+        return System.nanoTime();
+    }
+
     public JsonElement updateResource(AppSecurityContext session, String packageIdOrGuid, String resourceId,
             JsonElement resourceContent) {
+
+        final long mark1 = mark();
         ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        logElapsed(mark1, "findContentPackage");
+
+        final long mark2 = mark();
         securityManager.authorize(session, Arrays.asList(ADMIN, CONTENT_DEVELOPER), contentPackage.getGuid(),
                 "name=" + contentPackage.getGuid(), Collections.singletonList(Scopes.EDIT_MATERIAL_ACTION));
+        logElapsed(mark2, "authorize");
 
+        final long mark3 = mark();
         Resource resource = findContentResource(resourceId, contentPackage);
+        logElapsed(mark3, "findContentResource");
+
+        final long mark4 = mark();
         this.lockController.checkLockPermission(session, resource.getGuid(), true);
+        logElapsed(mark4, "checkLockPermission");
 
         String lockId = this.lockController.getLockForResource(session, resource.getGuid(), false).getLockId();
         doUpdate(contentPackage.getGuid(), resource, resourceContent, session.getPreferredUsername(), lockId, null,
                 true);
 
+        final long mark5 = mark();
         Gson gson = AppUtils.gsonBuilder().excludeFieldsWithoutExposeAnnotation().serializeNulls().create();
+        logElapsed(mark5, "ConvertToGson");
 
+        final long mark6 = mark();
         JsonElement resourceJson = gson.toJsonTree(resource);
         ((JsonObject) resourceJson).add("lock",
                 gson.toJsonTree(this.lockController.getLockForResource(session, resource.getGuid(), false)));
@@ -513,7 +537,9 @@ public class ContentResourceManager {
                 ResourceEventType.RESOURCE_UPDATED);
         resourceChangeEvent.setEventPayload((JsonObject) resourceJson);
         this.resourceChange.fire(resourceChangeEvent);
+        logElapsed(mark6, "ConverttoJSONTree");
 
+        logElapsed(mark1, "TotalTime");
         return resourceJson;
     }
 
@@ -551,15 +577,23 @@ public class ContentResourceManager {
 
     public Resource doUpdate(String packageIdOrGuid, Resource resource, JsonElement resourceContent, String author,
             String lockId, String nextRevision, boolean throwErrors) {
+
+        final long mark1 = mark();
         ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
+        logElapsed(mark1, "doUpdate::findContentPackage");
+
         JsonObject resourceTypeDefinition = null;
         if (((JsonObject) resourceContent).has("type")) {
             String type = ((JsonObject) resourceContent).get("type").getAsString();
             Configurations serviceConfig = this.configuration.get();
             resourceTypeDefinition = serviceConfig.getResourceTypeById(type);
         }
-        resource.getContentPackage().getEdges();
 
+        final long mark2 = mark();
+        resource.getContentPackage().getEdges();
+        logElapsed(mark2, "doUpdate::getEdges");
+
+        final long mark2a = mark();
         String p = contentPackage.getSourceLocation() + File.separator + resource.getFileNode().getPathFrom();
         Path oldPathFromResourceFile = FileSystems.getDefault().getPath(p);
 
@@ -570,7 +604,9 @@ public class ContentResourceManager {
         } else {
             resourceContent = parseIncomingXmlContent(resourceContent, resource);
         }
+        logElapsed(mark2a, "doUpdate::parseContent");
 
+        final long mark3 = mark();
         // check if the object is an assessment to extract drag and drop layouts
         if (resourceContent.getAsJsonObject().has("assessment")) {
             JsonArray assessmentItems = resourceContent.getAsJsonObject().get("assessment").getAsJsonObject()
@@ -613,7 +649,9 @@ public class ContentResourceManager {
             }
 
         }
+        logElapsed(mark3, "doUpdate::assessmentHandling");
 
+        final long mark3a = mark();
         String oldType = resource.getType();
 
         if (resourceTypeDefinition != null) {
@@ -621,10 +659,16 @@ public class ContentResourceManager {
         }
 
         // Parse update payload into final xml and json documents
-        Map<String, String> contentValues = contentValues(resourceContent, resource, jsonCapable);
 
+        Map<String, String> contentValues = contentValues(resourceContent, resource, jsonCapable);
+        logElapsed(mark3a, "doUpdate::contentValues");
+
+        final long mark3b = mark();
         Document document = validateXmlContent(contentPackage.getGuid(), resource, contentValues.get("xmlContent"),
                 throwErrors);
+        logElapsed(mark3b, "doUpdate::validateXmlContent");
+
+        final long mark4 = mark();
 
         Gson gson = AppUtils.gsonBuilder().setPrettyPrinting().create();
         if (jsonCapable && document != null && !resource.getType().equalsIgnoreCase("x-oli-learning_objectives")
@@ -670,16 +714,23 @@ public class ContentResourceManager {
             resource.setLastRevision(revision);
             resource.setLastSession(lockId);
         }
+        logElapsed(mark4, "doUpdate::set revision");
 
+        final long mark5 = mark();
         em.merge(resource);
+        logElapsed(mark5, "doUpdate::em.merge");
 
+        final long mark6 = mark();
         boolean ldModelUpdate = author != null && author.equalsIgnoreCase("LDModel");
         updateXMLFile(contentPackage, resource, contentValues.get("xmlContent"), oldType,
                 oldType.equals(resource.getType()) ? Optional.empty() : Optional.of(oldPathFromResourceFile),
                 ldModelUpdate ? false : true);
+        logElapsed(mark6, "doUpdate::updateXMLFile");
 
         if (!ldModelUpdate) {
+            final long mark7 = mark();
             edgesController.validateNonValidatedEdges(contentPackage.getGuid());
+            logElapsed(mark7, "doUpdate::validateNonValidatedEdges");
         }
 
         return resource;
@@ -927,6 +978,7 @@ public class ContentResourceManager {
 
     private Document validateXmlContent(String packageIdOrGuid, Resource resource, String xmlContent,
             boolean throwErrors) {
+        final long mark0 = mark();
         ContentPackage contentPackage = findContentPackage(packageIdOrGuid);
         // Validate xmlContent
         SAXBuilder builder = AppUtils.validatingSaxBuilder();
@@ -934,15 +986,21 @@ public class ContentResourceManager {
         try {
 
             resetResourceErrors(resource);
+            logElapsed(mark0, "resetResourceErrors");
 
+            final long mark1 = mark();
             Document build = builder.build(new StringReader(xmlContent));
             if (configuration.get().isContentServiceDebugEnabled()) {
                 log.info("resource.getType() " + resource.getType());
                 // log.info("XML Content \n" + xmlContent);
             }
+
             ResourceValidator validator = new BaseResourceValidator();
             validator.initValidator(resource, build, throwErrors);
             validator.validate();
+            logElapsed(mark1, "BaseResourceValidator");
+
+            final long mark2 = mark();
             Configurations serviceConfig = this.configuration.get();
             JsonObject resourceTypeDefinition = serviceConfig.getResourceTypeById(resource.getType());
             if (resourceTypeDefinition == null || !resourceTypeDefinition.has("validatorClass")) {
@@ -955,6 +1013,7 @@ public class ContentResourceManager {
                     ResourceValidator resourceValidator = (ResourceValidator) AppUtils.lookupCDIBean(aClass);
                     resourceValidator.initValidator(resource, build, throwErrors);
                     resourceValidator.validate();
+                    logElapsed(mark2, "SpecificResourceValidator");
                 } catch (ClassNotFoundException e) {
                     String message = resource.getType() + " validator class not found";
                     log.error(message);
