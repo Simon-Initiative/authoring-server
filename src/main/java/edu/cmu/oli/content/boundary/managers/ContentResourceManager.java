@@ -485,15 +485,13 @@ public class ContentResourceManager {
         updateXMLFile(contentPackage, resource, contentValues.get("xmlContent"), resource.getType(), Optional.empty(),
                 true);
 
-        edgesController.validateNonValidatedEdges(contentPackage.getGuid());
-
         return resource;
     }
 
     private void logElapsed(final long mark, final String desc) {
         final long delta = System.nanoTime() - mark;
-        final long inMs = delta / 1000000;
-        System.err.println(desc + ": " + inMs);
+        final float inMs = delta / 1000000.0f;
+        log.debug("Elapsed time for " + desc + ": " + inMs);
     }
 
     private long mark() {
@@ -726,12 +724,6 @@ public class ContentResourceManager {
                 oldType.equals(resource.getType()) ? Optional.empty() : Optional.of(oldPathFromResourceFile),
                 ldModelUpdate ? false : true);
         logElapsed(mark6, "doUpdate::updateXMLFile");
-
-        if (!ldModelUpdate) {
-            final long mark7 = mark();
-            edgesController.validateNonValidatedEdges(contentPackage.getGuid());
-            logElapsed(mark7, "doUpdate::validateNonValidatedEdges");
-        }
 
         return resource;
     }
