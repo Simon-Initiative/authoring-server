@@ -142,7 +142,7 @@ public class ContentPackageManager {
                 q.setHint(QueryHints.HINT_READONLY, true);
                 resultList = q.getResultList();
             } else {
-                resultList = fetchPackagesByGuids(permittedPkgs, true);
+                resultList = fetchPackagesByIdOrGuid(permittedPkgs);
             }
             resultList = resultList.stream().filter(cp -> {
                 return (cp.getVisible() == null || cp.getVisible()) && !cp.getBuildStatus().equals(BuildStatus.FAILED);
@@ -161,16 +161,13 @@ public class ContentPackageManager {
         return jsonElement;
     }
 
-    private List<ContentPackage> fetchPackagesByGuids(Set<String> packageGuids, boolean readOnly) {
-        CriteriaBuilder cb = em.getCriteriaBuilder();
-        CriteriaQuery<ContentPackage> criteria = cb.createQuery(ContentPackage.class);
-        Root<ContentPackage> contentPackageRoot = criteria.from(ContentPackage.class);
-        criteria.select(contentPackageRoot).where(contentPackageRoot.get("guid").in(packageGuids));
-        TypedQuery<ContentPackage> query = em.createQuery(criteria);
-        if (readOnly) {
-            query.setHint(QueryHints.HINT_READONLY, true);
+    private List<ContentPackage> fetchPackagesByIdOrGuid(Set<String> packageIdsOrGuids) {
+        List<ContentPackage> packages = new ArrayList<>();
+
+        for (String packageIdOrGuid : packageIdsOrGuids) {
+            packages.add(findContentPackage(packageIdOrGuid));
         }
-        return query.getResultList();
+        return packages;
     }
 
     public JsonElement setPackageEditable(AppSecurityContext session, boolean editable, JsonArray packageGuids) {
@@ -183,7 +180,7 @@ public class ContentPackageManager {
             }
         });
 
-        fetchPackagesByGuids(packageGuidSet, false).forEach(contentPackage -> contentPackage.setEditable(editable));
+        fetchPackagesByIdOrGuid(packageGuidSet).forEach(contentPackage -> contentPackage.setEditable(editable));
 
         JsonObject locked = new JsonObject();
         locked.addProperty("editable", editable);
@@ -202,7 +199,7 @@ public class ContentPackageManager {
             }
         });
 
-        fetchPackagesByGuids(packageGuidSet, false).forEach(contentPackage -> contentPackage.setVisible(visible));
+        fetchPackagesByIdOrGuid(packageGuidSet).forEach(contentPackage -> contentPackage.setVisible(visible));
 
         JsonObject hidden = new JsonObject();
         hidden.addProperty("visible", visible);
