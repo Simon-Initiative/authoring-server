@@ -161,11 +161,11 @@ public class ContentPackageManager {
         return jsonElement;
     }
 
-    private List<ContentPackage> fetchPackagesByIdOrGuid(Set<String> packageGuids) {
+    private List<ContentPackage> fetchPackagesByIdOrGuid(Set<String> packageIdsOrGuids) {
         List<ContentPackage> packages = new ArrayList<>();
 
-        for (String packageGuid : packageGuids) {
-            packages.add(findContentPackage(packageGuid));
+        for (String packageIdOrGuid : packageIdsOrGuids) {
+            packages.add(findContentPackage(packageIdOrGuid));
         }
         return packages;
     }
