@@ -165,9 +165,7 @@ public class ContentPackageManager {
         List<ContentPackage> packages = new ArrayList<>();
 
         for (String packageGuid : packageGuids) {
-            ContentPackage contentPackage = findContentPackage(packageGuid);
-            System.out.println("Content Package: " + packageGuid + ", " + contentPackage.toString());
-            packages.add(contentPackage);
+            packages.add(findContentPackage(packageGuid));
         }
         return packages;
     }
