@@ -66,7 +66,11 @@ public class MatcherByType {
             case TEXT:
             case ESSAY:
             case SHORT_ANSWER:
-                return textType(pattern);
+                TextResponseMatcher textResponseMatcher = (TextResponseMatcher) textType(pattern);
+                if(interaction.has("caseSensitive")){
+                    textResponseMatcher.setCaseSensitive(interaction.get("caseSensitive").getAsBoolean());
+                }
+                return textResponseMatcher;
             case ORDERING:
                 return ordering(pattern);
             case NUMERIC:
