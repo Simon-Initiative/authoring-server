@@ -312,7 +312,7 @@
       "id": "x-oli-embed-activity",
       "displayName": "Embed Activity",
       "description": "",
-      "jsonCapable": false,
+      "jsonCapable": true,
       "delivery": {
         "inline": {
           "method": "inline_superactivity",
