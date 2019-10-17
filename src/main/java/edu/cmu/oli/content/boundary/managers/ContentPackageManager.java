@@ -953,12 +953,52 @@ public class ContentPackageManager {
         }.getType());
         ((JsonObject) contentPkgJson).add("resources", resourceArray);
 
+        // identify embed activity types
+        HashMap<String, String> embedActivityTypes = identifyEmbedActivityTypes(resources);
+        ((JsonObject) contentPkgJson).add("embedActivityTypes", gson.toJsonTree(embedActivityTypes));
+
         Collection<WebContent> webContents = contentPackage.getWebContents();
         JsonElement webContentArray = gson.toJsonTree(webContents, new TypeToken<ArrayList<WebContent>>() {
         }.getType());
         ((JsonObject) contentPkgJson).add("webContents", webContentArray);
 
         return contentPkgJson;
+    }
+
+    private HashMap<String, String> identifyEmbedActivityTypes(Collection<Resource> resources) {
+        Collection<Resource> embedActivityResources = resources.stream()
+            .filter(r -> r.getType().equalsIgnoreCase("x-oli-embed-activity"))
+            .collect(Collectors.toList());
+            
+        HashMap<String, String> embedActivityTypes = new HashMap<String, String>();
+        for (Resource embedActivityResource : embedActivityResources) {
+                Revision lastestRev = embedActivityResource.getLastRevision();
+                JsonWrapper jsonPayload = lastestRev.getBody().getJsonPayload();
+
+                // infer type based on content
+                if (jsonPayload != null) {
+                    JsonObject embedActivityJson = jsonPayload.getJsonObject().getAsJsonObject()
+                        .get("embed_activity").getAsJsonObject();
+
+                    for (JsonElement item : embedActivityJson.get("#array").getAsJsonArray()) {
+                        JsonObject itemObj = item.getAsJsonObject();
+                        if (itemObj.has("assets")) {
+                            JsonArray assets = itemObj.get("assets").getAsJsonObject().get("#array").getAsJsonArray();
+
+                            for (JsonElement asset : assets) {
+                                JsonObject assetObj = asset.getAsJsonObject();
+                                if (assetObj.get("asset").getAsJsonObject().get("@name").getAsString().equals("jsrepl")) {
+                                    embedActivityTypes.put(embedActivityResource.getId(), "REPL");
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    embedActivityTypes.put(embedActivityResource.getId(), "UNKNOWN");
+                }
+        }
+
+        return embedActivityTypes;
     }
 
     // packageIdentifier is db guid or packageId-version combo
