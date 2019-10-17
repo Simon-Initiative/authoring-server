@@ -1,33 +1,32 @@
 package edu.cmu.oli.content.boundary.managers;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
-import com.google.gson.*;
-import com.google.gson.reflect.TypeToken;
-import edu.cmu.oli.content.AppUtils;
-import edu.cmu.oli.content.ContentServiceException;
-import edu.cmu.oli.content.DirectoryUtils;
-import edu.cmu.oli.content.ResourceException;
-import edu.cmu.oli.content.boundary.ResourceChangeEvent;
-import edu.cmu.oli.content.boundary.ResourceChangeEvent.ResourceEventType;
-import edu.cmu.oli.content.boundary.endpoints.ContentPackageResource;
-import edu.cmu.oli.content.configuration.ConfigurationCache;
-import edu.cmu.oli.content.configuration.Configurations;
-import edu.cmu.oli.content.contentfiles.readers.XmlToContentPackage;
-import edu.cmu.oli.content.controllers.*;
-import edu.cmu.oli.content.logging.Logging;
-import edu.cmu.oli.content.models.DeployStage;
-import edu.cmu.oli.content.models.persistance.JsonWrapper;
-import edu.cmu.oli.content.models.persistance.entities.*;
-import edu.cmu.oli.content.resource.builders.BuildException;
-import edu.cmu.oli.content.resource.builders.ContentPkgJsonReader;
-import edu.cmu.oli.content.resource.builders.ContentPkgXmlReader;
-import edu.cmu.oli.content.security.*;
-import org.hibernate.jpa.QueryHints;
-import org.jboss.ejb3.annotation.TransactionTimeout;
-import org.jdom2.Document;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
-import org.slf4j.Logger;
+import static edu.cmu.oli.content.AppUtils.generateUID;
+import static edu.cmu.oli.content.security.Roles.ADMIN;
+import static edu.cmu.oli.content.security.Roles.CONTENT_DEVELOPER;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.ejb.Stateless;
 import javax.enterprise.event.Event;
@@ -45,23 +44,56 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import java.io.File;
-import java.io.IOException;
-import java.io.StringReader;
-import java.nio.file.FileSystems;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
-import java.util.stream.Collectors;
 
-import static edu.cmu.oli.content.AppUtils.generateUID;
-import static edu.cmu.oli.content.security.Roles.ADMIN;
-import static edu.cmu.oli.content.security.Roles.CONTENT_DEVELOPER;
+import com.airhacks.porcupine.execution.boundary.Dedicated;
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
+
+import org.hibernate.jpa.QueryHints;
+import org.jboss.ejb3.annotation.TransactionTimeout;
+import org.jdom2.Document;
+import org.jdom2.JDOMException;
+import org.jdom2.input.SAXBuilder;
+import org.slf4j.Logger;
+
+import edu.cmu.oli.content.AppUtils;
+import edu.cmu.oli.content.ContentServiceException;
+import edu.cmu.oli.content.DirectoryUtils;
+import edu.cmu.oli.content.ResourceException;
+import edu.cmu.oli.content.boundary.ResourceChangeEvent;
+import edu.cmu.oli.content.boundary.ResourceChangeEvent.ResourceEventType;
+import edu.cmu.oli.content.boundary.endpoints.ContentPackageResource;
+import edu.cmu.oli.content.configuration.ConfigurationCache;
+import edu.cmu.oli.content.configuration.Configurations;
+import edu.cmu.oli.content.contentfiles.readers.XmlToContentPackage;
+import edu.cmu.oli.content.controllers.DeployController;
+import edu.cmu.oli.content.controllers.EdgesController;
+import edu.cmu.oli.content.controllers.LockController;
+import edu.cmu.oli.content.controllers.PackageFileController;
+import edu.cmu.oli.content.controllers.SVNImportController;
+import edu.cmu.oli.content.controllers.SVNSyncController;
+import edu.cmu.oli.content.controllers.VersionBatchProcess;
+import edu.cmu.oli.content.logging.Logging;
+import edu.cmu.oli.content.models.DeployStage;
+import edu.cmu.oli.content.models.persistance.JsonWrapper;
+import edu.cmu.oli.content.models.persistance.entities.BuildStatus;
+import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
+import edu.cmu.oli.content.models.persistance.entities.FileNode;
+import edu.cmu.oli.content.models.persistance.entities.Resource;
+import edu.cmu.oli.content.models.persistance.entities.Revision;
+import edu.cmu.oli.content.models.persistance.entities.WebContent;
+import edu.cmu.oli.content.resource.builders.BuildException;
+import edu.cmu.oli.content.resource.builders.ContentPkgJsonReader;
+import edu.cmu.oli.content.resource.builders.ContentPkgXmlReader;
+import edu.cmu.oli.content.security.AppSecurityContext;
+import edu.cmu.oli.content.security.AppSecurityController;
+import edu.cmu.oli.content.security.Scopes;
+import edu.cmu.oli.content.security.Secure;
+import edu.cmu.oli.content.security.UserInfo;
 
 /**
  * @author Raphael Gachuhi
@@ -975,20 +1007,32 @@ public class ContentPackageManager {
                 Revision lastestRev = embedActivityResource.getLastRevision();
                 JsonWrapper jsonPayload = lastestRev.getBody().getJsonPayload();
 
-                // infer type based on content
+                // use activity_type or infer type based on content
                 if (jsonPayload != null) {
                     JsonObject embedActivityJson = jsonPayload.getJsonObject().getAsJsonObject()
                         .get("embed_activity").getAsJsonObject();
 
-                    for (JsonElement item : embedActivityJson.get("#array").getAsJsonArray()) {
-                        JsonObject itemObj = item.getAsJsonObject();
-                        if (itemObj.has("assets")) {
-                            JsonArray assets = itemObj.get("assets").getAsJsonObject().get("#array").getAsJsonArray();
+                    if (embedActivityJson.has("@activity_type")) {
+                        // use activity_type attribute to determine type
+                        switch(embedActivityJson.get("@activity_type").getAsString().toLowerCase()) {
+                            case "repl":
+                                embedActivityTypes.put(embedActivityResource.getId(), "REPL");
+                                break;
+                            default:
+                                embedActivityTypes.put(embedActivityResource.getId(), "UNKNOWN");
+                        }
+                    } else {
+                        // use heuristic inspection of content to determine type
+                        for (JsonElement item : embedActivityJson.get("#array").getAsJsonArray()) {
+                            JsonObject itemObj = item.getAsJsonObject();
+                            if (itemObj.has("assets")) {
+                                JsonArray assets = itemObj.get("assets").getAsJsonObject().get("#array").getAsJsonArray();
 
-                            for (JsonElement asset : assets) {
-                                JsonObject assetObj = asset.getAsJsonObject();
-                                if (assetObj.get("asset").getAsJsonObject().get("@name").getAsString().equals("jsrepl")) {
-                                    embedActivityTypes.put(embedActivityResource.getId(), "REPL");
+                                for (JsonElement asset : assets) {
+                                    JsonObject assetObj = asset.getAsJsonObject();
+                                    if (assetObj.get("asset").getAsJsonObject().get("@name").getAsString().equals("jsrepl")) {
+                                        embedActivityTypes.put(embedActivityResource.getId(), "REPL");
+                                    }
                                 }
                             }
                         }
