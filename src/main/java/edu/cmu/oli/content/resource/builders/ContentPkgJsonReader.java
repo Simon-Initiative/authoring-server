@@ -1,8 +1,18 @@
 package edu.cmu.oli.content.resource.builders;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+
+import javax.ws.rs.core.Response;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.ResourceException;
 import edu.cmu.oli.content.models.persistance.JsonWrapper;
@@ -10,13 +20,6 @@ import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
 import edu.cmu.oli.content.models.persistance.entities.ErrorLevel;
 import edu.cmu.oli.content.models.persistance.entities.FileNode;
 import edu.cmu.oli.content.models.persistance.entities.WebContent;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import javax.ws.rs.core.Response;
-import java.io.File;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 
 /**
  * Methods for parsing a content package manifest from JSON.
@@ -75,6 +78,11 @@ public final class ContentPkgJsonReader {
         JsonElement preferences = pkgJson.get("preferences");
         mnfst.setOptions(new JsonWrapper(preferences));
 
+        System.out.println("Package: " + pkgJson.toString());
+        System.out.println("At language: " + pkgJson.get("language"));
+        String language = pkgJson.has("language") ? pkgJson.get("language").getAsString() : null;
+        mnfst.setLanguage(language);
+
         mnfst.setErrors(new JsonWrapper(errors));
 
         if (pkgJson.has("icon")) {
@@ -82,7 +90,8 @@ public final class ContentPkgJsonReader {
             JsonElement iconJson = pkgJson.get("icon");
             if (iconJson.isJsonObject()) {
                 if (pkgJson.get("icon").getAsJsonObject().has("fileNode")) {
-                    iconHref = pkgJson.get("icon").getAsJsonObject().getAsJsonObject("fileNode").get("pathTo").getAsString();
+                    iconHref = pkgJson.get("icon").getAsJsonObject().getAsJsonObject("fileNode").get("pathTo")
+                            .getAsString();
                 }
             } else if (iconJson.isJsonPrimitive()) {
                 iconHref = pkgJson.get("icon").getAsString();
