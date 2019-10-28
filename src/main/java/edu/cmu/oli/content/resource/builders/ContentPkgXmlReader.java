@@ -104,7 +104,9 @@ public final class ContentPkgXmlReader {
 
         // Language
         Element pkgLanguageElmnt = pkgElmnt.getChild("language");
-        mnfstBuilder.addProperty("language", pkgLanguageElmnt == null ? null : pkgLanguageElmnt.getTextNormalize());
+        if (pkgLanguageElmnt != null) {
+            mnfstBuilder.addProperty("language", pkgLanguageElmnt == null ? null : pkgLanguageElmnt.getTextNormalize());
+        }
 
         return mnfstBuilder;
     }

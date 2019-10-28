@@ -79,7 +79,9 @@ public final class ContentPkgJsonReader {
         mnfst.setOptions(new JsonWrapper(preferences));
 
         String language = pkgJson.has("language") ? pkgJson.get("language").getAsString() : null;
-        mnfst.setLanguage(language);
+        if (language != null) {
+            mnfst.setLanguage(language);
+        }
 
         mnfst.setErrors(new JsonWrapper(errors));
 
