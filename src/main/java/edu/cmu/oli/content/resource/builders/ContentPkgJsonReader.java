@@ -78,8 +78,6 @@ public final class ContentPkgJsonReader {
         JsonElement preferences = pkgJson.get("preferences");
         mnfst.setOptions(new JsonWrapper(preferences));
 
-        System.out.println("Package: " + pkgJson.toString());
-        System.out.println("At language: " + pkgJson.get("language"));
         String language = pkgJson.has("language") ? pkgJson.get("language").getAsString() : null;
         mnfst.setLanguage(language);
 
