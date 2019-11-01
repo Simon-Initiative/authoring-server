@@ -64,6 +64,7 @@ import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.ContentServiceException;
 import edu.cmu.oli.content.DirectoryUtils;
 import edu.cmu.oli.content.ResourceException;
+import edu.cmu.oli.content.AppUtils.EmbedActivityType;
 import edu.cmu.oli.content.boundary.ResourceChangeEvent;
 import edu.cmu.oli.content.boundary.ResourceChangeEvent.ResourceEventType;
 import edu.cmu.oli.content.boundary.endpoints.ContentPackageResource;
@@ -1004,42 +1005,17 @@ public class ContentPackageManager {
             
         HashMap<String, String> embedActivityTypes = new HashMap<String, String>();
         for (Resource embedActivityResource : embedActivityResources) {
-                Revision lastestRev = embedActivityResource.getLastRevision();
-                JsonWrapper jsonPayload = lastestRev.getBody().getJsonPayload();
+            Revision lastestRev = embedActivityResource.getLastRevision();
+            JsonWrapper jsonPayload = lastestRev.getBody().getJsonPayload();
 
-                // use activity_type or infer type based on content
-                if (jsonPayload != null) {
-                    JsonObject embedActivityJson = jsonPayload.getJsonObject().getAsJsonObject()
-                        .get("embed_activity").getAsJsonObject();
-
-                    if (embedActivityJson.has("@activity_type")) {
-                        // use activity_type attribute to determine type
-                        switch(embedActivityJson.get("@activity_type").getAsString().toLowerCase()) {
-                            case "repl":
-                                embedActivityTypes.put(embedActivityResource.getId(), "REPL");
-                                break;
-                            default:
-                                embedActivityTypes.put(embedActivityResource.getId(), "UNKNOWN");
-                        }
-                    } else {
-                        // use heuristic inspection of content to determine type
-                        for (JsonElement item : embedActivityJson.get("#array").getAsJsonArray()) {
-                            JsonObject itemObj = item.getAsJsonObject();
-                            if (itemObj.has("assets")) {
-                                JsonArray assets = itemObj.get("assets").getAsJsonObject().get("#array").getAsJsonArray();
-
-                                for (JsonElement asset : assets) {
-                                    JsonObject assetObj = asset.getAsJsonObject();
-                                    if (assetObj.get("asset").getAsJsonObject().get("@name").getAsString().equals("jsrepl")) {
-                                        embedActivityTypes.put(embedActivityResource.getId(), "REPL");
-                                    }
-                                }
-                            }
-                        }
-                    }
-                } else {
-                    embedActivityTypes.put(embedActivityResource.getId(), "UNKNOWN");
-                }
+            if (jsonPayload != null) {
+                JsonObject embedActivity = jsonPayload.getJsonObject().getAsJsonObject()
+                    .get("embed_activity").getAsJsonObject();
+                embedActivityTypes.put(
+                    embedActivityResource.getId(), AppUtils.inferEmbedActivityType(embedActivity).getAsString());
+            } else {
+                embedActivityTypes.put(embedActivityResource.getId(), EmbedActivityType.UNKNOWN.getAsString());
+            }
         }
 
         return embedActivityTypes;

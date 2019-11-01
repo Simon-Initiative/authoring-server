@@ -30,7 +30,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -357,5 +359,68 @@ public class AppUtils {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(JsonWrapper.class, new JsonWrapperSerializer());
         return gsonBuilder;
+    }
+
+    // ActivityType enum with string values and reverse lookup
+    public enum EmbedActivityType {
+        REPL("REPL"),
+        UNKNOWN("UNKNOWN");
+
+        private String type;
+    
+        EmbedActivityType(String type) {
+            this.type = type;
+        }
+    
+        public String getAsString() {
+            return type;
+        }
+        
+        private static final Map<String, EmbedActivityType> reverseLookup = new HashMap<>();
+    
+        // Populate the reverse lookup table on loading time
+        static
+        {
+            for(EmbedActivityType activityType : EmbedActivityType.values())
+            {
+                reverseLookup.put(activityType.getAsString(), activityType);
+            }
+        }
+    
+        //This method can be used for reverse lookup purpose
+        public static EmbedActivityType fromString(String type) 
+        {
+            return reverseLookup.get(type);
+        }
+    }
+
+    public static EmbedActivityType inferEmbedActivityType(JsonObject embedActivity) {
+        // use activity_type property or infer type based on content
+        if (embedActivity.has("@activity_type")) {
+            // use activity_type attribute to determine type
+            switch(embedActivity.get("@activity_type").getAsString().toLowerCase()) {
+                case "repl":
+                    return EmbedActivityType.REPL;
+                default:
+                    return EmbedActivityType.UNKNOWN;
+            }
+        } else {
+            // use heuristic inspection of content to determine type
+            for (JsonElement item : embedActivity.get("#array").getAsJsonArray()) {
+                JsonObject itemObj = item.getAsJsonObject();
+                if (itemObj.has("assets")) {
+                    JsonArray assets = itemObj.get("assets").getAsJsonObject().get("#array").getAsJsonArray();
+
+                    for (JsonElement asset : assets) {
+                        JsonObject assetObj = asset.getAsJsonObject();
+                        if (assetObj.get("asset").getAsJsonObject().get("@name").getAsString().equals("jsrepl")) {
+                            return EmbedActivityType.REPL;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return EmbedActivityType.UNKNOWN;
     }
 }
