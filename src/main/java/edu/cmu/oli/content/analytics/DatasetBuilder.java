@@ -220,7 +220,11 @@ public class DatasetBuilder {
                 sectionGuids.add(obj.get("section_guid").getAsString());
 
                 userCount += obj.get("students").getAsInt();
-                if (userCount >= MAXIMUM_STUDENTS || sectionGuids.size() >= 20 && userCount >= MINIMUM_STUDENTS) {
+
+                Boolean hasTooManyStudents = userCount >= MAXIMUM_STUDENTS;
+                Boolean hasEnoughSectionsAndStudents = sectionGuids.size() >= 10 && userCount >= MINIMUM_STUDENTS;
+                Boolean hasTooManySections = sectionGuids.size() > 20;
+                if (hasEnoughSectionsAndStudents || hasTooManyStudents || hasTooManySections) {
                     break outside;
                 }
             }
