@@ -223,7 +223,7 @@ public class DatasetBuilder {
 
                 Boolean hasTooManyStudents = userCount >= MAXIMUM_STUDENTS;
                 Boolean hasEnoughSectionsAndStudents = sectionGuids.size() >= 10 && userCount >= MINIMUM_STUDENTS;
-                Boolean hasTooManySections = sectionGuids.size() > 20;
+                Boolean hasTooManySections = sectionGuids.size() > 15;
                 if (hasEnoughSectionsAndStudents || hasTooManyStudents || hasTooManySections) {
                     break outside;
                 }
