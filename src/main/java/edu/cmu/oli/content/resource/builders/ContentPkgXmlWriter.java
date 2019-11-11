@@ -1,7 +1,9 @@
 package edu.cmu.oli.content.resource.builders;
 
-import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
-import edu.cmu.oli.content.models.persistance.entities.WebContent;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 import org.jdom2.DocType;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -11,9 +13,8 @@ import org.jdom2.output.XMLOutputter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
+import edu.cmu.oli.content.models.persistance.entities.WebContent;
 
 /**
  * Methods for generating content package manifest XML.
@@ -26,11 +27,11 @@ public final class ContentPkgXmlWriter {
     private static final String _SYSTEM_ID = "http://oli.cmu.edu/dtd/oli_content_package_simple_2_0.dtd";
     // Metadata and preference namespaces
 
-    private static final Namespace _METADATA_NS
-            = Namespace.getNamespace("cmd", "http://oli.web.cmu.edu/content/metadata/");
+    private static final Namespace _METADATA_NS = Namespace.getNamespace("cmd",
+            "http://oli.web.cmu.edu/content/metadata/");
 
-    private static final Namespace _PREFERENCES_NS
-            = Namespace.getNamespace("pref", "http://oli.web.cmu.edu/preferences/");
+    private static final Namespace _PREFERENCES_NS = Namespace.getNamespace("pref",
+            "http://oli.web.cmu.edu/preferences/");
 
     private static final Logger log = LoggerFactory.getLogger(ContentPkgXmlWriter.class);
 
@@ -46,39 +47,37 @@ public final class ContentPkgXmlWriter {
 
     /**
      * <p>
-     * Converts the given content package manifest to an XML document and writes
-     * the document to the specified file. The resulting XML will validate to
-     * the OLI content package DTD, provided the package was constructed in
-     * accordance with the general contract of said DTD.
+     * Converts the given content package manifest to an XML document and writes the
+     * document to the specified file. The resulting XML will validate to the OLI
+     * content package DTD, provided the package was constructed in accordance with
+     * the general contract of said DTD.
      *
      * @param mnfst   content package manifest
      * @param dstFile destination file
      * @throws NullPointerException if either argument is <tt>null</tt>
      * @throws IOException          if an error occurs while outputting the document
      */
-    public static void manifestToFile(ContentPackage mnfst, java.io.File dstFile)
-            throws IOException {
+    public static void manifestToFile(ContentPackage mnfst, java.io.File dstFile) throws IOException {
 
         try ( // Convert package and output document
-              FileOutputStream fos = new FileOutputStream(dstFile)) {
+                FileOutputStream fos = new FileOutputStream(dstFile)) {
             manifestToStream(mnfst, fos);
         }
     }
 
     /**
      * <p>
-     * Converts the given content package manifest to an XML document and writes
-     * the document to the specified output stream. The resulting XML will
-     * validate to the OLI content package DTD, provided the package was
-     * constructed in accordance with the general contract of said DTD.
+     * Converts the given content package manifest to an XML document and writes the
+     * document to the specified output stream. The resulting XML will validate to
+     * the OLI content package DTD, provided the package was constructed in
+     * accordance with the general contract of said DTD.
      *
      * @param mnfst content package manifest
      * @param os    output stream
      * @throws NullPointerException if either argument is <tt>null</tt>
      * @throws IOException          if an error occurs while outputting the document
      */
-    public static void manifestToStream(ContentPackage mnfst, OutputStream os)
-            throws IOException {
+    public static void manifestToStream(ContentPackage mnfst, OutputStream os) throws IOException {
 
         if (mnfst == null) {
             throw (new NullPointerException("'mnfst' cannot be null"));
@@ -97,10 +96,9 @@ public final class ContentPkgXmlWriter {
 
     /**
      * <p>
-     * Converts the given content package manifest to an XML document. The
-     * resulting XML will validate to the OLI content package DTD, provided the
-     * package was constructed in accordance with the general contract of said
-     * DTD.
+     * Converts the given content package manifest to an XML document. The resulting
+     * XML will validate to the OLI content package DTD, provided the package was
+     * constructed in accordance with the general contract of said DTD.
      *
      * @param contentPkg content package manifest
      * @return XML document representation of the content package manifest
@@ -128,9 +126,9 @@ public final class ContentPkgXmlWriter {
     // =======================================================================
     private static Element manifestToElement(ContentPackage contentPkg) {
 
-        Element pkgElmnt = new Element("package");//mnfstDoc.getRootElement();
+        Element pkgElmnt = new Element("package");// mnfstDoc.getRootElement();
 
-        //ContentPackage mnfst = parsePackageJson(pkgElmnt);
+        // ContentPackage mnfst = parsePackageJson(pkgElmnt);
 
         // Package ID and version
         pkgElmnt.setAttribute("id", contentPkg.getId());
@@ -152,7 +150,8 @@ public final class ContentPkgXmlWriter {
 
         // Metadata
         if (contentPkg.getMetadata() != null) {
-            Element pkgMdElmnt = MetadataWriter.metadataToElement(contentPkg.getMetadata().getJsonObject(), _METADATA_NS);
+            Element pkgMdElmnt = MetadataWriter.metadataToElement(contentPkg.getMetadata().getJsonObject(),
+                    _METADATA_NS);
             if (pkgMdElmnt != null) {
                 pkgElmnt.addContent(pkgMdElmnt);
             }
@@ -167,10 +166,18 @@ public final class ContentPkgXmlWriter {
 
         // Preferences
         if (contentPkg.getOptions() != null) {
-            Element prefsElmnt = OptionsWriter.preferenceSetToElement(contentPkg.getOptions().getJsonObject(), _PREFERENCES_NS);
+            Element prefsElmnt = OptionsWriter.preferenceSetToElement(contentPkg.getOptions().getJsonObject(),
+                    _PREFERENCES_NS);
             if (prefsElmnt != null) {
                 pkgElmnt.addContent(prefsElmnt);
             }
+        }
+
+        // Language
+        if (contentPkg.getLanguage() != null) {
+            Element pkgLanguageElmnt = new Element("langauge");
+            pkgLanguageElmnt.setText(contentPkg.getLanguage());
+            pkgElmnt.addContent(pkgLanguageElmnt);
         }
 
         return pkgElmnt;
