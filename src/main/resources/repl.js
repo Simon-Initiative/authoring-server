@@ -162,6 +162,7 @@ define(function () {
                     if (!superClient.isCurrentAttemptCompleted()) {
                         ActivityEmbed.repl.clearScreen();
                         ActivityEmbed.repl.writeStdin('\n');
+                        ActivityEmbed.repl.disableStdin(false);
                     }
                 });
 
@@ -243,7 +244,20 @@ define(function () {
                 activityEmbed.restoreSavedFile();
             });
         };
+        this.isUngradedActivity = function () {
+            // check if there was a question and part to process. If not, then this is treated as
+            // an ungraded activity
+            if (typeof (currentQuestion) === "undefined" || currentQuestion === null
+                    || typeof (currentPart) === "undefined" || currentPart === null) {
+                console.log("currentQuestion or currentPart not set");
+                return true;
+            }
+        };
         this.pushInput = function (input) {
+            if (activityEmbed.isUngradedActivity()) {
+                console.log("no question and part, activity will not be graded");
+                return;
+            }
             console.log("pushInput(): " + input);
             var questionData = questionsSaveData.getQuestionData(currentQuestion.getId());
             if (questionData === null) {
@@ -436,32 +450,40 @@ define(function () {
             if (superClient.isCurrentAttemptCompleted()) {
                 return;
             }
-            // Only score attempt if at least 1 question has been answered
-            if (questionsSaveData.numberOfQuestionsAnswered() < 1) {
-                console.log("scoreAttempt() no questions answered ");
-                return;
-            }
 
             ActivityEmbed.repl.disableStdin();
             return activityEmbed.process();
         };
         this.process = function () {
-            if (typeof (currentQuestion) === "undefined" || currentQuestion === null
-                    || typeof (currentPart) === "undefined" || currentPart === null) {
-                console.log("currentQuestion or currentPart not set");
-                return;
+            var questionData;
+            var partData;
+            var code;
+            if (activityEmbed.isUngradedActivity()) {
+                code = ActivityEmbed.editor.getValue();
+            } else {
+                questionData = questionsSaveData.getQuestionData(currentQuestion.getId());
+                partData = questionData.getPartData(currentPart.getId());
+                code = partData.getInput().value
             }
 
-            return activityEmbed.callReplit();
-        };
-        this.callReplit = function () {
-            var questionData = questionsSaveData.getQuestionData(currentQuestion.getId());
-            var partData = questionData.getPartData(currentPart.getId());
-            return ReplClient.exec(partData.getInput().value, { host: 'repl.oli.cmu.edu', language: 'python3' })
+            return ReplClient.exec(code, { host: 'repl.oli.cmu.edu', language: 'python3' })
                 .then(function (result) {
                     console.log("Ouput from ReplClient.exec " + JSON.stringify(result));
                     ActivityEmbed.repl.writeln('---------------------------------------');
                     ActivityEmbed.repl.write(result.combined);
+
+                    // check if there was a question and part to process. If not, then this is treated as
+                    // an ungraded activity, so simply return
+                    if (activityEmbed.isUngradedActivity()) {
+                        console.log("currentQuestion or currentPart not set");
+                        return;
+                    }
+
+                    // Only score attempt if at least 1 question has been answered
+                    if (questionsSaveData.numberOfQuestionsAnswered() < 1) {
+                        console.log("scoreAttempt() no questions answered ");
+                        return;
+                    }
 
                     if (!(result.error)) {
                         console.log("No error from ReplClient.exec");
