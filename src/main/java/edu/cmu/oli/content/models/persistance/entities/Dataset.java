@@ -55,7 +55,7 @@ import java.util.UUID;
     @NamedQuery(name = "Dataset.findByDateCompleted", query = "SELECT r FROM Dataset r WHERE r.dateCompleted = :dateCompleted"),
     @NamedQuery(name = "Dataset.findProcessing", query = "SELECT r FROM Dataset r WHERE r.dateCompleted is null"),
     @NamedQuery(name = "Dataset.findCompleted", query = "SELECT r FROM Dataset r WHERE r.dateCompleted is not null"),
-    @NamedQuery(name = "Dataset.findProcessingByPackageGuid", query = "SELECT r FROM Dataset r WHERE r.dateCompleted is null AND r.contentPackage.guid = :packageGuid"),
+    @NamedQuery(name = "Dataset.findProcessingByPackageGuid", query = "SELECT r FROM Dataset r WHERE r.datasetStatus = edu.cmu.oli.content.models.persistance.entities.DatasetStatus.PROCESSING AND r.contentPackage.guid = :packageGuid"),
     @NamedQuery(name = "Dataset.findCompletedByPackageGuid", query = "SELECT r FROM Dataset r WHERE r.dateCompleted is not null AND r.contentPackage.guid = :packageGuid"),
     @NamedQuery(name = "Dataset.resetProcessing", query = "UPDATE Dataset SET datasetStatus = edu.cmu.oli.content.models.persistance.entities.DatasetStatus.FAILED WHERE datasetStatus = edu.cmu.oli.content.models.persistance.entities.DatasetStatus.PROCESSING") })
 public class Dataset implements Serializable {
