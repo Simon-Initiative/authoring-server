@@ -364,6 +364,8 @@ public class AppUtils {
     // ActivityType enum with string values and reverse lookup
     public enum EmbedActivityType {
         REPL("REPL"),
+        DYNADROP("DYNADROP"),
+        DRAGDROP("DRAGDROP"),
         UNKNOWN("UNKNOWN");
 
         private String type;
@@ -453,6 +455,29 @@ public class AppUtils {
                     }
                 }
             }
+
+            // check for dyandrop drag and drop
+            for (JsonElement item : embedActivity.get("#array").getAsJsonArray()) {
+                JsonObject itemObj = item.getAsJsonObject();
+                if (itemObj.has("source")) {
+                    String source = itemObj.get("source").getAsJsonObject().get("#text").getAsString();
+                    if (source.endsWith("DynaDropHTML.js") || source.endsWith("DynaDropHTML-1.0.js")) {
+                        return EmbedActivityType.DYNADROP;
+                    }
+                }
+            }
+
+            // check for other drag drop
+            for (JsonElement item : embedActivity.get("#array").getAsJsonArray()) {
+                JsonObject itemObj = item.getAsJsonObject();
+                if (itemObj.has("source")) {
+                    String source = itemObj.get("source").getAsJsonObject().get("#text").getAsString();
+                    if (source.endsWith("dragdrop.js")) {
+                        return EmbedActivityType.DRAGDROP;
+                    }
+                }
+            }
+
         }
         
         return EmbedActivityType.UNKNOWN;
