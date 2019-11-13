@@ -406,14 +406,48 @@ public class AppUtils {
             }
         } else {
             // use heuristic inspection of content to determine type
+
+            // check for repl activity
+            // use bit map to store flags and easily check if conditions are met
+            //    0000xxxx
+            //           ^ has activty.js or repl.js in source
+            //          ^ has layout asset
+            //         ^ has questions asset
+            //        ^ has solutions asset
+            //  when flags == 0b00001111 we know all conditions are satisfied
+            final int REPL_FLAGS = 0b00001111;
+            int flags = 0;
             for (JsonElement item : embedActivity.get("#array").getAsJsonArray()) {
                 JsonObject itemObj = item.getAsJsonObject();
+                if (itemObj.has("source")) {
+                    String source = itemObj.get("source").getAsJsonObject().get("#text").getAsString();
+                    if (source.endsWith("activity.js") || source.endsWith("repl.js")) {
+                        flags = flags | 0b1;
+                        
+                        if (flags == REPL_FLAGS) {
+                            return EmbedActivityType.REPL;
+                        }
+                    }
+                }
                 if (itemObj.has("assets")) {
                     JsonArray assets = itemObj.get("assets").getAsJsonObject().get("#array").getAsJsonArray();
 
                     for (JsonElement asset : assets) {
                         JsonObject assetObj = asset.getAsJsonObject();
-                        if (assetObj.get("asset").getAsJsonObject().get("@name").getAsString().equals("jsrepl")) {
+                        switch (assetObj.get("asset").getAsJsonObject().get("@name").getAsString()) {
+                            case "layout":
+                                flags = flags | 0b10;
+                                break;
+                            case "questions":
+                                flags = flags | 0b100;
+                                break;
+                            case "solutions":
+                                flags = flags | 0b1000;
+                                break;
+                            default:
+                                break;
+                        }
+                        if (flags == REPL_FLAGS) {
                             return EmbedActivityType.REPL;
                         }
                     }
