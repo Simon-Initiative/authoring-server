@@ -364,7 +364,6 @@ public class AppUtils {
     // ActivityType enum with string values and reverse lookup
     public enum EmbedActivityType {
         REPL("REPL"),
-        DYNADROP("DYNADROP"),
         DRAGDROP("DRAGDROP"),
         UNKNOWN("UNKNOWN");
 
