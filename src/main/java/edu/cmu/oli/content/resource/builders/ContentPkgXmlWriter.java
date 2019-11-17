@@ -175,7 +175,7 @@ public final class ContentPkgXmlWriter {
 
         // Language
         if (contentPkg.getLanguage() != null) {
-            Element pkgLanguageElmnt = new Element("langauge");
+            Element pkgLanguageElmnt = new Element("language");
             pkgLanguageElmnt.setText(contentPkg.getLanguage());
             pkgElmnt.addContent(pkgLanguageElmnt);
         }
