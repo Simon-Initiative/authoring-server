@@ -103,48 +103,59 @@ define(function () {
             $.get(superClient.webContentFolder + assets.controls, function (controls) {
                 $('#oli-embed').append(controls);
                 $("#save_btn").click(function () {
-                    activityEmbed.save();
+                    if (!superClient.isCurrentAttemptCompleted() && questionsSaveData.numberOfQuestionsAnswered() < 1) {
+                        activityEmbed.save();
+                    }
                 });
                 $("#submit_btn").click(function () {
-                    activityEmbed.submit();
+                    if (!superClient.isCurrentAttemptCompleted() && questionsSaveData.numberOfQuestionsAnswered() < 1) {
+                        activityEmbed.submit();
+                    }
                 });
                 $("#hint_btn").click(function () {
-                    activityEmbed.hint();
+                    if (!superClient.isCurrentAttemptCompleted()
+                        && typeof (currentPart) === "undefined" || currentPart === null || currentPart.getHints().length > 0) {
+                        activityEmbed.hint();
+                    }
                 });
                 $("#next_btn").click(function () {
-                    activityEmbed.nextAttempt();
+                    if (superClient.isCurrentAttemptCompleted()) {
+                        activityEmbed.nextAttempt();
+                    }
                 });
                 $("#solution_btn").click(function () {
-                    $.get(superClient.webContentFolder + assets.solutions, function (data) {
-                        var solutionText = null;
-                        $(data).find("solution").each(function (q) {
-                            solutionText = $(this).text().trim();
-                            solutionText = solutionText + "\n";
-                        });
-                        if (typeof (ActivityEmbed.solution) !== "undefined" && ActivityEmbed.solution !== null) {
-                            if (solutionText !== null) {
-                                ActivityEmbed.solution.setValue(solutionText);
-                                $('#' + currentQuestion.getId() + '_solutions').show();
-                            }
-                        } else {
-                            require(['ace/ace'], function (ace) {
-                                ActivityEmbed.solution = ace.edit(currentQuestion.getId() + '_solutions');
-                                ActivityEmbed.solution.setTheme("ace/theme/chrome");
-                                ActivityEmbed.solution.getSession().setMode("ace/mode/python");
-                                ActivityEmbed.solution.setAutoScrollEditorIntoView(false);
-                                ActivityEmbed.solution.renderer.setScrollMargin(10, 10, 10, 10);
-                                ActivityEmbed.solution.setReadOnly(true);
-                                ActivityEmbed.solution.renderer.setShowGutter(false);
+                    if (superClient.isCurrentAttemptCompleted() || activityEmbed.isUngradedActivity()) {
+                        $.get(superClient.webContentFolder + assets.solutions, function (data) {
+                            var solutionText = null;
+                            $(data).find("solution").each(function (q) {
+                                solutionText = $(this).text().trim();
+                                solutionText = solutionText + "\n";
+                            });
+                            if (typeof (ActivityEmbed.solution) !== "undefined" && ActivityEmbed.solution !== null) {
                                 if (solutionText !== null) {
                                     ActivityEmbed.solution.setValue(solutionText);
                                     $('#' + currentQuestion.getId() + '_solutions').show();
                                 }
-                            });
-                        }
-                    });
+                            } else {
+                                require(['ace/ace'], function (ace) {
+                                    ActivityEmbed.solution = ace.edit(currentQuestion.getId() + '_solutions');
+                                    ActivityEmbed.solution.setTheme("ace/theme/chrome");
+                                    ActivityEmbed.solution.getSession().setMode("ace/mode/python");
+                                    ActivityEmbed.solution.setAutoScrollEditorIntoView(false);
+                                    ActivityEmbed.solution.renderer.setScrollMargin(10, 10, 10, 10);
+                                    ActivityEmbed.solution.setReadOnly(true);
+                                    ActivityEmbed.solution.renderer.setShowGutter(false);
+                                    if (solutionText !== null) {
+                                        ActivityEmbed.solution.setValue(solutionText);
+                                        $('#' + currentQuestion.getId() + '_solutions').show();
+                                    }
+                                });
+                            }
+                        });
+                    }
                 });
 
-                1 | $("#run").click(function () {
+                $("#run").click(function () {
                     if (!superClient.isCurrentAttemptCompleted()) {
                         var edit_text = ActivityEmbed.editor.getValue();
                         activityEmbed.pushInput(edit_text);
@@ -158,7 +169,7 @@ define(function () {
 
                 });
 
-                1 | $("#clear").click(function () {
+                $("#clear").click(function () {
                     if (!superClient.isCurrentAttemptCompleted()) {
                         ActivityEmbed.repl.clearScreen();
                         ActivityEmbed.repl.writeStdin('\n');
@@ -390,15 +401,15 @@ define(function () {
         };
         this.controls = function () {
             console.log("controls()");
-            var completed = superClient.isCurrentAttemptCompleted();
-            if (completed) {
+            if (superClient.isCurrentAttemptCompleted()) {
                 $('#save_btn').addClass('disabled');
                 $('#submit_btn').addClass('disabled');
-                1 | $('#run').addClass('disabled');
-                1 | $('#clear').addClass('disabled');
+                $('#run').addClass('disabled');
+                $('#clear').addClass('disabled');
                 $('#hint_btn').addClass('disabled');
-                $('#next_btn').removeClass('disabled');
 
+                $('#next_btn').removeClass('disabled');
+                $("#solution_btn").removeClass('disabled');
             } else {
                 if (questionsSaveData.numberOfQuestionsAnswered() > 0) {
                     $('#save_btn').removeClass('disabled');
@@ -413,10 +424,10 @@ define(function () {
                     $('#hint_btn').removeClass('disabled');
                 }
                 $('#next_btn').addClass('disabled');
-                1 | $('#run').removeClass('disabled');
-                1 | $('#clear').removeClass('disabled');
+                $('#run').removeClass('disabled');
+                $('#clear').removeClass('disabled');
             }
-            if (completed || Number(superClient.currentAttempt) > 1) {
+            if (Number(superClient.currentAttempt) > 1 || activityEmbed.isUngradedActivity()) {
                 $("#solution_btn").removeClass('disabled');
             } else {
                 $("#solution_btn").addClass('disabled');
@@ -516,7 +527,7 @@ define(function () {
                         partData.setOutput(result.combined);
                         partData.setCorrect(false);
                         partData.setScore(0);
-                        var feedback = {id: "error_feedback", content: "Error: " + result.error};
+                        var feedback = {id: "error_feedback", content: "Execution failed: " + result.stderr};
                         partData.setFeedback(feedback);
                         $('#' + currentQuestion.getId() + '_feedback').append('<div style="display: inline-block;">' + partData.getFeedback().content + '</div>');
                         var styles = {
