@@ -401,7 +401,7 @@ define(function () {
         };
         this.controls = function () {
             console.log("controls()");
-            if (superClient.isCurrentAttemptCompleted()) {
+            if (superClient.isCurrentAttemptCompleted() && !activityEmbed.isUngradedActivity()) {
                 $('#save_btn').addClass('disabled');
                 $('#submit_btn').addClass('disabled');
                 $('#run').addClass('disabled');
