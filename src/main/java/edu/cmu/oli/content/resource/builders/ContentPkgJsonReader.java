@@ -80,7 +80,7 @@ public final class ContentPkgJsonReader {
 
         JsonObject defaultMisc = new JsonObject();
         defaultMisc.addProperty("language", "en_US");
-        JsonElement misc = pkgJson.get("misc").getAsJsonObject();
+        JsonElement misc = pkgJson.has("misc") ? pkgJson.get("misc").getAsJsonObject() : null;
         mnfst.setMisc(new JsonWrapper(misc == null ? defaultMisc : misc));
 
         mnfst.setErrors(new JsonWrapper(errors));

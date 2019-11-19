@@ -245,7 +245,7 @@ public class ContentPackage implements Serializable {
     @Expose()
     @Column(name = "misc", columnDefinition = "json")
     @Type(type = "json")
-    private JsonWrapper misc;
+    private JsonWrapper misc = new JsonWrapper(new JsonObject());
 
     public ContentPackage() {
         this.init();
