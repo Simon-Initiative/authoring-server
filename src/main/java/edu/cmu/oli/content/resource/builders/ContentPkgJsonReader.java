@@ -78,10 +78,10 @@ public final class ContentPkgJsonReader {
         JsonElement preferences = pkgJson.get("preferences");
         mnfst.setOptions(new JsonWrapper(preferences));
 
-        String language = pkgJson.has("language") ? pkgJson.get("language").getAsString() : null;
-        if (language != null) {
-            mnfst.setLanguage(language);
-        }
+        JsonObject defaultMisc = new JsonObject();
+        defaultMisc.addProperty("language", "en_US");
+        JsonElement misc = pkgJson.has("misc") ? pkgJson.get("misc").getAsJsonObject() : null;
+        mnfst.setMisc(new JsonWrapper(misc == null ? defaultMisc : misc));
 
         mnfst.setErrors(new JsonWrapper(errors));
 
