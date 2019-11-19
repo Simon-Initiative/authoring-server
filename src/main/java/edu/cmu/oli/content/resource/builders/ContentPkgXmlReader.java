@@ -102,12 +102,6 @@ public final class ContentPkgXmlReader {
         JsonElement elementToPreferenceSet = elementToPreferenceSet(prefsElmnt);
         mnfstBuilder.add("preferences", elementToPreferenceSet);
 
-        // Language
-        Element pkgLanguageElmnt = pkgElmnt.getChild("language");
-        if (pkgLanguageElmnt != null) {
-            mnfstBuilder.addProperty("language", pkgLanguageElmnt == null ? null : pkgLanguageElmnt.getTextNormalize());
-        }
-
         return mnfstBuilder;
     }
 
