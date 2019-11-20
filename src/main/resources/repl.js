@@ -478,10 +478,10 @@ define(function () {
             }
 
             return ReplClient.exec(code, { host: 'repl.oli.cmu.edu', language: 'python3' })
-                .then(function (result) {
-                    console.log("Ouput from ReplClient.exec " + JSON.stringify(result));
+                .then(function (response) {
+                    console.log("Ouput from ReplClient.exec " + JSON.stringify(response));
                     ActivityEmbed.repl.writeln('---------------------------------------');
-                    ActivityEmbed.repl.write(result.combined);
+                    ActivityEmbed.repl.write(response.result);
 
                     // check if there was a question and part to process. If not, then this is treated as
                     // an ungraded activity, so simply return
@@ -496,7 +496,7 @@ define(function () {
                         return;
                     }
 
-                    if (!(result.error)) {
+                    if (!(response.error)) {
                         console.log("No error from ReplClient.exec");
                         var feedbackEngines = currentPart.feedbackEngines;
                         if (typeof (feedbackEngines) !== "undefined" && feedbackEngines !== null) {
@@ -524,10 +524,10 @@ define(function () {
                             activityEmbed.saveDataAndScore();
                         }
                     } else {
-                        partData.setOutput(result.combined);
+                        partData.setOutput(response.result);
                         partData.setCorrect(false);
                         partData.setScore(0);
-                        var feedback = {id: "error_feedback", content: "Execution failed: " + result.stderr};
+                        var feedback = {id: "error_feedback", content: "Execution failed. Check the console output and your code for errors"};
                         partData.setFeedback(feedback);
                         $('#' + currentQuestion.getId() + '_feedback').append('<div style="display: inline-block;">' + partData.getFeedback().content + '</div>');
                         var styles = {
@@ -540,7 +540,7 @@ define(function () {
                         activityEmbed.saveDataAndScore();
                     }
                     
-                    return result;
+                    return response;
                 },
                 function (err) {
                     console.error(err);
