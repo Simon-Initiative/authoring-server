@@ -173,13 +173,6 @@ public final class ContentPkgXmlWriter {
             }
         }
 
-        // Language
-        if (contentPkg.getLanguage() != null) {
-            Element pkgLanguageElmnt = new Element("langauge");
-            pkgLanguageElmnt.setText(contentPkg.getLanguage());
-            pkgElmnt.addContent(pkgLanguageElmnt);
-        }
-
         return pkgElmnt;
     }
 }

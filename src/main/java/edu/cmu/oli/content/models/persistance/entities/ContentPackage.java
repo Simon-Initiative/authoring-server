@@ -241,6 +241,12 @@ public class ContentPackage implements Serializable {
     @OneToMany(mappedBy = "contentPackage", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Edge> edges = new HashSet<>();
 
+    @Schema(hidden = true)
+    @Expose()
+    @Column(name = "misc", columnDefinition = "json")
+    @Type(type = "json")
+    private JsonWrapper misc = new JsonWrapper(new JsonObject());
+
     public ContentPackage() {
         this.init();
     }
@@ -539,6 +545,14 @@ public class ContentPackage implements Serializable {
         this.edges.remove(edge);
     }
 
+    public JsonWrapper getMisc() {
+        return misc;
+    }
+
+    public void setMisc(JsonWrapper misc) {
+        this.misc = misc;
+    }
+
     public ContentPackage shallowClone() {
         ContentPackage shallowClone = new ContentPackage();
         shallowClone.id = this.id;
@@ -563,6 +577,7 @@ public class ContentPackage implements Serializable {
         shallowClone.packageFamily = this.packageFamily;
         shallowClone.deploymentStatus = this.deploymentStatus;
         shallowClone.activeDataset = this.activeDataset;
+        shallowClone.misc = this.misc;
         return shallowClone;
     }
 
@@ -593,9 +608,10 @@ public class ContentPackage implements Serializable {
         versionClone.fileNode = this.fileNode != null ? this.fileNode.cloneVersion(volumeLocation) : null;
         versionClone.icon = this.icon != null ? this.icon.cloneVersion(webContentVolume) : null;
         versionClone.buildStatus = BuildStatus.PROCESSING;
+        versionClone.misc = this.misc;
 
         this.resources.forEach(resource -> {
-            if(resource.getResourceState() != ResourceState.DELETED) {
+            if (resource.getResourceState() != ResourceState.DELETED) {
                 Resource resourceClone = resource.cloneVersion(volumeLocation);
                 resourceClone.setContentPackage(versionClone);
                 versionClone.addResource(resourceClone);
