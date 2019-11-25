@@ -70,6 +70,7 @@ public class DatasetBuilder {
     DbConnector db;
 
     private static Integer MAXIMUM_STUDENTS = 5000;
+    private static Integer MINIMUM_STUDENTS = 100;
     private static String SQL_QUERIES_FILE = "dataset/sql_queries.json";
 
     // Sql scripts read in from local files
@@ -130,6 +131,7 @@ public class DatasetBuilder {
             log.info("Dataset creation completed");
 
             dataset.setDatasetStatus(DatasetStatus.DONE);
+            dataset.setMessage("");
             dataset.setDateCompleted(new Date());
             dataset.setDatasetBlob(new DatasetBlob(new JsonWrapper(blob)));
         } catch (Throwable t) {
@@ -218,7 +220,11 @@ public class DatasetBuilder {
                 sectionGuids.add(obj.get("section_guid").getAsString());
 
                 userCount += obj.get("students").getAsInt();
-                if (userCount >= MAXIMUM_STUDENTS) {
+
+                Boolean hasTooManyStudents = userCount >= MAXIMUM_STUDENTS;
+                Boolean hasEnoughSectionsAndStudents = sectionGuids.size() >= 10 && userCount >= MINIMUM_STUDENTS;
+                Boolean hasTooManySections = sectionGuids.size() > 15;
+                if (hasEnoughSectionsAndStudents || hasTooManyStudents || hasTooManySections) {
                     break outside;
                 }
             }

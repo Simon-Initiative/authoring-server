@@ -91,11 +91,17 @@ public class AnalyticsResourceManager {
         }
 
         Dataset dataset = new Dataset();
-        dataset.setContentPackage(contentPackage);
-        contentPackage.setActiveDataset(dataset);
-        em.flush();
-
-        es.submit(() -> datasetBuilder.build(dataset.getGuid()));
+        try {
+            dataset.setContentPackage(contentPackage);
+            contentPackage.setActiveDataset(dataset);
+            em.flush();
+            es.submit(() -> datasetBuilder.build(dataset.getGuid()));
+        } catch (Throwable t) {
+            log.info("Dataset creation failure: " + t.getMessage());
+            dataset.setDatasetStatus(DatasetStatus.FAILED);
+            dataset.setMessage(t.getMessage());
+            dataset.setDateCompleted(new Date());
+        }
 
         // Immediately return the guid of the dataset being processed
         return setDatasetInfo(dataset, "Creating new dataset");
