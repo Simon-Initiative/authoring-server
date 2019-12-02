@@ -13,5 +13,6 @@
     <include file="/oli/changelog/db.changelog-0.17.0.xml"/>
     <include file="/oli/changelog/db.changelog-0.25.0.xml"/>
     <include file="/oli/changelog/db.changelog-0.27.0.xml"/>
+    <include file="/oli/changelog/db.changelog-0.37.0.xml"/>
 
 </databaseChangeLog>
