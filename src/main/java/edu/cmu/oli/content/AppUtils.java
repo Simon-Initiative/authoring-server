@@ -30,7 +30,9 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -357,5 +359,115 @@ public class AppUtils {
         GsonBuilder gsonBuilder = new GsonBuilder();
         gsonBuilder.registerTypeAdapter(JsonWrapper.class, new JsonWrapperSerializer());
         return gsonBuilder;
+    }
+
+    // ActivityType enum with string values and reverse lookup
+    public enum EmbedActivityType {
+        REPL("REPL"),
+        DRAGDROP("DRAGDROP"),
+        UNKNOWN("UNKNOWN");
+
+        private String type;
+    
+        EmbedActivityType(String type) {
+            this.type = type;
+        }
+    
+        public String getAsString() {
+            return type;
+        }
+        
+        private static final Map<String, EmbedActivityType> reverseLookup = new HashMap<>();
+    
+        // Populate the reverse lookup table on loading time
+        static
+        {
+            for(EmbedActivityType activityType : EmbedActivityType.values())
+            {
+                reverseLookup.put(activityType.getAsString(), activityType);
+            }
+        }
+    
+        //This method can be used for reverse lookup purpose
+        public static EmbedActivityType fromString(String type) 
+        {
+            return reverseLookup.get(type);
+        }
+    }
+
+    public static EmbedActivityType inferEmbedActivityType(JsonObject embedActivity) {
+        // use activity_type property or infer type based on content
+        if (embedActivity.has("@activity_type")) {
+            // use activity_type attribute to determine type
+            switch(embedActivity.get("@activity_type").getAsString().toLowerCase()) {
+                case "repl":
+                    return EmbedActivityType.REPL;
+                default:
+                    return EmbedActivityType.UNKNOWN;
+            }
+        } else {
+            // use heuristic inspection of content to determine type
+
+            // check for repl activity
+            // use bit map to store flags and easily check if conditions are met
+            //    0000xxxx
+            //           ^ has activty.js or repl.js in source
+            //          ^ has layout asset
+            //         ^ has questions asset
+            //        ^ has solutions asset
+            //  when flags == 0b00001111 we know all conditions are satisfied
+            final int REPL_FLAGS = 0b00001111;
+            int flags = 0;
+            for (JsonElement item : embedActivity.get("#array").getAsJsonArray()) {
+                JsonObject itemObj = item.getAsJsonObject();
+                if (itemObj.has("source")) {
+                    String source = itemObj.get("source").getAsJsonObject().get("#text").getAsString();
+                    if (source.endsWith("activity.js") || source.endsWith("repl.js")) {
+                        flags = flags | 0b1;
+                        
+                        if (flags == REPL_FLAGS) {
+                            return EmbedActivityType.REPL;
+                        }
+                    }
+                }
+                if (itemObj.has("assets")) {
+                    JsonArray assets = itemObj.get("assets").getAsJsonObject().get("#array").getAsJsonArray();
+
+                    for (JsonElement asset : assets) {
+                        JsonObject assetObj = asset.getAsJsonObject();
+                        switch (assetObj.get("asset").getAsJsonObject().get("@name").getAsString()) {
+                            case "layout":
+                                flags = flags | 0b10;
+                                break;
+                            case "questions":
+                                flags = flags | 0b100;
+                                break;
+                            case "solutions":
+                                flags = flags | 0b1000;
+                                break;
+                            default:
+                                break;
+                        }
+                        if (flags == REPL_FLAGS) {
+                            return EmbedActivityType.REPL;
+                        }
+                    }
+                }
+            }
+
+            // check for dragdrop activity type
+            for (JsonElement item : embedActivity.get("#array").getAsJsonArray()) {
+                JsonObject itemObj = item.getAsJsonObject();
+                if (itemObj.has("source")) {
+                    String source = itemObj.get("source").getAsJsonObject().get("#text").getAsString();
+                    if (source.endsWith("dragdrop.js")) {
+                        return EmbedActivityType.DRAGDROP;
+                    }
+                }
+            }
+
+        }
+        
+        return EmbedActivityType.UNKNOWN;
     }
 }
