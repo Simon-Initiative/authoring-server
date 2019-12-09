@@ -7,6 +7,7 @@ import edu.cmu.oli.assessment.builders.Assessment2Transform;
 import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.DirectoryUtils;
 import edu.cmu.oli.content.ResourceException;
+import edu.cmu.oli.content.AppUtils.EmbedActivityType;
 import edu.cmu.oli.content.boundary.ResourceChangeEvent;
 import edu.cmu.oli.content.boundary.ResourceChangeEvent.ResourceEventType;
 import edu.cmu.oli.content.configuration.ConfigurationCache;
@@ -73,6 +74,7 @@ public class ContentResourceManager {
     public static final String JSON_CAPABLE = "jsonCapable";
     public static final String OLD_DYNA_DROP_SRC_FILENAME = "DynaDropHTML-1.0.js";
     public static final String DYNA_DROP_SRC_FILENAME = "DynaDropHTML.js";
+    public static final String REPL_ACTIVITY_SOURCE_FILENAME = "repl.js";
 
     @Inject
     @Logging
@@ -188,6 +190,26 @@ public class ContentResourceManager {
                     }
                 }
             }
+            // check if the object is an embed_activity to inject asset file content
+            if (jsonObject.has("embed_activity")) {
+                JsonArray embedActivityChildren = jsonObject.get("embed_activity")
+                    .getAsJsonObject().get("#array").getAsJsonArray();
+
+                for (JsonElement child : embedActivityChildren) {
+                    if (child.getAsJsonObject().has("assets")) {
+                        JsonArray assets = child.getAsJsonObject().get("assets").getAsJsonObject().get("#array").getAsJsonArray();
+
+                        for (JsonElement asset : assets) {
+                            // inject asset content
+                            try {
+                                this.injectAssetContent(resource, asset.getAsJsonObject());
+                            } catch (Throwable t) {
+                                log.error(t.toString());
+                            }
+                        }
+                    }
+                }
+            }
 
             resourceJson.add("doc", jsonObject);
         } else {
@@ -209,6 +231,79 @@ public class ContentResourceManager {
         resourceJson.addProperty("packageGuid", resource.getContentPackage().getGuid());
 
         return resourceJson;
+    }
+
+    public void injectAssetContent(Resource resource, JsonObject asset) {
+        String assetPath = asset.get("asset").getAsJsonObject().get("#text").getAsString();
+        Path contentPackagePath = Paths
+            .get(resource.getContentPackage().getSourceLocation() + File.separator + "content");
+        Path relativeAssetPath = contentPackagePath.resolve(Paths.get(assetPath)).normalize();
+
+        try {
+            String assetContent = new String(Files.readAllBytes(relativeAssetPath), StandardCharsets.UTF_8);
+            asset.get("asset").getAsJsonObject().addProperty("content", assetContent);
+        } catch (Exception ex) {
+            log.error(ex.getLocalizedMessage());
+            throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, null,
+                    ex.getLocalizedMessage());
+        }
+    }
+
+    private void processReplEmbedActivity(Resource resource, JsonObject embedActivity) {
+        Path contentPackagePath = Paths
+            .get(resource.getContentPackage().getSourceLocation() + File.separator + "content");
+        JsonArray embedActivityChildren = embedActivity.get("#array").getAsJsonArray();
+
+        String source = "";
+        for (JsonElement child : embedActivityChildren) {
+            if (child.getAsJsonObject().has("source")) {
+                source = child.getAsJsonObject().get("source").getAsJsonObject().get("#text").getAsString();
+            }
+        }
+        String relativeSourceLocation = "webcontent" + File.separator + "repl" + File.separator
+            + REPL_ACTIVITY_SOURCE_FILENAME;
+
+        // if this activity was created in the editor, we must ensure that
+        // the correct files are in place
+        if (relativeSourceLocation.equals(source)) {
+            try {
+                // read repl.js file to string
+                InputStream dynaDropJsStream = Thread.currentThread().getContextClassLoader()
+                        .getResourceAsStream(REPL_ACTIVITY_SOURCE_FILENAME);
+                BufferedReader br = null;
+                StringBuilder sb = new StringBuilder();
+                br = new BufferedReader(new InputStreamReader(dynaDropJsStream));
+                String line;
+                while ((line = br.readLine()) != null) {
+                    sb.append(line + System.getProperty("line.separator"));
+                }
+                String replJs = sb.toString();
+
+                // write repl.js to file to versioned source directory
+                Path fullSourcePath = contentPackagePath.resolve(relativeSourceLocation);
+                directoryUtils.createDirectories(fullSourcePath.toString());
+                this.updateFileContent(resource, fullSourcePath, replJs);
+            } catch (Exception ex) {
+                log.error(ex.getLocalizedMessage());
+                throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, null,
+                        ex.getLocalizedMessage());
+            }
+        }
+    }
+
+    private void processAssetContent(Resource resource, JsonObject asset) {
+        if (asset.has("content")) {
+            Path contentPackagePath = Paths
+                .get(resource.getContentPackage().getSourceLocation() + File.separator + "content");
+    
+            String assetPath = asset.get("#text").getAsString();
+            Path relativeAssetPath = contentPackagePath.resolve(Paths.get(assetPath)).normalize();
+            Path fullAssetPath = contentPackagePath.resolve(relativeAssetPath);
+            directoryUtils.createDirectories(fullAssetPath.toString());
+            this.updateFileContent(resource, fullAssetPath, asset.get("content").getAsString());
+
+            asset.remove("content");
+        }
     }
 
     public boolean isSupportedDynaDropSrcFile(String filename) {
@@ -648,6 +743,36 @@ public class ContentResourceManager {
 
         }
         logElapsed(mark3, "doUpdate::assessmentHandling");
+
+        // check if the object is an embed_activity to extract asset content
+        if (resourceContent.getAsJsonObject().has("embed_activity")) {
+            JsonObject embedActivity = resourceContent.getAsJsonObject().get("embed_activity").getAsJsonObject();
+            JsonArray embedActivityChildren = embedActivity.get("#array").getAsJsonArray();
+
+            // if embed_activity is a REPL, make sure required assets are in place
+            boolean isReplActivity = AppUtils.inferEmbedActivityType(embedActivity) == EmbedActivityType.REPL;
+            if (isReplActivity) {
+                this.processReplEmbedActivity(resource, embedActivity);
+            }
+
+            for (JsonElement child : embedActivityChildren) {
+                if (child.getAsJsonObject().has("assets")) {
+                    JsonArray assets = child.getAsJsonObject().get("assets").getAsJsonObject().get("#array").getAsJsonArray();
+
+                    for (JsonElement asset : assets) {
+                        if (asset.getAsJsonObject().get("asset").getAsJsonObject().has("content")) {
+                            // extract asset content
+                            try {
+                                this.processAssetContent(resource, asset.getAsJsonObject().get("asset").getAsJsonObject());
+                            } catch (Throwable t) {
+                                log.error(t.toString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        logElapsed(mark3, "doUpdate::embedActivityHandling");
 
         final long mark3a = mark();
         String oldType = resource.getType();
