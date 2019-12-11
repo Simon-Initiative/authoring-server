@@ -7,7 +7,6 @@ import com.google.gson.JsonObject;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 
-
 /**
  * Methods for generating preference service XML.
  *
@@ -31,7 +30,8 @@ public final class OptionsWriter {
     /**
      * <p>
      * Converts the given preference set to an XML element in the specified
-     * namespace. The resulting XML conforms to the OLI preferences DTD.</p>
+     * namespace. The resulting XML conforms to the OLI preferences DTD.
+     * </p>
      *
      * @param prefSeti preference set
      * @param nsi      XML namespace
@@ -39,7 +39,8 @@ public final class OptionsWriter {
      * @throws NullPointerException if either argument is <tt>null</tt>
      */
     public static Element preferenceSetToElement(JsonElement prefSeti, Namespace nsi) {
-        if (prefSeti == null || prefSeti.isJsonNull() || prefSeti.isJsonPrimitive()) {
+        if (prefSeti == null || prefSeti.isJsonNull() || prefSeti.isJsonPrimitive()
+                || prefSeti.isJsonObject() && prefSeti.getAsJsonObject().size() == 0) {
             return null;
         }
         if (nsi == null) {
@@ -70,8 +71,9 @@ public final class OptionsWriter {
 
     /**
      * <p>
-     * Converts the given preference to an XML element. The result XML conforms
-     * to the OLI preferences DTD.</p>
+     * Converts the given preference to an XML element. The result XML conforms to
+     * the OLI preferences DTD.
+     * </p>
      *
      * @param pref preference
      * @return XML element representation of the preference
@@ -83,8 +85,9 @@ public final class OptionsWriter {
 
     /**
      * <p>
-     * Converts the given preference to an XML element in the specified
-     * namespace. The result XML conforms to the OLI preferences DTD.</p>
+     * Converts the given preference to an XML element in the specified namespace.
+     * The result XML conforms to the OLI preferences DTD.
+     * </p>
      *
      * @param prefi preference
      * @param nsi   XML namespace
