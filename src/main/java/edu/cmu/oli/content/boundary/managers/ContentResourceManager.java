@@ -32,6 +32,7 @@ import edu.cmu.oli.content.security.Secure;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jdom2.DocType;
 import org.jdom2.Document;
+import org.jdom2.Element;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
@@ -58,8 +59,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static edu.cmu.oli.content.AppUtils.generateUID;
 import static edu.cmu.oli.content.security.Roles.ADMIN;
@@ -537,6 +537,17 @@ public class ContentResourceManager {
             JsonObject organization = (JsonObject) ((JsonObject) resourceContent).get("organization");
             organization.remove("@id");
             organization.addProperty("@id", id);
+            JsonArray meta = organization.getAsJsonArray("#array");
+            if(meta!= null){
+                JsonElement icon = null;
+                for (JsonElement elem : meta) {
+                    if (elem.isJsonObject() && elem.getAsJsonObject().has("icon")) {
+                        icon = elem;
+                        break;
+                    }
+                }
+                meta.remove(icon);
+            }
             resource.setId(id);
             JsonObject metadata = new JsonObject();
             metadata.addProperty("version", "1.0");
@@ -557,7 +568,6 @@ public class ContentResourceManager {
 
         // Parse update payload into final xml and json documents
         Map<String, String> contentValues = contentValues(resourceContent, resource, jsonCapable);
-
         String pathTo = jsonCapable ? pathFrom.substring(0, pathFrom.lastIndexOf(".xml")) + ".json" : pathFrom;
 
         FileNode fileNode = new FileNode(contentPackage.getVolumeLocation(), pathFrom, pathTo,
