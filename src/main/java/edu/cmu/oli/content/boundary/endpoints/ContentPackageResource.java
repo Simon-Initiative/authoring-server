@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.boundary.endpoints;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -61,7 +61,7 @@ public class ContentPackageResource {
         Instance<Configurations> configuration;
 
         @Inject
-        @Dedicated("packagesResourceApiExecutor")
+        @DedicatedExecutor("packagesResourceApiExecutor")
         ExecutorService executor;
 
         @Context

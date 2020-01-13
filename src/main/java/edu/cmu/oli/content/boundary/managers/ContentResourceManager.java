@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.boundary.managers;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.common.collect.Iterables;
 import com.google.gson.*;
 import edu.cmu.oli.assessment.builders.Assessment2Transform;
@@ -107,7 +107,7 @@ public class ContentResourceManager {
     EdgesController edgesController;
 
     @Inject
-    @Dedicated("svnExecutor")
+    @DedicatedExecutor("svnExecutor")
     ExecutorService svnExecutor;
 
     public JsonElement fetchResource(AppSecurityContext session, String packageIdOrGuid, String resourceId) {
@@ -404,7 +404,6 @@ public class ContentResourceManager {
             }
 
             JsonArray contentItems = questionBody.get("#array").getAsJsonArray();
-            ;
 
             for (JsonElement contentItem : contentItems) {
                 boolean isCustom = contentItem.getAsJsonObject().has("custom");

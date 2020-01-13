@@ -5,7 +5,7 @@
  */
 package edu.cmu.oli.content.contentfiles;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import edu.cmu.oli.content.configuration.ConfigurationCache;
 import edu.cmu.oli.content.configuration.Configurations;
 import edu.cmu.oli.content.logging.Logging;
@@ -39,12 +39,14 @@ import java.util.concurrent.TimeUnit;
 @ApplicationScoped
 public class DirectorysWatcher {
 
+    private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
     @Inject
     @Logging
     Logger log;
 
     @Inject
-    @Dedicated("contentFilesProcessor")
+    @DedicatedExecutor("contentFilesProcessor")
     ExecutorService rscExec;
 
     @Inject
@@ -197,7 +199,7 @@ public class DirectorysWatcher {
             String message = "Error while processing course content package import " + packageFolder.toString();
             log.error(message, e);
         }
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
         scheduler.schedule(() -> {
             WebContentFolderCleanup webContentFolderCleanup = null;
             try {

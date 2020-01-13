@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.controllers;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.*;
 import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.ContentServiceException;
@@ -75,7 +75,7 @@ public class LDModelControllerImpl implements LDModelController {
     Instance<Configurations> configuration;
 
     @Inject
-    @Dedicated("svnExecutor")
+    @DedicatedExecutor("svnExecutor")
     ExecutorService svnExecutor;
 
     @Override
