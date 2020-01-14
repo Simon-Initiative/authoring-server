@@ -186,9 +186,13 @@ public class WebResourceManager {
                 }
                 String fileName = fileNameOption.get();
                 fileName = fileName.replaceAll(" ", "_");
-                String substring = fileName.substring(0, fileName.lastIndexOf('.'));
+                int extensionIndex = fileName.lastIndexOf('.');
+                if (extensionIndex == -1) {
+                    extensionIndex = fileName.length() - 1;
+                }
+                String substring = fileName.substring(0, extensionIndex);
                 substring = substring.replaceAll("\\.", "");
-                fileName = substring + fileName.substring(fileName.lastIndexOf('.'));
+                fileName = substring + fileName.substring(extensionIndex);
 
                 // Force upload into webcontent directory
                 if (!fileName.contains("webcontent")) {
