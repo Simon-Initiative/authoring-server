@@ -103,28 +103,28 @@ define(function () {
             $.get(superClient.webContentFolder + assets.controls, function (controls) {
                 $('#oli-embed').append(controls);
                 $("#save_btn").click(function () {
-                    if (!superClient.isCurrentAttemptCompleted() && questionsSaveData.numberOfQuestionsAnswered() < 1) {
+                    if (!superClient.isCurrentAttemptCompleted() && questionsSaveData.numberOfQuestionsAnswered() < 1 && !$('#save_btn').hasClass('disabled')) {
                         activityEmbed.save();
                     }
                 });
                 $("#submit_btn").click(function () {
-                    if (!superClient.isCurrentAttemptCompleted() && questionsSaveData.numberOfQuestionsAnswered() < 1) {
+                    if (!superClient.isCurrentAttemptCompleted() && questionsSaveData.numberOfQuestionsAnswered() < 1 && !$('#submit_btn').hasClass('disabled')) {
                         activityEmbed.submit();
                     }
                 });
                 $("#hint_btn").click(function () {
-                    if (!superClient.isCurrentAttemptCompleted()
+                    if (!superClient.isCurrentAttemptCompleted() && !$('#hint_btn').hasClass('disabled')
                         && typeof (currentPart) === "undefined" || currentPart === null || currentPart.getHints().length > 0) {
                         activityEmbed.hint();
                     }
                 });
                 $("#next_btn").click(function () {
-                    if (superClient.isCurrentAttemptCompleted()) {
+                    if (superClient.isCurrentAttemptCompleted() && !$('#next_btn').hasClass('disabled')) {
                         activityEmbed.nextAttempt();
                     }
                 });
                 $("#solution_btn").click(function () {
-                    if (superClient.isCurrentAttemptCompleted() || activityEmbed.isUngradedActivity()) {
+                    if ((superClient.isCurrentAttemptCompleted() || activityEmbed.isUngradedActivity()) && !$('#solution_btn').hasClass('disabled')) {
                         $.get(superClient.webContentFolder + assets.solutions, function (data) {
                             var solutionText = null;
                             $(data).find("solution").each(function (q) {
@@ -156,7 +156,13 @@ define(function () {
                 });
 
                 $("#run").click(function () {
-                    if (!superClient.isCurrentAttemptCompleted()) {
+                    if (!superClient.isCurrentAttemptCompleted() && !$('#run').hasClass('disabled')) {
+                        activityEmbed.run();
+                    }
+                });
+
+                $("#submit").click(function () {
+                    if (!superClient.isCurrentAttemptCompleted() && !$('#submit').hasClass('disabled')) {
                         var edit_text = ActivityEmbed.editor.getValue();
                         activityEmbed.pushInput(edit_text);
 
@@ -170,7 +176,7 @@ define(function () {
                 });
 
                 $("#clear").click(function () {
-                    if (!superClient.isCurrentAttemptCompleted()) {
+                    if (!superClient.isCurrentAttemptCompleted() && !$('#clear').hasClass('disabled')) {
                         ActivityEmbed.repl.clearScreen();
                         ActivityEmbed.repl.writeStdin('\n');
                         ActivityEmbed.repl.disableStdin(false);
@@ -247,6 +253,8 @@ define(function () {
                 if (superClient.isCurrentAttemptCompleted()) {
                     ActivityEmbed.repl.disableStdin();
                     ActivityEmbed.repl.disableStdout();
+
+                    $('#oli-embed .question').append('<p>This activity has been submitted. Click Reset to try again.</p>');
                 } 
 
                 ActivityEmbed.repl.attach(document.getElementById('console'));
@@ -380,6 +388,9 @@ define(function () {
                                 
                                 // restore content to editor
                                 initEditorText = input.value;
+                                if (ActivityEmbed.editor) {
+                                    ActivityEmbed.editor.setValue(initEditorText);
+                                }
 
                                 // write previous input/output content
                                 ActivityEmbed.repl.on('afterconnect', () => {
@@ -405,8 +416,8 @@ define(function () {
                 $('#save_btn').addClass('disabled');
                 $('#submit_btn').addClass('disabled');
                 $('#run').addClass('disabled');
+                $('#submit').addClass('disabled');
                 $('#clear').addClass('disabled');
-                $('#hint_btn').addClass('disabled');
 
                 $('#next_btn').removeClass('disabled');
                 $("#solution_btn").removeClass('disabled');
@@ -418,16 +429,18 @@ define(function () {
                     $('#save_btn').addClass('disabled');
                     $('#submit_btn').addClass('disabled');
                 }
-                if (typeof (currentPart) === "undefined" || currentPart === null || currentPart.getHints().length === 0) {
-                    $('#hint_btn').addClass('disabled');
-                } else {
-                    $('#hint_btn').removeClass('disabled');
-                }
                 $('#next_btn').addClass('disabled');
                 $('#run').removeClass('disabled');
+                $('#submit').removeClass('disabled');
                 $('#clear').removeClass('disabled');
             }
-            if (Number(superClient.currentAttempt) > 1 || activityEmbed.isUngradedActivity()) {
+
+            if (typeof (currentPart) === "undefined" || currentPart === null || currentPart.getHints().length === 0) {
+                $('#hint_btn').addClass('disabled');
+            } else {
+                $('#hint_btn').removeClass('disabled');
+            }
+            if (superClient.isCurrentAttemptCompleted() || activityEmbed.isUngradedActivity()) {
                 $("#solution_btn").removeClass('disabled');
             } else {
                 $("#solution_btn").addClass('disabled');
@@ -456,16 +469,92 @@ define(function () {
             superClient.logAction(action);
 
         };
+        // Run the code in the editor without submitting for a score
+        this.run = function () {
+            console.log("run()");
+
+            // disable run button
+            $('#run').addClass('disabled');
+            $('#run').text('Running...');
+
+            // clear out previous feedback
+            $('#' + currentQuestion.getId() + '_feedback').empty();
+            $('#' + currentQuestion.getId() + '_feedback').removeAttr("style");
+
+            // clear console and disable further input
+            code = ActivityEmbed.editor.getValue();
+            ActivityEmbed.repl.clearScreen();
+            ActivityEmbed.repl.writeln('EXECUTING CODE:');
+            ActivityEmbed.repl.writeln(code);
+            ActivityEmbed.repl.write('\n');
+            ActivityEmbed.repl.disableStdin();
+
+            return ReplClient.exec(code, { host: 'repl.oli.cmu.edu', language: 'python3' })
+                .then(function (response) {
+                    console.log("Ouput from ReplClient.exec " + JSON.stringify(response));
+                    ActivityEmbed.repl.writeln('---------------------------------------');
+                    ActivityEmbed.repl.writeln('RESULT:');
+                    ActivityEmbed.repl.write(response.result);
+
+                    // check if there was a question and part to process. If not, then this is treated as
+                    // an ungraded activity, so simply return
+                    if (activityEmbed.isUngradedActivity()) {
+                        console.log("currentQuestion or currentPart not set");
+                        return;
+                    }
+
+                    // Only score attempt if at least 1 question has been answered
+                    if (questionsSaveData.numberOfQuestionsAnswered() < 1) {
+                        console.log("scoreAttempt() no questions answered ");
+                        return;
+                    }
+
+                    if (!(response.error)) {
+                        console.log("No error from ReplClient.exec");
+
+                        var feedback = "Execution succeeded: Code is well formated";
+                        $('#' + currentQuestion.getId() + '_feedback').append('<div style="display: inline-block;">' + feedback + '</div>');
+                        var styles = {
+                            background: '#ddffdd',
+                            borderColor: '#33aa33',
+                            display: 'block'
+                        };
+                        $('#' + currentQuestion.getId() + '_feedback').css(styles);
+                    } else {
+                        var feedback = "Execution failed. Check the console output and your code for errors";
+                        $('#' + currentQuestion.getId() + '_feedback').append('<div style="display: inline-block;">' + feedback + '</div>');
+                        var styles = {
+                            background: '#f4cfc9',
+                            borderColor: '#e75d36',
+                            display: 'block'
+                        };
+                        $('#' + currentQuestion.getId() + '_feedback').css(styles);
+                    }
+                    
+                    return response;
+                })
+                .catch(function (err) {
+                    console.error(err);
+                    ActivityEmbed.repl.writeln("An unexpected error occurred: " + err);
+                    ActivityEmbed.repl.writeln('Please try reloading the page or contact support if the issue persists');
+                })
+                .finally(function () {
+                    $('#run').removeClass('disabled');
+                    $('#run').text('Run');
+                });
+        };
+        // Run the code in the editor and submit for a scoring
         this.submit = function () {
             console.log("submit()");
-            if (superClient.isCurrentAttemptCompleted()) {
-                return;
-            }
 
-            ActivityEmbed.repl.disableStdin();
-            return activityEmbed.process();
-        };
-        this.process = function () {
+            // disable run button
+            $('#submit').addClass('disabled');
+            $('#submit').text('Submitting...');
+
+            // clear out previous feedback
+            $('#' + currentQuestion.getId() + '_feedback').empty();
+            $('#' + currentQuestion.getId() + '_feedback').removeAttr("style");
+
             var questionData;
             var partData;
             var code;
@@ -477,10 +566,17 @@ define(function () {
                 code = partData.getInput().value
             }
 
+            ActivityEmbed.repl.clearScreen();
+            ActivityEmbed.repl.writeln('EXECUTING CODE:');
+            ActivityEmbed.repl.writeln(code);
+            ActivityEmbed.repl.write('\n');
+            ActivityEmbed.repl.disableStdin();
+
             return ReplClient.exec(code, { host: 'repl.oli.cmu.edu', language: 'python3' })
                 .then(function (response) {
                     console.log("Ouput from ReplClient.exec " + JSON.stringify(response));
                     ActivityEmbed.repl.writeln('---------------------------------------');
+                    ActivityEmbed.repl.writeln('RESULT:');
                     ActivityEmbed.repl.write(response.result);
 
                     // check if there was a question and part to process. If not, then this is treated as
@@ -510,7 +606,7 @@ define(function () {
                                 }
                             }
                         } else {
-                            var feedback = {id: "replt_eval", content: "Correct: code is well formated"};
+                            var feedback = {id: "replt_eval", content: "Execution succeeded: Code is well formated"};
                             partData.setFeedback(feedback);
                             partData.setScore(Number(10));
                             partData.setCorrect(true);
@@ -539,13 +635,19 @@ define(function () {
 
                         activityEmbed.saveDataAndScore();
                     }
+
+                    $('#oli-embed .question').append('<p>This activity has been submitted. Click Reset to try again.</p>');
                     
                     return response;
-                },
-                function (err) {
+                })
+                .catch(function (err) {
                     console.error(err);
-                }
-            );
+                    ActivityEmbed.repl.writeln("An unexpected error occurred: " + err);
+                    ActivityEmbed.repl.writeln('Please try reloading the page or contact support if the issue persists');
+                })
+                .finally(function () {
+                    $('#submit').text('Submit');
+                })
         };
         this.cloudCoderProcess = function (info) {
             var questionData = questionsSaveData.getQuestionData(currentQuestion.getId());
