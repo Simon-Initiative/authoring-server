@@ -495,6 +495,7 @@ define(function () {
                     ActivityEmbed.repl.writeln('---------------------------------------');
                     ActivityEmbed.repl.writeln('RESULT:');
                     ActivityEmbed.repl.write(response.result);
+                    ActivityEmbed.repl.terminal.scrollToBottom();
 
                     // check if there was a question and part to process. If not, then this is treated as
                     // an ungraded activity, so simply return
@@ -578,6 +579,7 @@ define(function () {
                     ActivityEmbed.repl.writeln('---------------------------------------');
                     ActivityEmbed.repl.writeln('RESULT:');
                     ActivityEmbed.repl.write(response.result);
+                    ActivityEmbed.repl.terminal.scrollToBottom();
 
                     // check if there was a question and part to process. If not, then this is treated as
                     // an ungraded activity, so simply return
