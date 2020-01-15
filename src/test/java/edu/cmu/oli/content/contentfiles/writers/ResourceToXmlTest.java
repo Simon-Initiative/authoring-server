@@ -103,7 +103,7 @@ public class ResourceToXmlTest {
     xml = xml.replaceAll("\n", "");
 
     // Verify correct alignment between match and input
-    assertTrue(xml.indexOf("match=\"sm_under\" score=\"1\" input=\"s5\"") == 1);
+    assertTrue(xml.indexOf("match=\"sm_under\" score=\"1\" input=\"s5\"") > 1);
   }
 
 }
