@@ -1,0 +1,25 @@
+name: Java CI
+
+on:
+  push:
+    branches:
+      - master
+      - 'SPRINT-*'
+  pull_request:
+    branches:
+      - '*'
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Set up JDK
+      uses: actions/setup-java@v1
+      with:
+        java-version: 11.0.x
+    - name: Copy env settings
+      run: cp service.example.envs service.envs
+    - name: Build with Maven
+      run: mvn clean test
