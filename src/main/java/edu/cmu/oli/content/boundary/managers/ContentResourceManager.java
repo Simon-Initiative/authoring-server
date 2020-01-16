@@ -555,6 +555,42 @@ public class ContentResourceManager {
             pathFrom = "organizations/" + random + "/" + "organization.xml";
         }
 
+        String pathTo = jsonCapable ? pathFrom.substring(0, pathFrom.lastIndexOf(".xml")) + ".json" : pathFrom;
+
+        FileNode fileNode = new FileNode(contentPackage.getVolumeLocation(), pathFrom, pathTo,
+                jsonCapable ? "application/json" : "text/xml");
+        resource.setFileNode(fileNode);
+        resource.setContentPackage(contentPackage);
+
+        // check if the object is an embed_activity to extract asset content
+        if (resourceContent.getAsJsonObject().has("embed_activity")) {
+            JsonObject embedActivity = resourceContent.getAsJsonObject().get("embed_activity").getAsJsonObject();
+            JsonArray embedActivityChildren = embedActivity.get("#array").getAsJsonArray();
+
+            // if embed_activity is a REPL, make sure required assets are in place
+            boolean isReplActivity = AppUtils.inferEmbedActivityType(embedActivity) == EmbedActivityType.REPL;
+            if (isReplActivity) {
+                this.processReplEmbedActivity(resource, embedActivity);
+            }
+
+            for (JsonElement child : embedActivityChildren) {
+                if (child.getAsJsonObject().has("assets")) {
+                    JsonArray assets = child.getAsJsonObject().get("assets").getAsJsonObject().get("#array").getAsJsonArray();
+
+                    for (JsonElement asset : assets) {
+                        if (asset.getAsJsonObject().get("asset").getAsJsonObject().has("content")) {
+                            // extract asset content
+                            try {
+                                this.processAssetContent(resource, asset.getAsJsonObject().get("asset").getAsJsonObject());
+                            } catch (Throwable t) {
+                                log.error(t.toString());
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
         TypedQuery<Resource> query = em.createQuery(
                 "select r from Resource r where r.contentPackage.guid = :pkgGuid and r.id = :id", Resource.class);
         query.setParameter("id", resource.getId());
@@ -568,12 +604,6 @@ public class ContentResourceManager {
 
         // Parse update payload into final xml and json documents
         Map<String, String> contentValues = contentValues(resourceContent, resource, jsonCapable);
-        String pathTo = jsonCapable ? pathFrom.substring(0, pathFrom.lastIndexOf(".xml")) + ".json" : pathFrom;
-
-        FileNode fileNode = new FileNode(contentPackage.getVolumeLocation(), pathFrom, pathTo,
-                jsonCapable ? "application/json" : "text/xml");
-        resource.setFileNode(fileNode);
-        resource.setContentPackage(contentPackage);
         validateXmlContent(contentPackage.getGuid(), resource, contentValues.get("xmlContent"), throwErrors);
 
         RevisionBlob revisionBlob = jsonCapable
