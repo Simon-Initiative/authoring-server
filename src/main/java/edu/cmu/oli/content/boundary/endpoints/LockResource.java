@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.boundary.endpoints;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.JsonElement;
 import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.boundary.ExceptionHandler;
@@ -39,7 +39,7 @@ public class LockResource {
     private LockResourceManager lm;
 
     @Inject
-    @Dedicated("locksResourceApiExecutor")
+    @DedicatedExecutor("locksResourceApiExecutor")
     ExecutorService mes;
 
     @Context

@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.boundary.endpoints;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import edu.cmu.oli.content.AppUtils;
@@ -39,7 +39,7 @@ public class DeveloperResource {
     private DeveloperResourceManager pm;
 
     @Inject
-    @Dedicated("developersResourceApiExecutor")
+    @DedicatedExecutor("developersResourceApiExecutor")
     ExecutorService mes;
 
     @Context
