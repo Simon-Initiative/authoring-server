@@ -45,7 +45,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -142,12 +142,14 @@ public class ContentPackageManager {
     XmlToContentPackage xmlToContentPackage;
 
     @Inject
-    @Dedicated("svnExecutor")
+    @DedicatedExecutor("svnExecutor")
     ExecutorService svnExecutor;
 
     @Inject
-    @Dedicated("versionBatchExec")
+    @DedicatedExecutor("versionBatchExec")
     ExecutorService versionExec;
+
+    static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Inject
     DeployController deployController;
@@ -827,7 +829,7 @@ public class ContentPackageManager {
                 revsMap.put(resource.getTransientRev(), resource.getGuid());
             }
 
-            ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
             scheduler.schedule(() -> {
                 Set<String> jobIds = new HashSet<>(jobs.keySet());
 

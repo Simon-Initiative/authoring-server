@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.boundary.endpoints;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import edu.cmu.oli.content.AppUtils;
@@ -45,7 +45,7 @@ public class AnalyticsResource {
     AppSecurityContextFactory appSecurityContextFactory;
 
     @Inject
-    @Dedicated("AnalyticsResourceApiExecutor")
+    @DedicatedExecutor("AnalyticsResourceApiExecutor")
     ExecutorService executor;
 
     @Context

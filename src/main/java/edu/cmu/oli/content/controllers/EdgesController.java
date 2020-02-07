@@ -29,6 +29,8 @@ import java.util.concurrent.TimeUnit;
 @Stateless
 public class EdgesController {
 
+    private static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
     @Inject
     @Logging
     Logger log;
@@ -99,7 +101,7 @@ public class EdgesController {
     }
 
     private void doValidateAsync(String pkgGuid, Integer retryCnt) {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
         scheduler.schedule(() -> {
             try {
                 EdgesController edgesController = (EdgesController)

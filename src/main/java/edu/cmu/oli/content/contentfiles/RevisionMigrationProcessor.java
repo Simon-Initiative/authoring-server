@@ -24,7 +24,7 @@
 
 package edu.cmu.oli.content.contentfiles;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import edu.cmu.oli.content.configuration.ConfigurationCache;
 import edu.cmu.oli.content.configuration.Configurations;
 import edu.cmu.oli.content.logging.Logging;
@@ -58,7 +58,7 @@ public class RevisionMigrationProcessor {
     Logger log;
 
     @Inject
-    @Dedicated("revMigrationExec")
+    @DedicatedExecutor("revMigrationExec")
     ExecutorService rscExec;
 
     @Inject

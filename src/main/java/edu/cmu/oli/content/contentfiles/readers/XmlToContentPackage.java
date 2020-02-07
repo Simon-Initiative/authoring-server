@@ -43,6 +43,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.*;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
@@ -78,6 +79,8 @@ public class XmlToContentPackage {
     ContentPackage contentPackage;
 
     Map<String, String> oldResourceGuids = new HashMap<>();
+
+    static ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(2);
 
     public void setContentPackage(ContentPackage contentPackage) {
         this.contentPackage = contentPackage;
@@ -566,7 +569,7 @@ public class XmlToContentPackage {
             }
             final String sourceLocation = contentPackage.getSourceLocation();
 
-            Executors.newSingleThreadScheduledExecutor().schedule(() -> doProcessLDmodelFiles(guid, sourceLocation), 2, TimeUnit.SECONDS);
+            scheduler.schedule(() -> doProcessLDmodelFiles(guid, sourceLocation), 2, TimeUnit.SECONDS);
 
             log.info("Done processing content import for package=" + contentPackage.getId() + " version=" + contentPackage.getVersion() + " location=" + contentPackage.getSourceLocation());
         } catch (IOException e) {
@@ -641,7 +644,7 @@ public class XmlToContentPackage {
                 return;
             }
         }
-        Executors.newSingleThreadScheduledExecutor().schedule(() -> doLDImport(packageGuid, skillsModel, problemsModel, losModel, retry), 5, TimeUnit.SECONDS);
+        scheduler.schedule(() -> doLDImport(packageGuid, skillsModel, problemsModel, losModel, retry), 5, TimeUnit.SECONDS);
     }
 
     public class FNode {

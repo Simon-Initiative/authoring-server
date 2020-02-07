@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.contentfiles;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import edu.cmu.oli.content.AppUtils;
@@ -40,8 +40,10 @@ public class MigrationProcessor {
     Logger log;
 
     @Inject
-    @Dedicated("migrationExec")
+    @DedicatedExecutor("migrationExec")
     ExecutorService rscExec;
+
+    static ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
 
     @Inject
     @ConfigurationCache
@@ -135,7 +137,7 @@ public class MigrationProcessor {
     }
 
     private void webContentFolderCleanup() {
-        ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
         scheduler.schedule(() -> {
             WebContentFolderCleanup webContentFolderCleanup = null;
             try {
