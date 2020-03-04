@@ -59,12 +59,14 @@ public final class OptionsWriter {
 
         // Preferences
         JsonArray preferences = prefSet.getAsJsonArray("preferences");
-        preferences.forEach((val) -> {
-            Element element = preferenceToElement(val, ns);
-            if (element != null) {
-                setElmnt.addContent(element);
-            }
-        });
+        if (preferences != null) {
+            preferences.forEach((val) -> {
+                Element element = preferenceToElement(val, ns);
+                if (element != null) {
+                    setElmnt.addContent(element);
+                }
+            });
+        }
 
         return setElmnt;
     }
