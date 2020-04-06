@@ -891,7 +891,10 @@ public class AssessmentV2Validator implements ResourceValidator {
         String match = matchElem.getAttributeValue("match");
 
         JsonObject responseCriteria = new JsonObject();
-        responseCriteria.addProperty("interactionId", i.get("id").getAsString());
+        // interactionId maybe null for cases where x-oli-inline-assessment is custom dnd activity
+        if(i != null) {
+            responseCriteria.addProperty("interactionId", i.get("id").getAsString());
+        }
         responseCriteria.addProperty("match", match);
 //:FIXME: find way to validate match criteria
 //        try {

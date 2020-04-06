@@ -5,6 +5,8 @@ import org.jdom2.JDOMException;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -93,42 +95,61 @@ public class PlainTest {
         //
         // entry = zis.getNextEntry();
         // }
+//
+//        List<Date> listDates = new ArrayList<Date>();
+//        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
+//
+//        try {
+//            listDates.add(dateFormatter.parse("2013-09-30"));
+//            listDates.add(dateFormatter.parse("2013-07-06"));
+//            listDates.add(dateFormatter.parse("2013-11-28"));
+//        } catch (ParseException ex) {
+//            System.err.print(ex);
+//        }
+//
+//        System.out.println("Before sorting: " + listDates);
+//
+//        Collections.sort(listDates, new Comparator<Date>() {
+//            @Override
+//            public int compare(Date o1, Date o2) {
+//                return o2.compareTo(o1);
+//            }
+//        });
+//
+//        System.out.println("After sorting: " + listDates);
+//
+//        List<Integer> integerList = new ArrayList<>();
+//        integerList.add(new Integer(1));
+//        integerList.add(new Integer(2));
+//        integerList.add(new Integer(3));
+//        Collections.sort(integerList, new Comparator<Integer>() {
+//            @Override
+//            public int compare(Integer o1, Integer o2) {
+//                return o2.compareTo(o1);
+//            }
+//        });
 
-        List<Date> listDates = new ArrayList<Date>();
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
+        String val = "After sorting ints: ";
+        MessageDigest messageDigest = null;
         try {
-            listDates.add(dateFormatter.parse("2013-09-30"));
-            listDates.add(dateFormatter.parse("2013-07-06"));
-            listDates.add(dateFormatter.parse("2013-11-28"));
-        } catch (ParseException ex) {
-            System.err.print(ex);
+            messageDigest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
 
-        System.out.println("Before sorting: " + listDates);
-
-        Collections.sort(listDates, new Comparator<Date>() {
-            @Override
-            public int compare(Date o1, Date o2) {
-                return o2.compareTo(o1);
-            }
-        });
-
-        System.out.println("After sorting: " + listDates);
-
-        List<Integer> integerList = new ArrayList<>();
-        integerList.add(new Integer(1));
-        integerList.add(new Integer(2));
-        integerList.add(new Integer(3));
-        Collections.sort(integerList, new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o2.compareTo(o1);
-            }
-        });
-
-        System.out.println("After sorting ints: " + integerList);
+        messageDigest.update(val.getBytes());
+        String encryptedString = convertByteArrayToHexString(messageDigest.digest());
+        System.out.println("After sorting ints: " + encryptedString);
         assertTrue(true);
+    }
+
+    private static String convertByteArrayToHexString(byte[] arrayBytes) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < arrayBytes.length; i++) {
+            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
+                    .substring(1));
+        }
+        return stringBuffer.toString();
     }
 
 }
