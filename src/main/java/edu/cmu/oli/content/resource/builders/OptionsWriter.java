@@ -6,6 +6,8 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Methods for generating preference service XML.
@@ -13,7 +15,7 @@ import org.jdom2.Namespace;
  * @author Raphael Gachuhi
  */
 public final class OptionsWriter {
-
+    static final Logger log = LoggerFactory.getLogger(OptionsWriter.class);
     private static final String _PUBLIC_ID = "-//Carnegie Mellon University//DTD Preferences 1.0//EN";
     private static final String _SYSTEM_ID = "http://oli.cmu.edu/dtd/oli_preferences_1_0.dtd";
 
@@ -49,6 +51,12 @@ public final class OptionsWriter {
 
         final Namespace ns = nsi;
         JsonObject prefSet = (JsonObject) prefSeti;
+        // Preferences
+        JsonArray preferences = prefSet.getAsJsonArray("preferences");
+        if (preferences == null) {
+            return null;
+        }
+
         // Preference set
         Element setElmnt = new Element("preferences", ns);
 
@@ -57,16 +65,12 @@ public final class OptionsWriter {
             setElmnt.setAttribute("guid", prefSet.get("@guid").getAsString());
         }
 
-        // Preferences
-        JsonArray preferences = prefSet.getAsJsonArray("preferences");
-        if (preferences != null) {
-            preferences.forEach((val) -> {
-                Element element = preferenceToElement(val, ns);
-                if (element != null) {
-                    setElmnt.addContent(element);
-                }
-            });
-        }
+        preferences.forEach((val) -> {
+            Element element = preferenceToElement(val, ns);
+            if (element != null) {
+                setElmnt.addContent(element);
+            }
+        });
 
         return setElmnt;
     }
