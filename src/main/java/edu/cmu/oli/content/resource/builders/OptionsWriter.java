@@ -1,6 +1,9 @@
 package edu.cmu.oli.content.resource.builders;
 
-import com.google.gson.*;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonNull;
+import com.google.gson.JsonObject;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
 import org.slf4j.Logger;
@@ -48,11 +51,12 @@ public final class OptionsWriter {
 
         final Namespace ns = nsi;
         JsonObject prefSet = (JsonObject) prefSeti;
-        if(prefSet.has("jsonObject")){
-            prefSet = prefSet.getAsJsonObject("jsonObject");
+        // Preferences
+        JsonArray preferences = prefSet.getAsJsonArray("preferences");
+        if (preferences == null) {
+            return null;
         }
 
-        log.info("Preference set info: " + new Gson().toJson(prefSet));
         // Preference set
         Element setElmnt = new Element("preferences", ns);
 
@@ -61,16 +65,12 @@ public final class OptionsWriter {
             setElmnt.setAttribute("guid", prefSet.get("@guid").getAsString());
         }
 
-        // Preferences
-        JsonArray preferences = prefSet.getAsJsonArray("preferences");
-        if (preferences != null) {
-            preferences.forEach((val) -> {
-                Element element = preferenceToElement(val, ns);
-                if (element != null) {
-                    setElmnt.addContent(element);
-                }
-            });
-        }
+        preferences.forEach((val) -> {
+            Element element = preferenceToElement(val, ns);
+            if (element != null) {
+                setElmnt.addContent(element);
+            }
+        });
 
         return setElmnt;
     }
