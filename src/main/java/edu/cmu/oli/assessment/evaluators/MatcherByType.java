@@ -30,6 +30,8 @@ import com.google.gson.JsonObject;
 import edu.cmu.oli.assessment.InputFormatException;
 import edu.cmu.oli.assessment.InteractionStyle;
 import edu.cmu.oli.assessment.PatternFormatException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -42,6 +44,7 @@ import java.util.regex.PatternSyntaxException;
  * @author Raphael Gachuhi
  */
 public class MatcherByType {
+    static final Logger log = LoggerFactory.getLogger(MatcherByType.class);
 
     JsonObject interaction;
 
@@ -74,6 +77,7 @@ public class MatcherByType {
             case ORDERING:
                 return ordering(pattern);
             case NUMERIC:
+                log.info("numeric");
                 return numeric(pattern);
             case IMAGE_HOTSPOT:
                 return imageHotSpot(pattern);
@@ -140,6 +144,7 @@ public class MatcherByType {
         // Precision
         int p = pattern.indexOf("#");
         if (p >= 0) {
+            log.info("precision 1");
             int precision;
             try {
                 precision = Integer.parseInt(pattern.substring(p + 1));

@@ -24,9 +24,13 @@
 
 package edu.cmu.oli.assessment.evaluators;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.math.BigDecimal;
 
 public class PrecisionMatcher implements ResponseMatcher<BigDecimal> {
+    static final Logger log = LoggerFactory.getLogger(PrecisionMatcher.class);
     private int precision;
 
     public PrecisionMatcher(int precision) {
@@ -52,6 +56,7 @@ public class PrecisionMatcher implements ResponseMatcher<BigDecimal> {
     }
 
     public boolean matches(BigDecimal response) {
+        log.info("value= "+ response + "match precision:= "+response.precision() +" vs " + precision + " vs scale= " + response.scale());
         if (response == null) return false;
         return (precision == response.precision());
     }
