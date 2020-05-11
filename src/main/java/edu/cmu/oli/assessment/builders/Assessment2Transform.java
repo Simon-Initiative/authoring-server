@@ -75,6 +75,11 @@ public class Assessment2Transform {
                         select.detach();
                         element.setAttribute(select);
                     }
+                    Attribute grading = next.getAttribute("grading");
+                    if (grading != null) {
+                        grading.detach();
+                        element.setAttribute(grading);
+                    }
                 });
             }
             if (inputs.hasNext()) {
@@ -87,7 +92,7 @@ public class Assessment2Transform {
                     }
 
                 });
-            } else if (inputRefs.hasNext()) {
+            } else if (inputRefs.hasNext() && !next.getName().equalsIgnoreCase("image_hotspot")) {
                 List<Element> refs = new ArrayList<>();
                 inputRefs.forEach(element -> refs.add(element));
                 for (int i = 0; i < refs.size(); i++) {
@@ -100,7 +105,7 @@ public class Assessment2Transform {
                         ty.setAttribute(select);
                     }
                 }
-            } else {
+            } else if (!next.getName().equalsIgnoreCase("image_hotspot")) {
                 Element input = next.getChild("input");
                 if (input == null) {
                     input = new Element(next.getName());
@@ -190,6 +195,14 @@ public class Assessment2Transform {
                 case "image_hotspot":
                     questionType.forEach(element -> {
                         element.setName("image_input");
+                        element.getAttributes().forEach(attribute -> {
+                            if (attribute.getName().equalsIgnoreCase("select") ||
+                                    attribute.getName().equalsIgnoreCase("grading")) {
+                                attribute.detach();
+                                ((Element) element.getParent()).setAttribute(attribute);
+                            }
+                        });
+
                     });
                     break;
                 default:

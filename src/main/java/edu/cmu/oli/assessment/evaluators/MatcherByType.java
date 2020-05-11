@@ -42,7 +42,6 @@ import java.util.regex.PatternSyntaxException;
  * @author Raphael Gachuhi
  */
 public class MatcherByType {
-
     JsonObject interaction;
 
     public MatcherByType(JsonObject interaction) {
