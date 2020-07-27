@@ -418,6 +418,9 @@ public class ResourceToXml {
                 Attribute whitespace = el.getAttribute("whitespace");
                 Attribute caseSensitive = el.getAttribute("case_sensitive");
                 Attribute select2 = el.getAttribute("select");
+                // AW: new attributes for math input
+                Attribute evaluation = el.getAttribute("evaluation");
+                Attribute keyboard = el.getAttribute("keyboard");
                 if (whitespace != null) {
                     whitespace.detach();
                     if (!whitespace.getValue().isEmpty()) {
@@ -434,6 +437,18 @@ public class ResourceToXml {
                     select2.detach();
                     if (!select2.getValue().isEmpty()) {
                         ((Element) el.getParent()).setAttribute(select2);
+                    }
+                }
+                if (evaluation != null) {
+                    evaluation.detach();
+                    if (!evaluation.getValue().isEmpty()) {
+                        ((Element) el.getParent()).setAttribute(evaluation);
+                    }
+                }
+                if (keyboard != null) {
+                    keyboard.detach();
+                    if (!keyboard.getValue().isEmpty()) {
+                        ((Element) el.getParent()).setAttribute(keyboard);
                     }
                 }
                 el.removeAttribute("notation");
