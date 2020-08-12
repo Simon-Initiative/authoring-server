@@ -39,6 +39,14 @@ import edu.cmu.oli.content.security.AppSecurityContext;
 import edu.cmu.oli.content.security.AppSecurityController;
 import edu.cmu.oli.content.security.Secure;
 import edu.cmu.oli.content.security.UserInfo;
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
+import org.jdom2.filter.Filters;
+import org.jdom2.input.SAXBuilder;
+import org.jdom2.input.sax.XMLReaders;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -55,8 +63,14 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.File;
+import java.io.IOException;
+import java.io.StringReader;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Stateless
 public class DeployControllerImpl implements DeployController {
@@ -332,6 +346,34 @@ public class DeployControllerImpl implements DeployController {
         sb.append("Package Title: " + contentPackage.getTitle() + "\n");
         sb.append("Description: " + contentPackage.getDescription() + "\n");
         sb.append("Last Updated: " + contentPackage.getDateUpdated() + "\n\n");
+
+        CriteriaBuilder cb = em.getCriteriaBuilder();
+        CriteriaQuery<Resource> criteria = cb.createQuery(Resource.class);
+        Root<Resource> resourceRoot = criteria.from(Resource.class);
+        criteria.select(resourceRoot)
+                .where(cb.and(cb.equal(resourceRoot.get("contentPackage").get("guid"), contentPackage.getGuid()),
+                        resourceRoot.get("type").in("x-oli-organization")));
+        List<Resource> organizationList = em.createQuery(criteria).getResultList();
+        List<Optional<String>> orgRelatedMessages = organizationList.stream().map(o -> {
+            String path = contentPackage.getSourceLocation() + File.separator + o.getFileNode().getPathFrom();
+            SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);
+            builder.setExpandEntities(false);
+            Document document = null;
+            String message = null;
+            try {
+                document = builder.build(new StringReader(new String(Files.readAllBytes(Paths.get(path)), StandardCharsets.UTF_8)));
+            } catch (JDOMException | IOException e) {
+                log.error(e.getLocalizedMessage(), e);
+                return Optional.ofNullable(message);
+            }
+            XPathExpression<Element> xexpression = XPathFactory.instance().compile("//module", Filters.element());
+            if (xexpression.evaluate(document).isEmpty()) {
+                message = "Warning: no module found in organization " + o.getId() +"\n";
+            }
+            return Optional.ofNullable(message);
+
+        }).filter(Optional::isPresent).collect(Collectors.toList());
+        orgRelatedMessages.forEach(e->sb.append(e.get()));
         return sb.toString();
     }
 

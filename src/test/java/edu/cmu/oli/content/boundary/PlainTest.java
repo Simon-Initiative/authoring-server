@@ -10,7 +10,9 @@ import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 
@@ -21,7 +23,6 @@ public class PlainTest {
 
     @Test
     public void testNothing() throws JDOMException, IOException {
-
         String val = "After sorting ints: ";
         MessageDigest messageDigest = null;
         try {
@@ -33,7 +34,12 @@ public class PlainTest {
         messageDigest.update(val.getBytes());
         String encryptedString = convertByteArrayToHexString(messageDigest.digest());
         System.out.println("After sorting ints: " + encryptedString);
-        assertTrue(true);
+
+        System.out.println("Time zones in GMT:");
+        List<String> gmt = getTimeZoneList(OffsetBase.GMT);
+        for (String timeZone : gmt) {
+            System.out.println(timeZone);
+        }
     }
 
     private static String convertByteArrayToHexString(byte[] arrayBytes) {
@@ -45,4 +51,35 @@ public class PlainTest {
         return stringBuffer.toString();
     }
 
+    public enum OffsetBase {
+        GMT, UTC
+    }
+
+    public List<String> getTimeZoneList(OffsetBase base) {
+        String[] availableZoneIds = TimeZone.getAvailableIDs();
+        List<String> result = new ArrayList<>(availableZoneIds.length);
+
+        for (String zoneId : availableZoneIds) {
+            TimeZone curTimeZone = TimeZone.getTimeZone(zoneId);
+
+            String offset = calculateOffset(curTimeZone.getRawOffset());
+
+            result.add(String.format("(%s%s) %s", base, offset, zoneId ));
+        }
+
+        Collections.sort(result);
+
+        return result;
+    }
+
+    private String calculateOffset(int rawOffset) {
+        if (rawOffset == 0) {
+            return "+00:00";
+        }
+        long hours = TimeUnit.MILLISECONDS.toHours(rawOffset);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(rawOffset);
+        minutes = Math.abs(minutes - TimeUnit.HOURS.toMinutes(hours));
+
+        return String.format("%+03d:%02d", hours, Math.abs(minutes));
+    }
 }

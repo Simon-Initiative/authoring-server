@@ -22,6 +22,11 @@ import javax.json.Json;
 import javax.json.JsonValue;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
+import javax.ws.rs.client.ClientBuilder;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -469,5 +474,14 @@ public class AppUtils {
         }
         
         return EmbedActivityType.UNKNOWN;
+    }
+
+    public static Response.Status sendSlackAlert(JsonObject message){
+        WebTarget target =
+                ClientBuilder.newClient()
+                        .target("https://hooks.slack.com/services/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");
+        Response response = target.request(MediaType.APPLICATION_JSON)
+                .post(Entity.json(AppUtils.gsonBuilder().create().toJson(message)));
+        return Response.Status.fromStatusCode(response.getStatus());
     }
 }
