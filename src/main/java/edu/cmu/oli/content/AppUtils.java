@@ -467,7 +467,6 @@ public class AppUtils {
     }
 
     public static Response.Status sendSlackAlert(JsonObject message) {
-        log.info("sending slack message " + new Gson().toJson(message));
         String slackHook = System.getenv().get("slack_alert_hook");
         if (slackHook == null || slackHook.isEmpty() || slackHook.equalsIgnoreCase("none")) {
             return Response.Status.FORBIDDEN;
