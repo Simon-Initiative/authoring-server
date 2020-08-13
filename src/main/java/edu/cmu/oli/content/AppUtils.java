@@ -6,6 +6,7 @@ import edu.cmu.oli.content.models.persistance.JsonWrapper;
 import edu.cmu.oli.content.models.persistance.entities.ContentPackage;
 import edu.cmu.oli.content.models.persistance.entities.ErrorLevel;
 import edu.cmu.oli.content.models.persistance.entities.Resource;
+import edu.cmu.oli.content.resource.builders.Xml2Json;
 import org.apache.tika.Tika;
 import org.apache.xml.resolver.tools.CatalogResolver;
 import org.jdom2.Attribute;
@@ -27,22 +28,14 @@ import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
-import edu.cmu.oli.content.resource.builders.Xml2Json;
 
 /**
  * @author Raphael Gachuhi
@@ -97,7 +90,7 @@ public class AppUtils {
     }
 
     public static void addToPackageError(ContentPackage contentPackage, String message, String source,
-            ErrorLevel level) {
+                                         ErrorLevel level) {
         if (contentPackage.getErrors() == null) {
             JsonObject errors = new JsonObject();
             errors.addProperty("contentPackageErrors", contentPackage.getId() + "_" + contentPackage.getVersion());
@@ -134,13 +127,13 @@ public class AppUtils {
 
     private static boolean isQuestionWithParts(Element element) {
         if (element.getName().equals("multiple_choice")
-            || element.getName().equals("ordering")
-            || element.getName().equals("short_answer")
-            || element.getName().equals("essay")
-            || element.getName().equals("numeric")
-            || element.getName().equals("text")
-            || element.getName().equals("fill_in_the_blank")
-            || element.getName().equals("question")) {
+                || element.getName().equals("ordering")
+                || element.getName().equals("short_answer")
+                || element.getName().equals("essay")
+                || element.getName().equals("numeric")
+                || element.getName().equals("text")
+                || element.getName().equals("fill_in_the_blank")
+                || element.getName().equals("question")) {
             return true;
         }
 
@@ -174,8 +167,8 @@ public class AppUtils {
 
         switch (question.getName()) {
             case "multiple_choice":
-            if (question.getAttribute("select") != null
-                && question.getAttribute("select").getValue().equals("single")) {
+                if (question.getAttribute("select") != null
+                        && question.getAttribute("select").getValue().equals("single")) {
                     return "Multiple Choice";
                 }
                 return "Check All That Apply";
@@ -224,16 +217,16 @@ public class AppUtils {
         if (element.getName().equals("pool")) {
             for (Element c : element.getChildren()) {
                 switch (c.getName()) {
-                case "multiple_choice":
-                case "ordering":
-                case "short_answer":
-                case "essay":
-                case "numeric":
-                case "text":
-                case "fill_in_the_blank":
-                case "question":
-                    count = count + 1;
-                default:
+                    case "multiple_choice":
+                    case "ordering":
+                    case "short_answer":
+                    case "essay":
+                    case "numeric":
+                    case "text":
+                    case "fill_in_the_blank":
+                    case "question":
+                        count = count + 1;
+                    default:
                 }
             }
         }
@@ -373,29 +366,26 @@ public class AppUtils {
         UNKNOWN("UNKNOWN");
 
         private String type;
-    
+
         EmbedActivityType(String type) {
             this.type = type;
         }
-    
+
         public String getAsString() {
             return type;
         }
-        
+
         private static final Map<String, EmbedActivityType> reverseLookup = new HashMap<>();
-    
+
         // Populate the reverse lookup table on loading time
-        static
-        {
-            for(EmbedActivityType activityType : EmbedActivityType.values())
-            {
+        static {
+            for (EmbedActivityType activityType : EmbedActivityType.values()) {
                 reverseLookup.put(activityType.getAsString(), activityType);
             }
         }
-    
+
         //This method can be used for reverse lookup purpose
-        public static EmbedActivityType fromString(String type) 
-        {
+        public static EmbedActivityType fromString(String type) {
             return reverseLookup.get(type);
         }
     }
@@ -404,7 +394,7 @@ public class AppUtils {
         // use activity_type property or infer type based on content
         if (embedActivity.has("@activity_type")) {
             // use activity_type attribute to determine type
-            switch(embedActivity.get("@activity_type").getAsString().toLowerCase()) {
+            switch (embedActivity.get("@activity_type").getAsString().toLowerCase()) {
                 case "repl":
                     return EmbedActivityType.REPL;
                 default:
@@ -429,7 +419,7 @@ public class AppUtils {
                     String source = itemObj.get("source").getAsJsonObject().get("#text").getAsString();
                     if (source.endsWith("activity.js") || source.endsWith("repl.js")) {
                         flags = flags | 0b1;
-                        
+
                         if (flags == REPL_FLAGS) {
                             return EmbedActivityType.REPL;
                         }
@@ -472,16 +462,21 @@ public class AppUtils {
             }
 
         }
-        
+
         return EmbedActivityType.UNKNOWN;
     }
 
-    public static Response.Status sendSlackAlert(JsonObject message){
-        WebTarget target =
-                ClientBuilder.newClient()
-                        .target("https://hooks.slack.com/services/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");
+    public static Response.Status sendSlackAlert(JsonObject message) {
+        log.info("sending slack message " + new Gson().toJson(message));
+        String slackHook = System.getenv().get("slack_alert_hook");
+        if (slackHook == null || slackHook.isEmpty() || slackHook.equalsIgnoreCase("none")) {
+            return Response.Status.FORBIDDEN;
+        }
+        WebTarget target = ClientBuilder.newClient().target(slackHook);
         Response response = target.request(MediaType.APPLICATION_JSON)
                 .post(Entity.json(AppUtils.gsonBuilder().create().toJson(message)));
+        log.info("response code " + response.getStatusInfo() + " code " + response.getStatus());
+
         return Response.Status.fromStatusCode(response.getStatus());
     }
 }

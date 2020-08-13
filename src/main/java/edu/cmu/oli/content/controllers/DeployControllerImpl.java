@@ -261,7 +261,9 @@ public class DeployControllerImpl implements DeployController {
         sb.append(packageDetails(pkg));
 
         // Send email to authors only
-        doSendEmail(pkg, authorEmailsj, subject, sb.toString(), Optional.empty());
+        if(authorEmailsj.size() > 0) {
+            doSendEmail(pkg, authorEmailsj, subject, sb.toString(), Optional.empty());
+        }
 
         if (svnLocation != null) {
             sb.append("SVN Location: " + svnLocation + "\n\n");
@@ -368,7 +370,8 @@ public class DeployControllerImpl implements DeployController {
             }
             XPathExpression<Element> xexpression = XPathFactory.instance().compile("//module", Filters.element());
             if (xexpression.evaluate(document).isEmpty()) {
-                message = "Warning: no module found in organization " + o.getId() +"\n";
+                message = "Warning: An organization (id=" + o.getId() +") has no modules\n" +
+                        "Organizations without at least one module have learning dashboard limitations in OLI\n\n";
             }
             return Optional.ofNullable(message);
 
@@ -388,6 +391,8 @@ public class DeployControllerImpl implements DeployController {
         if (attachments.isPresent()) {
             payload.add("attachments", attachments.get());
         }
+
+        log.info("email payload " + new Gson().toJson(payload));
 
         WebTarget target = ClientBuilder.newClient().target(configuration.get().getEmailServer());
         Response response = target.request(MediaType.APPLICATION_JSON)
