@@ -35,6 +35,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -466,14 +467,46 @@ public class AppUtils {
         return EmbedActivityType.UNKNOWN;
     }
 
+    private static Map<String, Long> delayedSlackMessages;
+    static {
+        delayedSlackMessages = new ConcurrentHashMap<>();
+        long sleepTimeInMilli = 1000L * 60 * 1; // 1 minutes
+        Timer timer = new Timer(true);
+        TimerTask timerTask = new TimerTask() {
+            @Override
+            public void run() {
+                delayedSlackMessagesClear();
+            }
+        };
+        timer.scheduleAtFixedRate(timerTask, sleepTimeInMilli, sleepTimeInMilli);
+    }
+
+    private static void delayedSlackMessagesClear(){
+        Iterator<Map.Entry<String, Long>> it = delayedSlackMessages.entrySet().iterator();
+        while (it.hasNext()){
+            Map.Entry<String, Long> next = it.next();
+            // Remove entry after 15 minutes
+            if((System.currentTimeMillis() - next.getValue()) > (1000L * 60 * 15)){
+                delayedSlackMessages.remove(next.getKey());
+            }
+        }
+    }
+
     public static Response.Status sendSlackAlert(JsonObject message) {
         String slackHook = System.getenv().get("slack_alert_hook");
         if (slackHook == null || slackHook.isEmpty() || slackHook.equalsIgnoreCase("none")) {
             return Response.Status.FORBIDDEN;
         }
+        String messageString = AppUtils.gsonBuilder().create().toJson(message);
+        if(delayedSlackMessages.containsKey(messageString)){
+            // Same message already dispatched less than 15 minutes ago; ignore this one
+            return Response.Status.OK;
+        }
+
+        delayedSlackMessages.put(messageString, System.currentTimeMillis());
         WebTarget target = ClientBuilder.newClient().target(slackHook);
         Response response = target.request(MediaType.APPLICATION_JSON)
-                .post(Entity.json(AppUtils.gsonBuilder().create().toJson(message)));
+                .post(Entity.json(messageString));
         log.info("response code " + response.getStatusInfo() + " code " + response.getStatus());
 
         return Response.Status.fromStatusCode(response.getStatus());
