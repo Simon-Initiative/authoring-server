@@ -348,6 +348,7 @@ public class DeployControllerImpl implements DeployController {
         sb.append("Package Title: " + contentPackage.getTitle() + "\n");
         sb.append("Description: " + contentPackage.getDescription() + "\n");
         sb.append("Last Updated: " + contentPackage.getDateUpdated() + "\n\n");
+        sb.append("Theme choice: " + contentPackage.getTheme()+ "\n\n");
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Resource> criteria = cb.createQuery(Resource.class);
