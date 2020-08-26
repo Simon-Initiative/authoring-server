@@ -6,6 +6,8 @@ import com.google.gson.JsonObject;
 import edu.cmu.oli.content.AppUtils;
 import org.apache.commons.text.StringEscapeUtils;
 import org.jdom2.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,6 +18,8 @@ import java.util.Set;
  * @author Raphael Gachuhi
  */
 public class Json2Xml {
+
+    private Logger log = LoggerFactory.getLogger(Json2Xml.class);
 
     public Document jsonToXml(JsonObject json, Map<String, Namespace> namespaceMap) {
         Document document = new Document();
@@ -118,9 +122,13 @@ public class Json2Xml {
             } else if (key.equalsIgnoreCase("#cdata")) {
                 ((Element) xmlParent).addContent(new CDATA(jsonTree.getAsString()));
             } else {
-
-                String s = StringEscapeUtils.escapeXml10(jsonTree.getAsString());
-                ((Element) xmlParent).addContent(s);
+                // Wraps with cdata any codeblock content not already wrapped in cdata
+                if (((Element)xmlParent).getName().equalsIgnoreCase("codeblock")) {
+                    ((Element) xmlParent).addContent(new CDATA(jsonTree.getAsString()));
+                }else {
+                    String s = StringEscapeUtils.escapeXml10(jsonTree.getAsString());
+                    ((Element) xmlParent).addContent(s);
+                }
 
             }
         } else if (jsonTree.isJsonNull()) {
