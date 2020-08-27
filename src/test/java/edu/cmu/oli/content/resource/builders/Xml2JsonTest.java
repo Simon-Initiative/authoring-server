@@ -27,15 +27,17 @@ public class Xml2JsonTest {
         assertTrue(str.contains("<p>1 2 3</p>"));
         assertTrue(str.contains("<p>4 5 6</p>"));
 
+          System.out.println(str);
         // check newlines retained in preformatted codeblocks
         Matcher regex = Pattern.compile(
-          "<codeblock syntax\\=\"xml\">7$\\s+8$\\s+9</codeblock>",
+          "<codeblock syntax\\=\"xml\"><\\!\\[CDATA\\[7$\\s+8$\\s+9\\]\\]></codeblock>",
           Pattern.DOTALL | Pattern.MULTILINE
         ).matcher(str);
         assertTrue("XML contains 7\\n        8\\n        9", regex.find());
 
+
         regex = Pattern.compile(
-          "<codeblock syntax\\=\"xml\">$\\s+10$\\s+11$\\s+12</codeblock>",
+          "<codeblock syntax\\=\"xml\"><\\!\\[CDATA\\[$\\s+10$\\s+11$\\s+12\\]\\]></codeblock>",
           Pattern.DOTALL | Pattern.MULTILINE
         ).matcher(str);
         assertTrue("XML contains \\n        10\\n        11\\n        12", regex.find());
