@@ -1393,9 +1393,7 @@ public class LDModelControllerImpl implements LDModelController {
                     skillsRef.add(s);
                 }
             });
-            if(!skillsRef.isEmpty()) {
-                obLoad.add(new ObSkill(e, skillsRef));
-            }
+            obLoad.add(new ObSkill(e, skillsRef));
         });
 
         int maxSkills1 = 0;
