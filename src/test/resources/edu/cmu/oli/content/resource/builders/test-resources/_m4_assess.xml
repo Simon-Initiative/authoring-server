@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="UTF-8"?> <!DOCTYPE assessment PUBLIC "-//Carnegie Mellon University//DTD Assessment MathML 2.4//EN" "http://oli.web.cmu.edu/dtd/oli_assessment_mathml_2_4.dtd">
+<assessment xmlns:cmd="http://oli.web.cmu.edu/content/metadata/2.1/" id="_m4_assess">
+    <title>Effects of Multiple Forces</title>
+    <page>
+        <numeric id="q1">
+            <body><p>Two forces are applied to the body via cables. Both forces act through the
+                point (x,y)=(3,2) and the line of action of the force F<sub>1</sub> passes
+                through (x,y)=(2,5). You are to replace the two cables by a single cable that is
+                produces the same effect on the body. </p><image src="../webcontent/statics_quiz4_image1.gif"/><p>First, deter mine the
+                components of the forces F<sub>1</sub> and F<sub>2</sub>:</p><ul>
+                <li><p>x-component of F<sub>1</sub> = <input_ref input="i1"/> N</p></li>
+                <li><p>y-component of F<sub>1</sub> = <input_ref input="i2"/> N</p></li>
+                <li><p>x-compo nent of F<sub>2</sub> = <input_ref input="i3"/> N</p></li>
+                <li><p>y-component of F<sub>2</sub> = <input_ref input="i4"/> N</p></li>
+            </ul></body>
+            <input id="i1"/>
+            <input id="i2"/>
+            <input id="i3"/>
+            <input id="i4"/>
+            <part id="p1">
+                <skillref idref="resolve_into_components"/>
+                <response name="-1.58" input="i1" match="(-1.659,-1.501)" score="5"/>
+                <response input="i1" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+            <part id="p2">
+                <skillref idref="resolve_into_components"/>
+                <response name="4.74" input="i2" match="(4.503,4.977)" score="5"/>
+                <response input="i2" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+            <part id="p3">
+                <skillref idref="resolve_into_components"/>
+                <response name="17" input="i3 " match="(16.15,17.85)" score="5"/>
+                <response input="i3" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+            <part id="p4">
+                <skillref idref="resolve_into_components"/>
+                <response name="-10" input="i4" match="(-10.5,-9.5)" score="5"/>
+                <response input="i4" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+        </numeric>
+        <numeric id="q2">
+            <body><p>What is the tension in the single replacement cable? <input_ref input="i1"/>
+                N</p></body>
+            <input id="i1"/>
+            <part id="p1">
+                <skillref idref="find_magnitude_given_components"/>
+                <response name="16.6" input="i1" match="(15.77,17.43)" score="15"/>
+                <response input="i1" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+        </numeric>
+        <numeric id="q3">
+            <body><p>What is the angle α that the single replacement cable forms with the x axis?
+                (enter a positive number) <input_ref input="i1"/> degrees</p></body>
+            <input id="i1"/>
+            <part id="p1">
+                <skillref idref="find_angle_given_components"/>
+                <response name="18.5" input="i1" match="(17.575,19.425)" score="15"/>
+                <response name="341.5" input="i1" match="(324.425,358.575)" score="15"/>
+                <response input="i1" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+        </numeric>
+        <image_hotspot id="q4" select="single">
+            <body><p>Indicate the direction of the single replacement cable by clicking on the
+                appropriate quadrant:</p><input_ref input="direction"/></body>
+            <image_input id="direction" src="../webcontent/statics_ quiz4_image2.gif" width="107"
+                         height="108">
+                <hotspot shape="rect" value="up_and_left" coords="0,0,53,52">Up and Left</hotspot>
+                <hotspot shape="rect" value="up_and_right" coords="54,0,107,52">Up and
+                    Right</hotspot>
+                <hotspot shape="rect" value="down_and_left" coords="0,53,53,105">Down and
+                    Left</hotspot>
+                <hotspot shape="rect" value="down_and_right" coords="54,53,107,105">Down and
+                    Right</hotspot>
+            </image_input>
+            <part id="p1">
+                <skillref idref="find_angle_given_components"/>
+                <response name="up and left" input="direction" match="up_and_left" score="0"/>
+                <response name="up and right" input="direction" match="up_and_right" score="0"/>
+                <response name="down and left" input="direction" match="dow n_and_left" score="0"/>
+                <response name="down and right" input="direction" match="down_and_right" score="5"/>
+                <no_response score="0"/>
+            </part>
+        </image_hotspot>
+    </page>
+    <page>
+        <content>
+            <p>Determine the moment created by the two forces about the point O.</p>
+            <image src="../webcontent/statics_quiz4_image3.gif"/>
+        </content>
+        <numeric id="q5">
+            <body><p>Magnitude of moment (enter positive number) = <input_ref input="i1"/>
+                lb-in</p></body>
+            <input id="i1"/>
+            <part id="p1">
+                <skillref idref="determine_moment"/>
+                <response name="10" input="i1" match="(9.5, 10.5)" score="10"/>
+                <response input="i1" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+        </numeric>
+        <fill_in_the_blank id="q6">
+            <body><p>Sense of moment = <input_ref input="i1"/></p></body>
+            <input id="i1" shuffle="false">
+                <choice value="cw">CW</choice>
+                <choice value="ccw">CCW</choice>
+            </input>
+            <part id="p1">
+                <skillref idref="moment_sign_sense_relation"/>
+                <response name="CW" input="i1" match="cw " score="5"/>
+                <response name="CCW" input="i1" match="ccw" score="0"/>
+                <no_response score="0"/>
+            </part>
+        </fill_in_the_blank>
+    </page>
+    <page>
+        <content>
+            <p>Determine the moment of the force about the point O.</p>
+            <image src="../webcontent/stati cs_quiz4_image4.gif"/>
+        </content>
+        <numeric id="q7">
+            <body><p>Component of F perpendicular to OP = <input_ref input="i1"/> N</p></body>
+            <input id="i1"/>
+            <part id="p1">
+                <skillref idref="resolve_into_components"/>
+                <response name="15.32" input="i1" match="(14.554, 16.086)" score="15"/>
+                <response input="i1" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+        </numeric>
+        <numeric id="q8">
+            <body><p>Magnitude of moment (enter positive number; pay attention to units) =
+                <input_ref input="i1"/> N-m</p></body>
+            <input id="i1"/>
+            <part id="p1">
+                <skillref idref="find_moment_arm"/>
+                <response name="7.66" input="i1" match="(7.277, 8.043)" score="15"/>
+                <response input="i1" match="*" score="0"/>
+                <no_response score="0"/>
+            </part>
+        </numeric>
+        <fill_in_the_blank id="q9">
+            <body><p>Sense of moment = <input_ref input="i1"/></p></body>
+            <input id="i1" shuffle="false">
+                <choice value="cw">CW</choice>
+                <choice value="ccw">CCW</choice>
+            </input>
+            <part id="p1">
+                <skillref idref="moment_sign_sense_relation"/>
+                <skillref idref="rotation_sense_of_force"/>
+                <response name="CW" input="i1" match="cw" score="0"/>
+                <response name="CCW" input="i1" match="ccw" score="5"/>
+                <no_response score="0"/>
+            </part>
+        </fill_in_the_blank>
+    </page>
+</assessment>

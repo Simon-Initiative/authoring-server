@@ -274,6 +274,11 @@ public class SVNSyncController {
 
             } catch (SVNException e) {
                 log.error("SVN Add Entry Error: ", e);
+                JsonObject alert = new JsonObject();
+                alert.addProperty("text", System.getenv().get("SERVER_URL")
+                        + " SVN Add Entry Error: working copy name:- " + base.getName() +
+                        " \nerror message " + e.getLocalizedMessage() +" \nsvn url:- " +svnUrl.get(0));
+                AppUtils.sendSlackAlert(alert);
             }
 
             Map<String, Path> repoFiles = new HashMap<>();
@@ -334,11 +339,23 @@ public class SVNSyncController {
 
             } catch (SVNException ex) {
                 log.error("SVN Update Error: ", ex);
+                JsonObject alert = new JsonObject();
+                alert.addProperty("text", System.getenv().get("SERVER_URL")
+                        + " SVN Update Error: working copy name:- " + base.getName() +
+                        " \nerror message " + ex.getLocalizedMessage() +" \nsvn url:- " +svnUrl.get(0));
+                AppUtils.sendSlackAlert(alert);
             }
+
             try {
                 svnCommit(base, svnManager);
             } catch (SVNException ex) {
                 log.error("SVN Commit Error: ", ex);
+                JsonObject alert = new JsonObject();
+                alert.addProperty("text", System.getenv().get("SERVER_URL")
+                        +" SVN Commit Error: working copy name:- " + base.getName() +
+                        " \nerror message " + ex.getLocalizedMessage() +" \nsvn url:- " +svnUrl.get(0));
+
+                AppUtils.sendSlackAlert(alert);
             }
 
             log.info("Done Committing changes to svn " + base.getName());

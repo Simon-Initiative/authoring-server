@@ -1,6 +1,6 @@
 package edu.cmu.oli.content.controllers;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import com.google.gson.*;
 import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.ContentServiceException;
@@ -75,7 +75,7 @@ public class LDModelControllerImpl implements LDModelController {
     Instance<Configurations> configuration;
 
     @Inject
-    @Dedicated("svnExecutor")
+    @DedicatedExecutor("svnExecutor")
     ExecutorService svnExecutor;
 
     @Override
@@ -1022,8 +1022,12 @@ public class LDModelControllerImpl implements LDModelController {
         JsonArray stepArray = partAsJsonObject.getAsJsonArray("#array");
 
         boolean skillRefAlreadyExists = false;
+        int index = -1;
         try {
             for (JsonElement next : stepArray) {
+                if(next.isJsonObject() && next.getAsJsonObject().has("title")){
+                    index = 0;
+                }
                 if (next.isJsonObject() && next.getAsJsonObject().has("skillref") && next.getAsJsonObject()
                         .get("skillref").getAsJsonObject().get("@idref").getAsString().equals(skillId)) {
                     skillRefAlreadyExists = true;
@@ -1034,7 +1038,7 @@ public class LDModelControllerImpl implements LDModelController {
             log.error(AppUtils.gsonBuilder().create().toJson(part));
             throw e;
         }
-        tagWithSkill(skillId, part, stepArray, -1, skillRefAlreadyExists);
+        tagWithSkill(skillId, part, stepArray, index, skillRefAlreadyExists);
     }
 
     private void findAllParts(JsonElement content, List<JsonElement> parts) {
@@ -1389,9 +1393,7 @@ public class LDModelControllerImpl implements LDModelController {
                     skillsRef.add(s);
                 }
             });
-            if(!skillsRef.isEmpty()) {
-                obLoad.add(new ObSkill(e, skillsRef));
-            }
+            obLoad.add(new ObSkill(e, skillsRef));
         });
 
         int maxSkills1 = 0;

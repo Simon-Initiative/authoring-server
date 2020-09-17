@@ -5,10 +5,14 @@ import org.jdom2.JDOMException;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.ZoneId;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 import static org.junit.Assert.assertTrue;
 
@@ -19,116 +23,63 @@ public class PlainTest {
 
     @Test
     public void testNothing() throws JDOMException, IOException {
-        // StringReader st = new StringReader(content);
-        // SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);
-        // Document document = builder.build(st);
-        // XPathFactory xFactory = XPathFactory.instance();
-        // XPathExpression<Element> xexpression = xFactory.compile("//*[contains(@*,
-        // 'webcontent')]", Filters.element());
-        // List<Element> elements = xexpression.evaluate(document.getRootElement());
-        // elements.forEach(e->{
-        // System.out.println("element " + e.getName());
-        // List<Attribute> ats = e.getAttributes();
-        // ats.forEach(a->{
-        // if(a.getValue().contains("webcontent")) {
-        // System.out.println("attribute " + a.getName());
-        // }
-        // });
-        // });
-        // Path path = Paths.get("/oli/content/somefile.xml");
-        // Path relativize = path.resolve("../otherfile.xml");
-        // System.out.println(relativize.normalize());
-        // System.out.println(Paths.get("/oli").relativize(relativize.normalize()));
-        // assertTrue(!elements.isEmpty());
-
-        // StringReader st = new StringReader(content);
-        // SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);
-        // Document document = builder.build(st);
-        // XPathFactory xFactory = XPathFactory.instance();
-        //// //cmd:concept |
-        // XPathExpression<Element> xexpression = xFactory.compile("//*[contains(@src,
-        // 'webcontent/')] | //*[contains(text(),'webcontent/')]", Filters.element(),
-        // null,
-        // Namespace.getNamespace("cmd",
-        // "http://oli.web.cmu.edu/content/metadata/2.1/"));
-        // List<Element> images = xexpression.evaluate(document);
-        // images.forEach(e->{
-        // JsonObject ob = new JsonObject();
-        // getParent(e, ob);
-        // System.out.println(AppUtils.gsonBuilder().create().toJson(ob));
-        // //System.out.println(XPathHelper.getAbsolutePath(e));
-        // });
-
-        // DirectoryUtils du = new DirectoryUtils();
-        //
-        // ZipInputStream zis = new
-        // ZipInputStream(Files.newInputStream(Paths.get(File.separator+"oli"+File.separator+"content"+
-        // File.separator+"ldmodel.zip")));
-        //
-        // ZipEntry entry = zis.getNextEntry();
-        //
-        // assertNotNull(entry);
-        //
-        // while (entry != null) {
-        // String fileName = entry.getName();
-        // fileName = fileName.replaceAll(" ", "_");
-        // String substring = fileName.substring(0, fileName.lastIndexOf('.'));
-        // substring = substring.replaceAll("\\.", "");
-        // fileName = substring + fileName.substring(fileName.lastIndexOf('.'));
-        //
-        // // Force upload into webcontent directory
-        // if (!fileName.contains("webcontent")) {
-        // fileName = "webcontent_test" + File.separator + "ld_model" + File.separator +
-        // fileName;
-        // }
-        // String uploadLocation = File.separator+"oli"+File.separator+"content"+
-        // File.separator + fileName;
-        // Path uploadPath = FileSystems.getDefault().getPath(uploadLocation);
-        //
-        // assertTrue(!uploadPath.toFile().exists());
-        //
-        // du.createDirectories(uploadLocation);
-        //
-        // du.saveFile(zis, uploadPath);
-        //
-        // entry = zis.getNextEntry();
-        // }
-
-        List<Date> listDates = new ArrayList<Date>();
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd");
-
+        String val = "After sorting ints: ";
+        MessageDigest messageDigest = null;
         try {
-            listDates.add(dateFormatter.parse("2013-09-30"));
-            listDates.add(dateFormatter.parse("2013-07-06"));
-            listDates.add(dateFormatter.parse("2013-11-28"));
-        } catch (ParseException ex) {
-            System.err.print(ex);
+            messageDigest = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
 
-        System.out.println("Before sorting: " + listDates);
+        messageDigest.update(val.getBytes());
+        String encryptedString = convertByteArrayToHexString(messageDigest.digest());
+        System.out.println("After sorting ints: " + encryptedString);
 
-        Collections.sort(listDates, new Comparator<Date>() {
-            @Override
-            public int compare(Date o1, Date o2) {
-                return o2.compareTo(o1);
-            }
-        });
-
-        System.out.println("After sorting: " + listDates);
-
-        List<Integer> integerList = new ArrayList<>();
-        integerList.add(new Integer(1));
-        integerList.add(new Integer(2));
-        integerList.add(new Integer(3));
-        Collections.sort(integerList, new Comparator<Integer>() {
-            @Override
-            public int compare(Integer o1, Integer o2) {
-                return o2.compareTo(o1);
-            }
-        });
-
-        System.out.println("After sorting ints: " + integerList);
-        assertTrue(true);
+        System.out.println("Time zones in GMT:");
+        List<String> gmt = getTimeZoneList(OffsetBase.GMT);
+        for (String timeZone : gmt) {
+            System.out.println(timeZone);
+        }
     }
 
+    private static String convertByteArrayToHexString(byte[] arrayBytes) {
+        StringBuffer stringBuffer = new StringBuffer();
+        for (int i = 0; i < arrayBytes.length; i++) {
+            stringBuffer.append(Integer.toString((arrayBytes[i] & 0xff) + 0x100, 16)
+                    .substring(1));
+        }
+        return stringBuffer.toString();
+    }
+
+    public enum OffsetBase {
+        GMT, UTC
+    }
+
+    public List<String> getTimeZoneList(OffsetBase base) {
+        String[] availableZoneIds = TimeZone.getAvailableIDs();
+        List<String> result = new ArrayList<>(availableZoneIds.length);
+
+        for (String zoneId : availableZoneIds) {
+            TimeZone curTimeZone = TimeZone.getTimeZone(zoneId);
+
+            String offset = calculateOffset(curTimeZone.getRawOffset());
+
+            result.add(String.format("(%s%s) %s", base, offset, zoneId ));
+        }
+
+        Collections.sort(result);
+
+        return result;
+    }
+
+    private String calculateOffset(int rawOffset) {
+        if (rawOffset == 0) {
+            return "+00:00";
+        }
+        long hours = TimeUnit.MILLISECONDS.toHours(rawOffset);
+        long minutes = TimeUnit.MILLISECONDS.toMinutes(rawOffset);
+        minutes = Math.abs(minutes - TimeUnit.HOURS.toMinutes(hours));
+
+        return String.format("%+03d:%02d", hours, Math.abs(minutes));
+    }
 }

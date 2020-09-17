@@ -6,7 +6,8 @@ import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import org.jdom2.Element;
 import org.jdom2.Namespace;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Methods for generating preference service XML.
@@ -14,7 +15,7 @@ import org.jdom2.Namespace;
  * @author Raphael Gachuhi
  */
 public final class OptionsWriter {
-
+    static final Logger log = LoggerFactory.getLogger(OptionsWriter.class);
     private static final String _PUBLIC_ID = "-//Carnegie Mellon University//DTD Preferences 1.0//EN";
     private static final String _SYSTEM_ID = "http://oli.cmu.edu/dtd/oli_preferences_1_0.dtd";
 
@@ -31,7 +32,8 @@ public final class OptionsWriter {
     /**
      * <p>
      * Converts the given preference set to an XML element in the specified
-     * namespace. The resulting XML conforms to the OLI preferences DTD.</p>
+     * namespace. The resulting XML conforms to the OLI preferences DTD.
+     * </p>
      *
      * @param prefSeti preference set
      * @param nsi      XML namespace
@@ -39,7 +41,8 @@ public final class OptionsWriter {
      * @throws NullPointerException if either argument is <tt>null</tt>
      */
     public static Element preferenceSetToElement(JsonElement prefSeti, Namespace nsi) {
-        if (prefSeti == null || prefSeti.isJsonNull() || prefSeti.isJsonPrimitive()) {
+        if (prefSeti == null || prefSeti.isJsonNull() || prefSeti.isJsonPrimitive()
+                || prefSeti.isJsonObject() && prefSeti.getAsJsonObject().size() == 0) {
             return null;
         }
         if (nsi == null) {
@@ -48,6 +51,12 @@ public final class OptionsWriter {
 
         final Namespace ns = nsi;
         JsonObject prefSet = (JsonObject) prefSeti;
+        // Preferences
+        JsonArray preferences = prefSet.getAsJsonArray("preferences");
+        if (preferences == null) {
+            return null;
+        }
+
         // Preference set
         Element setElmnt = new Element("preferences", ns);
 
@@ -56,8 +65,6 @@ public final class OptionsWriter {
             setElmnt.setAttribute("guid", prefSet.get("@guid").getAsString());
         }
 
-        // Preferences
-        JsonArray preferences = prefSet.getAsJsonArray("preferences");
         preferences.forEach((val) -> {
             Element element = preferenceToElement(val, ns);
             if (element != null) {
@@ -70,8 +77,9 @@ public final class OptionsWriter {
 
     /**
      * <p>
-     * Converts the given preference to an XML element. The result XML conforms
-     * to the OLI preferences DTD.</p>
+     * Converts the given preference to an XML element. The result XML conforms to
+     * the OLI preferences DTD.
+     * </p>
      *
      * @param pref preference
      * @return XML element representation of the preference
@@ -83,8 +91,9 @@ public final class OptionsWriter {
 
     /**
      * <p>
-     * Converts the given preference to an XML element in the specified
-     * namespace. The result XML conforms to the OLI preferences DTD.</p>
+     * Converts the given preference to an XML element in the specified namespace.
+     * The result XML conforms to the OLI preferences DTD.
+     * </p>
      *
      * @param prefi preference
      * @param nsi   XML namespace

@@ -1,11 +1,11 @@
 package edu.cmu.oli.content.boundary.managers;
 
-import com.airhacks.porcupine.execution.boundary.Dedicated;
 import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.ResourceException;
 import edu.cmu.oli.content.analytics.DatasetBuilder;
+import edu.cmu.oli.content.configuration.DedicatedExecutor;
 import edu.cmu.oli.content.logging.Logging;
 import edu.cmu.oli.content.models.persistance.entities.*;
 import edu.cmu.oli.content.security.*;
@@ -47,7 +47,7 @@ public class AnalyticsResourceManager {
     DatasetBuilder datasetBuilder;
 
     @Inject
-    @Dedicated("analyticsresourceApiExecutor")
+    @DedicatedExecutor("analyticsresourceApiExecutor")
     ExecutorService es;
 
     @Inject

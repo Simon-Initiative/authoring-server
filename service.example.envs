@@ -30,5 +30,7 @@ svn_projects=https://example.edu/svn/content/editor/projects/dev-local/
 #dataset_db=jdbc:mysql://example.edu:3306?useTimezone=true&serverTimezone=UTC&user=xxxxxxx&password=xxxxxxxxx
 dataset_db=jdbc:mysql://example.edu:3306?user=xxxxxxx&password=xxxxxxxx
 
+slack_alert_hook=none
+
 # Java runtime options
 JAVA_OPTS=-Xms64m -Xmx512m -XX:MetaspaceSize=96M -XX:MaxMetaspaceSize=256m -Djava.net.preferIPv4Stack=true -Djboss.modules.system.pkgs=org.jboss.byteman -Djava.awt.headless=true -Dxml.catalog.ignoreMissing=true -Dxml.catalog.files=/oli/dtd/catalog.xml -Dxml.catalog.verbosity=1 -Dxml.catalog.prefer=public  -Dxml.catalog.staticCatalog=yes -Dxml.catalog.allowPI=yes -Dxml.catalog.className=com.sun.org.apache.xml.internal.resolver.Resolver

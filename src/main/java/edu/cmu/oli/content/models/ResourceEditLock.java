@@ -9,9 +9,6 @@ import edu.cmu.oli.content.AppUtils;
 public final class ResourceEditLock {
 
     @Expose
-    long lockMaxDuration = 1000L * 60L * 5L; // 5 minutes
-
-    @Expose
     String lockId;
 
     @Expose
@@ -24,24 +21,22 @@ public final class ResourceEditLock {
     @Expose
     long lockedAt;
 
-    public ResourceEditLock(long lockMaxDuration, String resourceId, String lockedBy, long lockedAt) {
+    public ResourceEditLock(String resourceId, String lockedBy, long lockedAt) {
         this.lockId = AppUtils.generateGUID();
-        this.lockMaxDuration = lockMaxDuration;
         this.resourceId = resourceId;
         this.lockedBy = lockedBy;
         this.lockedAt = lockedAt;
     }
 
-    public ResourceEditLock(String lockId, long lockMaxDuration, String resourceId, String lockedBy, long lockedAt) {
+    public ResourceEditLock(String lockId, String resourceId, String lockedBy, long lockedAt) {
         this.lockId = lockId;
-        this.lockMaxDuration = lockMaxDuration;
         this.resourceId = resourceId;
         this.lockedBy = lockedBy;
         this.lockedAt = lockedAt;
     }
 
     public ResourceEditLock withUpdatedLockedAt(long lockedAt) {
-        return new ResourceEditLock(this.lockId, this.lockMaxDuration, this.resourceId, this.lockedBy, lockedAt);
+        return new ResourceEditLock(this.lockId, this.resourceId, this.lockedBy, lockedAt);
     }
 
     public String getLockId() {

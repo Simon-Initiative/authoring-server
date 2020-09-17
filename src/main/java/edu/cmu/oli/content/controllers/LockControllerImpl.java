@@ -16,8 +16,6 @@ import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static javax.ws.rs.core.Response.Status.FORBIDDEN;
@@ -36,37 +34,31 @@ public class LockControllerImpl implements LockController {
     @ConfigurationCache
     Instance<Configurations> configuration;
 
-    // :FIXME: avoid use of global state, not good for horizontal scaling. Switch to using a distributed cache
     private Map<String, ResourceEditLock> resourceLocks;
 
     @PostConstruct
     void init() {
         resourceLocks = new ConcurrentHashMap<>();
-        long sleepTimeInMilli = 1000L * 60 * 5; // 5 minutes
-        Timer timer = new Timer(true);
-        TimerTask timerTask = new TimerTask() {
-            @Override
-            public void run() {
-                lockListCleanup();
-            }
-        };
-        timer.scheduleAtFixedRate(timerTask, sleepTimeInMilli, sleepTimeInMilli);
     }
 
     @Override
     public ResourceEditLock aquire(AppSecurityContext session, String resourceId) {
+        
         ResourceEditLock resourceEditLock = resourceLocks.get(resourceId);
-        // if resourceEditLock has expired create new one
-        if (resourceEditLock != null) {
-            if (System.currentTimeMillis() - resourceEditLock.getLockedAt() > configuration.get().getEditLockMaxDuration()) {
-                //Old ResourceEditLock has expired
-                resourceEditLock = new ResourceEditLock(configuration.get().getEditLockMaxDuration(), resourceId, session.getPreferredUsername(), System.currentTimeMillis());
-                resourceLocks.put(resourceId, resourceEditLock);
-            }
-        } else {
-            resourceEditLock = new ResourceEditLock(configuration.get().getEditLockMaxDuration(), resourceId, session.getPreferredUsername(), System.currentTimeMillis());
+
+        // Update the lock if either:
+        //
+        // 1. One does not exist for this resource
+        // 2. The user name of an existing lock matches the current user name
+        // 3. The lock has expired
+        if (resourceEditLock == null
+            || resourceEditLock.getLockedBy().equalsIgnoreCase(session.getPreferredUsername())
+            || System.currentTimeMillis() - resourceEditLock.getLockedAt() > configuration.get().getEditLockMaxDuration()) {
+
+            resourceEditLock = new ResourceEditLock(resourceId, session.getPreferredUsername(), System.currentTimeMillis());
             resourceLocks.put(resourceId, resourceEditLock);
         }
+
         return resourceEditLock;
     }
 
@@ -103,7 +95,7 @@ public class LockControllerImpl implements LockController {
         ResourceEditLock resourceEditLock = resourceLocks.get(resourceId);
         // if resourceEditLock has expired create new one
         if (resourceEditLock == null || doCreate) {
-            resourceEditLock = new ResourceEditLock(configuration.get().getEditLockMaxDuration(), resourceId, session.getPreferredUsername(), System.currentTimeMillis());
+            resourceEditLock = new ResourceEditLock(resourceId, session.getPreferredUsername(), System.currentTimeMillis());
             resourceLocks.put(resourceId, resourceEditLock);
         }
         return resourceEditLock;
@@ -133,13 +125,4 @@ public class LockControllerImpl implements LockController {
         }
     }
 
-    private void lockListCleanup() {
-        resourceLocks.forEach((key, value) -> {
-            long timeDiff = System.currentTimeMillis() - value.getLockedAt();
-            if (timeDiff > configuration.get().getEditLockMaxDuration()) {
-                log.debug("lock cleanup time diff " + timeDiff + " lock" + value.toString());
-                resourceLocks.remove(key, value);
-            }
-        });
-    }
 }

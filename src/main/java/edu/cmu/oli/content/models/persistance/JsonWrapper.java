@@ -34,9 +34,7 @@ public class JsonWrapper implements Externalizable {
     }
 
     public JsonElement serializeJson() {
-        JsonObject jsonObject = new JsonObject();
-        jsonObject.add("jsonObject", jp.parse(jsonString));
-        return jsonObject;
+        return jp.parse(jsonString);
     }
 
     public void setJsonObject(JsonElement jsonObject) {

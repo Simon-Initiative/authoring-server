@@ -22,7 +22,7 @@ public class Configurations {
     private String webContentVolume;
     private String themesRepository;
     private int transactionRetrys = 3;
-    private int editLockMaxDuration = 300000;
+    private int editLockMaxDuration = 1000 * 60 * 5; // 5 minutes
     private JsonObject developerAdmin;
     private JsonObject namespaces;
     private JsonArray themes;
