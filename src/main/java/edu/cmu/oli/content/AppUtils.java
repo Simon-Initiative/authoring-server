@@ -71,8 +71,7 @@ public class AppUtils {
         Matcher m = Pattern.compile(pattern).matcher(val);
         List<String> cdataList = new ArrayList<>();
         while (m.find()){
-            String s = m.group();
-            cdataList.add(s);
+            cdataList.add(m.group());
         }
         val = val.replaceAll(pattern, "~~!");
         val = val.replaceAll("&(?!.{2,4};)", "&amp;");
