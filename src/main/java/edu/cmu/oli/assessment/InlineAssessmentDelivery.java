@@ -652,7 +652,7 @@ public class InlineAssessmentDelivery implements Delivery {
 
             SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);
             builder.setExpandEntities(true);
-            content = content.replaceAll("&(?!.{2,4};)", "&amp;");
+            content = AppUtils.escapeAmpersand(content);
             Document srcDoc = builder.build(new StringReader("<body unique_ref=\"m0\">" + content + "</body>"));
             root.addContent(srcDoc.getRootElement().detach());
         } catch (Exception ex) {

@@ -623,7 +623,6 @@ public class SVNSyncController {
         try {
             if (jsonCapable) {
                 document = builder.build(new StringReader(fileString.trim()));
-                //.replaceAll("&", "&amp;")));
             } else {
                 document = builder.build(new StringReader(fileString.trim()));
             }
@@ -709,7 +708,6 @@ public class SVNSyncController {
         try {
             if (jsonCapable) {
                 document = builder.build(new StringReader(fileString.trim()));
-                //.replaceAll("&", "&amp;")));
             } else {
                 document = builder.build(new StringReader(fileString.trim()));
             }
