@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import edu.cmu.oli.assessment.builders.Assessment2Transform;
+import edu.cmu.oli.content.AppUtils;
 import edu.cmu.oli.content.configuration.Configurations;
 import edu.cmu.oli.content.resource.builders.Json2Xml;
 import org.apache.commons.text.StringEscapeUtils;
@@ -114,12 +115,12 @@ public class ResourceToXml {
         cleanupGeneral(document);
 
         String data = xmlOut.outputString(document);
-
+        data = AppUtils.escapeAmpersand(data);
         String[] split = data.split("\n");
         StringBuilder sb = new StringBuilder();
         for (String str : split) {
             str = StringEscapeUtils.unescapeXml(str);
-            str = str.replaceAll("&(?!.{2,4};)", "&amp;").replaceAll("<m:math.*><!\\[CDATA\\[", "")
+            str = str.replaceAll("<m:math.*><!\\[CDATA\\[", "")
                     .replaceAll("\\]\\]>.*</m:math>", "");
             sb.append(str);
             sb.append("\n");

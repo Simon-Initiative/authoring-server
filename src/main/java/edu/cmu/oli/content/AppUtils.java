@@ -36,6 +36,8 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -64,17 +66,20 @@ public class AppUtils {
     }
 
     public static String escapeAmpersand(String data) {
-        String[] split = data.split("\n");
-        StringBuilder sb = new StringBuilder();
-        for (int x = 0; x < split.length; x++) {
-            String str = split[x];
-            str = str.replaceAll("&(?!.{2,4};)", "&amp;");
-            sb.append(str);
-            if ((x + 1) < split.length) {
-                sb.append("\n");
-            }
+        String val = data.replaceAll("\\n", "``!");
+        String pattern = "(?s)(&lt;|<)!\\[CDATA\\[(.*?)\\]\\](&gt;|>)";
+        Matcher m = Pattern.compile(pattern).matcher(val);
+        List<String> cdataList = new ArrayList<>();
+        while (m.find()){
+            cdataList.add(m.group());
         }
-        return sb.toString();
+        val = val.replaceAll(pattern, "~~!");
+        val = val.replaceAll("&(?!.{2,4};)", "&amp;");
+        for(String cd : cdataList){
+            val = val.replaceFirst("~~!", cd);
+        }
+        val = val.replaceAll("``!", "\n");
+        return val;
     }
 
     public static JsonElement createJsonElement(String value) {
