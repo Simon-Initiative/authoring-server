@@ -207,6 +207,7 @@ public class DeployControllerImpl implements DeployController {
         previewUrlInfo.addProperty("orgId", orgIdToUse);
         previewUrlInfo.addProperty("orgVersion", orgVersion);
         previewUrlInfo.addProperty("redeploy", redeploy);
+        previewUrlInfo.addProperty("theme", pkg.getTheme());
 
         JsonObject userInfo = new JsonObject();
         userInfo.addProperty("firstName", session.getFirstName());
