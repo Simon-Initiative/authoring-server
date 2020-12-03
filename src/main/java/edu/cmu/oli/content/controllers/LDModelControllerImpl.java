@@ -514,8 +514,37 @@ public class LDModelControllerImpl implements LDModelController {
             parameters.addProperty("high_mastery", highMastery);
             lo.add("parameters", parameters);
 
+            log.debug("resssee " + new Gson().toJson(resourceById.json));
+
             JsonObject resourceJson = resourceById.json.getAsJsonObject("objectives");
+            if(resourceJson == null && resourceById.json.has("workbook_page")){
+                JsonArray ar = resourceById.json.getAsJsonObject("workbook_page").getAsJsonArray("#array");
+                label: for (JsonElement e : ar) {
+                    JsonObject e1 = (JsonObject) e;
+                    if(e1.has("head")){
+                        JsonArray headArray = e1.getAsJsonObject("head").getAsJsonArray("#array");
+                        for(JsonElement h :headArray){
+                            JsonObject h1 = (JsonObject) h;
+                            if(h1.has("objectives")){
+                                resourceJson = h1.getAsJsonObject("objectives");
+                                break label;
+                            }
+                        }
+                    }
+                }
+            }
+
             JsonArray objectivesAndMappingList = resourceJson.getAsJsonArray("#array");
+            if(objectivesAndMappingList == null){
+                objectivesAndMappingList = new JsonArray();
+                if(resourceJson.has("objective")) {
+                    JsonObject ob = new JsonObject();
+                    ob.add("objective", resourceJson.getAsJsonObject("objective"));
+                    resourceJson.remove("objective");
+                    objectivesAndMappingList.add(ob);
+                    resourceJson.add("#array", objectivesAndMappingList);
+                }
+            }
             JsonObject objSkillsList = null;
             for (JsonElement e : objectivesAndMappingList) {
                 JsonObject e1 = (JsonObject) e;
