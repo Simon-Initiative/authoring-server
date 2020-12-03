@@ -37,6 +37,7 @@ import edu.cmu.oli.content.models.persistance.entities.DatasetBlob;
 import edu.cmu.oli.content.models.persistance.entities.DatasetStatus;
 import edu.cmu.oli.content.reportingdb.DbConnector;
 
+import org.jboss.ejb3.annotation.TransactionTimeout;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateless;
@@ -53,6 +54,7 @@ import java.io.InputStreamReader;
 import java.sql.SQLException;
 import java.util.Date;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,6 +94,7 @@ public class DatasetBuilder {
     /**
      * Handle the request to create a dataset from the frontend API call
      */
+    @TransactionTimeout(unit = TimeUnit.MINUTES, value = 60L)
     public void build(final String datasetGuid) {
         Dataset dataset = findDataset(datasetGuid);
         ContentPackage contentPackage = dataset.getContentPackage();
