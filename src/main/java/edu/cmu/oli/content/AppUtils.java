@@ -66,18 +66,22 @@ public class AppUtils {
     }
 
     public static String escapeAmpersand(String data) {
-        String val = data.replaceAll("\\n", "``!");
+        String val = data.replaceAll("\\R", "``!");
         String pattern = "(?s)(&lt;|<)!\\[CDATA\\[(.*?)\\]\\](&gt;|>)";
         Matcher m = Pattern.compile(pattern).matcher(val);
         List<String> cdataList = new ArrayList<>();
         while (m.find()){
-            cdataList.add(m.group());
+            String cdata = m.group();
+            cdata = cdata.replaceAll("\\$", "!`!");
+            cdataList.add(cdata);
         }
         val = val.replaceAll(pattern, "~~!");
+        val = val.replaceAll("\\$", "!`!");
         val = val.replaceAll("&(?!.{2,4};)", "&amp;");
         for(String cd : cdataList){
             val = val.replaceFirst("~~!", cd);
         }
+        val = val.replaceAll("!`!", "\\$");
         val = val.replaceAll("``!", "\n");
         return val;
     }
