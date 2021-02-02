@@ -79,7 +79,8 @@ public class AppUtils {
         val = val.replaceAll("\\$", "!`!");
         val = val.replaceAll("&(?!.{2,4};)", "&amp;");
         for(String cd : cdataList){
-            val = val.replaceFirst("~~!", cd);
+            // AW: AUTHORING-2318 suppress processing regexp metachars in replacement.
+            val = val.replaceFirst("~~!", Matcher.quoteReplacement(cd));
         }
         val = val.replaceAll("!`!", "\\$");
         val = val.replaceAll("``!", "\n");
