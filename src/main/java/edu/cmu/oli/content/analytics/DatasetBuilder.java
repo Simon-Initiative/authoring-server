@@ -103,11 +103,20 @@ public class DatasetBuilder {
             List<String> packageGuids = getPackages(dataset);
             List<String> sectionGuids = getSections(packageGuids, dataset);
 
-            String modelId = contentPackage.getId() + "-" + contentPackage.getVersion();
+            // Skill model id is the id + version of the PREVIOUS content package (if multiple versions exist)
+            String modelId = getSkillModelId(packageGuids);
+            log.info("Dataset query is using skill model id " + modelId + " for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
+
+            if (packageGuids.size() < 1) {
+                log.info("No publications found error for content package " + contentPackage.getId() + "-" + contentPackage.getVersion());
+                throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(),
+                    "No publications for the dataset to be created from were found for this course.");
+            }
 
             if (packageGuids.size() < 1 || sectionGuids.size() < 1) {
+                log.info("Not enough student data error for content package " + contentPackage.getId() + "-" + contentPackage.getVersion());
                 throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(),
-                        "Not enough course data to create an analytics dataset. A course must be published with data for at least ten students before a dataset can be created.");
+                    "Not enough course data to create an analytics dataset. A course must have data at least ten students before a dataset can be created.");
             }
 
             log.info("Processing dataset request with sections: " + sectionGuids.toString());
@@ -127,6 +136,11 @@ public class DatasetBuilder {
             JsonObject blob = new JsonObject();
             for (Map.Entry<String, String> query : queries.entrySet()) {
                 JsonArray results = db.readDatabase(query.getValue());
+                if (results.size() == 0) {
+                    log.info("Query " + query.getKey() " had no results for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
+                    throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(),
+                        "Query " + query.getKey() " had no results");
+                }
                 // postProcess mutates the result set to add calculated statistics
                 postProcess(results);
                 blob.add(query.getKey(), results);
@@ -234,6 +248,30 @@ public class DatasetBuilder {
         }
 
         return sectionGuids;
+    }
+
+    /**
+     * Finds the skill model id of the previous content package version, if it exists.
+     * Otherwise, returns the skill model id of the latest package version.
+     * @param packageGuids
+     * @return The skill model id string
+     */
+    private String getSkillModelId(final List<string> packageGuids) {
+        if (packageGuids.size() < 1) {
+            String message = "Error: no packages given to find a skill model for";
+            log.error(message);
+            throw new ResourceException(Response.Status.NOT_FOUND, 1, message);
+        }
+        if (packageGuids.size() === 1) {
+            return skillModelIdFromPackage(findContentPackage(packageGuids[0]));
+        }
+        // Assumes the packages were sorted from newest to oldest by `getPackages`
+        ContentPackage previousVersion = packageGuids[1];
+        return skillModelIdFromPackage(previousVersion);
+    }
+
+    private String skillModelIdFromPackage(final ContentPackage package) {
+        return package.getId() + "-" + package.getVersion();
     }
 
     private void postProcess(JsonArray results) {
