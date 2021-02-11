@@ -137,9 +137,9 @@ public class DatasetBuilder {
             for (Map.Entry<String, String> query : queries.entrySet()) {
                 JsonArray results = db.readDatabase(query.getValue());
                 if (results.size() == 0) {
-                    log.info("Query " + query.getKey() " had no results for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
+                    log.info("Query " + query.getKey() + " had no results for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
                     throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(),
-                        "Query " + query.getKey() " had no results");
+                        "Query " + query.getKey() + " had no results");
                 }
                 // postProcess mutates the result set to add calculated statistics
                 postProcess(results);
@@ -256,22 +256,21 @@ public class DatasetBuilder {
      * @param packageGuids
      * @return The skill model id string
      */
-    private String getSkillModelId(final List<string> packageGuids) {
+    private String getSkillModelId(final List<String> packageGuids) {
         if (packageGuids.size() < 1) {
             String message = "Error: no packages given to find a skill model for";
             log.error(message);
-            throw new ResourceException(Response.Status.NOT_FOUND, 1, message);
+            throw new ResourceException(Response.Status.NOT_FOUND, "no id", message);
         }
-        if (packageGuids.size() === 1) {
-            return skillModelIdFromPackage(findContentPackage(packageGuids[0]));
+        if (packageGuids.size() == 1) {
+            return skillModelIdFromPackage(findContentPackage(packageGuids.get(0)));
         }
         // Assumes the packages were sorted from newest to oldest by `getPackages`
-        ContentPackage previousVersion = packageGuids[1];
-        return skillModelIdFromPackage(previousVersion);
+        return skillModelIdFromPackage(findContentPackage(packageGuids.get(1)));
     }
 
-    private String skillModelIdFromPackage(final ContentPackage package) {
-        return package.getId() + "-" + package.getVersion();
+    private String skillModelIdFromPackage(final ContentPackage contentPackage) {
+        return contentPackage.getId() + "-" + contentPackage.getVersion();
     }
 
     private void postProcess(JsonArray results) {
