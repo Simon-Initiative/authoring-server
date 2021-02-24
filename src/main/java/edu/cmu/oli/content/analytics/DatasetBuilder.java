@@ -59,6 +59,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Stateless
 public class DatasetBuilder {
@@ -110,7 +111,8 @@ public class DatasetBuilder {
             // Skill model id is the id + version of the PREVIOUS content package (if multiple versions exist)
             JsonElement previous = remotePackages.get(0);
             String modelId = previous == null? contentPackage.getId() + "-" + contentPackage.getVersion() :
-                    previous.getAsJsonObject().get("id") + "-" + previous.getAsJsonObject().get("version").getAsString();
+                    previous.getAsJsonObject().get("id").getAsString() + "-" + previous.getAsJsonObject().get("version").getAsString();
+
             log.info("Dataset query is using skill model id " + modelId + " for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
 
             if (packageGuids.size() < 1) {
@@ -128,6 +130,8 @@ public class DatasetBuilder {
             log.info("Processing dataset request with sections: " + sectionGuids.toString());
 
             Map<String, String> variableReplacements = new HashMap<>();
+
+//            sectionGuids = sectionGuids.stream().map(s -> s).limit(2).collect(Collectors.toList());
 
             variableReplacements.put("modelId", toSqlString(modelId));
             variableReplacements.put("sectionGuids", toSqlString(sectionGuids));
