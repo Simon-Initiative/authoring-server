@@ -46,6 +46,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import edu.cmu.oli.content.ResourceException;
+
+import javax.persistence.TypedQuery;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
@@ -100,11 +102,16 @@ public class DatasetBuilder {
         ContentPackage contentPackage = dataset.getContentPackage();
 
         try {
-            List<String> packageGuids = getPackages(dataset);
+            List<JsonElement> remotePackages = getPackages(dataset);
+            List<String> packageGuids = new ArrayList<>();
+            remotePackages.forEach(e -> packageGuids.add(e.getAsJsonObject().get("guid").getAsString()));
             List<String> sectionGuids = getSections(packageGuids, dataset);
 
             // Skill model id is the id + version of the PREVIOUS content package (if multiple versions exist)
-            String modelId = getSkillModelId(packageGuids);
+            JsonElement previous = remotePackages.get(0);
+            String modelId = previous == null? contentPackage.getId() + "-" + contentPackage.getVersion() :
+                    previous.getAsJsonObject().get("id") + "-" + previous.getAsJsonObject().get("version").getAsString();
+                    //getSkillModelId(packageGuids.get("local"));
             log.info("Dataset query is using skill model id " + modelId + " for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
 
             if (packageGuids.size() < 1) {
@@ -166,7 +173,7 @@ public class DatasetBuilder {
      * We include the original package triggered by the API request, previous
      * versions of that package, and "parents" of the package if it was cloned.
      */
-    private List<String> getPackages(final Dataset dataset) throws SQLException {
+    private List<JsonElement> getPackages(final Dataset dataset) throws SQLException {
         ContentPackage datasetPackage = dataset.getContentPackage();
         List<ContentPackage> packagesToQuery = new ArrayList<>();
         packagesToQuery.add(datasetPackage);
@@ -183,7 +190,9 @@ public class DatasetBuilder {
         // Sort packages from newest to oldest
         packagesToQuery.sort((ContentPackage a, ContentPackage b) -> b.getDateCreated().compareTo(a.getDateCreated()));
 
-        List<String> packageGuids = new ArrayList<String>();
+        List<JsonElement> packageGuids = new ArrayList<>();
+//        packageGuids.put("local", new ArrayList<>());
+//        packageGuids.put("remote", new ArrayList<>());
 
         for (ContentPackage contentPackage : packagesToQuery) {
             Map<String, String> variableReplacements = new HashMap<>();
@@ -198,9 +207,19 @@ public class DatasetBuilder {
             // Query returns package versions ordered from newest to oldest. Results are in
             // the form [{ "guid": "234587878753827" }]
             for (JsonElement result : results) {
-                packageGuids.add(result.getAsJsonObject().get("guid").getAsString());
+                packageGuids.add(result);
+//                ContentPackage p = findContentPackageByIdVersion(result.getAsJsonObject().get("id").getAsString(),
+//                        result.getAsJsonObject().get("version").getAsString());
+//                if(p != null) {
+//                    packageGuids.get("remote").add(result.getAsJsonObject().get("guid").getAsString());
+//                    packageGuids.get("local").add(p.getGuid());
+//                }
             }
         }
+
+//        if(packageGuids.isEmpty()){
+//            packageGuids.get("local").add(datasetPackage.getGuid());
+//        }
 
         return packageGuids;
     }
@@ -482,6 +501,11 @@ public class DatasetBuilder {
             if (contentPackage == null) {
                 String message = "Error: package requested was not found " + packageGuid;
                 log.error(message);
+                try{
+                    throw new RuntimeException(message);
+                }catch (Exception e){
+                    log.error(e.getMessage(), e);
+                }
                 throw new ResourceException(Response.Status.NOT_FOUND, packageGuid, message);
             }
         } catch (IllegalArgumentException e) {
@@ -490,5 +514,13 @@ public class DatasetBuilder {
             throw new ResourceException(Response.Status.INTERNAL_SERVER_ERROR, packageGuid, message);
         }
         return contentPackage;
+    }
+
+    private ContentPackage findContentPackageByIdVersion(String id, String version){
+        TypedQuery<ContentPackage> q = em
+                .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+                .setParameter("id", id).setParameter("version", version);
+
+        return q.getResultList().isEmpty() ? null : q.getResultList().get(0);
     }
 }
