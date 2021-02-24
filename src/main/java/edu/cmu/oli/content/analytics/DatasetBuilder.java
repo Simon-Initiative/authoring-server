@@ -111,7 +111,6 @@ public class DatasetBuilder {
             JsonElement previous = remotePackages.get(0);
             String modelId = previous == null? contentPackage.getId() + "-" + contentPackage.getVersion() :
                     previous.getAsJsonObject().get("id") + "-" + previous.getAsJsonObject().get("version").getAsString();
-                    //getSkillModelId(packageGuids.get("local"));
             log.info("Dataset query is using skill model id " + modelId + " for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
 
             if (packageGuids.size() < 1) {
@@ -191,8 +190,6 @@ public class DatasetBuilder {
         packagesToQuery.sort((ContentPackage a, ContentPackage b) -> b.getDateCreated().compareTo(a.getDateCreated()));
 
         List<JsonElement> packageGuids = new ArrayList<>();
-//        packageGuids.put("local", new ArrayList<>());
-//        packageGuids.put("remote", new ArrayList<>());
 
         for (ContentPackage contentPackage : packagesToQuery) {
             Map<String, String> variableReplacements = new HashMap<>();
@@ -205,21 +202,11 @@ public class DatasetBuilder {
             log.info("Received packages from db: " + results.toString());
 
             // Query returns package versions ordered from newest to oldest. Results are in
-            // the form [{ "guid": "234587878753827" }]
+            // the form [{ "guid": "234587878753827", "id": "psychology", "version": "1.2" }]
             for (JsonElement result : results) {
                 packageGuids.add(result);
-//                ContentPackage p = findContentPackageByIdVersion(result.getAsJsonObject().get("id").getAsString(),
-//                        result.getAsJsonObject().get("version").getAsString());
-//                if(p != null) {
-//                    packageGuids.get("remote").add(result.getAsJsonObject().get("guid").getAsString());
-//                    packageGuids.get("local").add(p.getGuid());
-//                }
             }
         }
-
-//        if(packageGuids.isEmpty()){
-//            packageGuids.get("local").add(datasetPackage.getGuid());
-//        }
 
         return packageGuids;
     }
