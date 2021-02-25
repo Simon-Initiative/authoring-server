@@ -146,9 +146,13 @@ public class DatasetBuilder {
             for (Map.Entry<String, String> query : queries.entrySet()) {
                 JsonArray results = db.readDatabase(query.getValue());
                 if (results.size() == 0) {
-                    log.info("Query " + query.getKey() + " had no results for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
+                    String errorMessage = "The " + query.getKey() + " query had no results for package " 
+                        + contentPackage.getId() + "-" + contentPackage.getVersion() 
+                        + " using skill model " + modelId + 
+                        ". Has this course been properly deployed with the correct skill model id?";
+                    log.info(errorMessage);
                     throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(),
-                        "Query " + query.getKey() + " had no results");
+                        errorMessage);
                 }
                 // postProcess mutates the result set to add calculated statistics
                 postProcess(results);
