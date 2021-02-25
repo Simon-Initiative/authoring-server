@@ -474,7 +474,7 @@ public class DatasetBuilder {
                 log.error(message);
                 try {
                     throw new RuntimeException(message);
-                } catch (Exception e){
+                } catch (Exception e) {
                     log.error(e.getMessage(), e);
                 }
                 throw new ResourceException(Response.Status.NOT_FOUND, packageGuid, message);
