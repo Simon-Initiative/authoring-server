@@ -486,12 +486,4 @@ public class DatasetBuilder {
         }
         return contentPackage;
     }
-
-    private ContentPackage findContentPackageByIdVersion(String id, String version) {
-        TypedQuery<ContentPackage> q = em
-            .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
-            .setParameter("id", id).setParameter("version", version);
-
-        return q.getResultList().isEmpty() ? null : q.getResultList().get(0);
-    }
 }
