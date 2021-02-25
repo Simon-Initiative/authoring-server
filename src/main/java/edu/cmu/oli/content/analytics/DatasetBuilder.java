@@ -197,7 +197,7 @@ public class DatasetBuilder {
         for (ContentPackage contentPackage : packagesToQuery) {
             Map<String, String> variableReplacements = new HashMap<>();
             variableReplacements.put("packageId", toSqlString(contentPackage.getId()));
-            variableReplacements.put("packageGuid", toSqlString(contentPackage.getGuid()));
+            variableReplacements.put("packageVersion", toSqlString(contentPackage.getVersion()));
             String query = parseQuery(findPackagesQuery, variableReplacements);
 
             // DB queries run synchronously
