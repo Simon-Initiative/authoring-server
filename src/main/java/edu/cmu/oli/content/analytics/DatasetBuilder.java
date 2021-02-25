@@ -110,8 +110,9 @@ public class DatasetBuilder {
 
             // Skill model id is the id + version of the PREVIOUS content package (if multiple versions exist)
             JsonElement previous = remotePackages.get(0);
-            String modelId = previous == null? contentPackage.getId() + "-" + contentPackage.getVersion() :
-                    previous.getAsJsonObject().get("id").getAsString() + "-" + previous.getAsJsonObject().get("version").getAsString();
+            String modelId = previous == null 
+                ? contentPackage.getId() + "-" + contentPackage.getVersion() 
+                : previous.getAsJsonObject().get("id").getAsString() + "-" + previous.getAsJsonObject().get("version").getAsString();
 
             log.info("Dataset query is using skill model id " + modelId + " for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
 
@@ -130,8 +131,6 @@ public class DatasetBuilder {
             log.info("Processing dataset request with sections: " + sectionGuids.toString());
 
             Map<String, String> variableReplacements = new HashMap<>();
-
-//            sectionGuids = sectionGuids.stream().map(s -> s).limit(2).collect(Collectors.toList());
 
             variableReplacements.put("modelId", toSqlString(modelId));
             variableReplacements.put("sectionGuids", toSqlString(sectionGuids));
@@ -258,29 +257,6 @@ public class DatasetBuilder {
         }
 
         return sectionGuids;
-    }
-
-    /**
-     * Finds the skill model id of the previous content package version, if it exists.
-     * Otherwise, returns the skill model id of the latest package version.
-     * @param packageGuids
-     * @return The skill model id string
-     */
-    private String getSkillModelId(final List<String> packageGuids) {
-        if (packageGuids.size() < 1) {
-            String message = "Error: no packages given to find a skill model for";
-            log.error(message);
-            throw new ResourceException(Response.Status.NOT_FOUND, "no id", message);
-        }
-        if (packageGuids.size() == 1) {
-            return skillModelIdFromPackage(findContentPackage(packageGuids.get(0)));
-        }
-        // Assumes the packages were sorted from newest to oldest by `getPackages`
-        return skillModelIdFromPackage(findContentPackage(packageGuids.get(1)));
-    }
-
-    private String skillModelIdFromPackage(final ContentPackage contentPackage) {
-        return contentPackage.getId() + "-" + contentPackage.getVersion();
     }
 
     private void postProcess(JsonArray results) {
@@ -492,9 +468,9 @@ public class DatasetBuilder {
             if (contentPackage == null) {
                 String message = "Error: package requested was not found " + packageGuid;
                 log.error(message);
-                try{
+                try {
                     throw new RuntimeException(message);
-                }catch (Exception e){
+                } catch (Exception e){
                     log.error(e.getMessage(), e);
                 }
                 throw new ResourceException(Response.Status.NOT_FOUND, packageGuid, message);
@@ -507,10 +483,10 @@ public class DatasetBuilder {
         return contentPackage;
     }
 
-    private ContentPackage findContentPackageByIdVersion(String id, String version){
+    private ContentPackage findContentPackageByIdVersion(String id, String version) {
         TypedQuery<ContentPackage> q = em
-                .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
-                .setParameter("id", id).setParameter("version", version);
+            .createNamedQuery("ContentPackage.findByIdAndVersion", ContentPackage.class)
+            .setParameter("id", id).setParameter("version", version);
 
         return q.getResultList().isEmpty() ? null : q.getResultList().get(0);
     }
