@@ -46,6 +46,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 
 import edu.cmu.oli.content.ResourceException;
+
+import javax.persistence.TypedQuery;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
@@ -57,6 +59,7 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 @Stateless
 public class DatasetBuilder {
@@ -100,11 +103,17 @@ public class DatasetBuilder {
         ContentPackage contentPackage = dataset.getContentPackage();
 
         try {
-            List<String> packageGuids = getPackages(dataset);
+            List<JsonElement> remotePackages = getPackages(dataset);
+            List<String> packageGuids = new ArrayList<>();
+            remotePackages.forEach(e -> packageGuids.add(e.getAsJsonObject().get("guid").getAsString()));
             List<String> sectionGuids = getSections(packageGuids, dataset);
 
             // Skill model id is the id + version of the PREVIOUS content package (if multiple versions exist)
-            String modelId = getSkillModelId(packageGuids);
+            JsonElement previous = remotePackages.get(0);
+            String modelId = previous == null 
+                ? contentPackage.getId() + "-" + contentPackage.getVersion() 
+                : previous.getAsJsonObject().get("id").getAsString() + "-" + previous.getAsJsonObject().get("version").getAsString();
+
             log.info("Dataset query is using skill model id " + modelId + " for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
 
             if (packageGuids.size() < 1) {
@@ -137,9 +146,13 @@ public class DatasetBuilder {
             for (Map.Entry<String, String> query : queries.entrySet()) {
                 JsonArray results = db.readDatabase(query.getValue());
                 if (results.size() == 0) {
-                    log.info("Query " + query.getKey() + " had no results for package " + contentPackage.getId() + "-" + contentPackage.getVersion());
+                    String errorMessage = "The " + query.getKey() + " query had no results for package " 
+                        + contentPackage.getId() + "-" + contentPackage.getVersion() 
+                        + " using skill model " + modelId + 
+                        ". Has this course been properly deployed with the correct skill model id?";
+                    log.info(errorMessage);
                     throw new ResourceException(Response.Status.BAD_REQUEST, contentPackage.getGuid(),
-                        "Query " + query.getKey() + " had no results");
+                        errorMessage);
                 }
                 // postProcess mutates the result set to add calculated statistics
                 postProcess(results);
@@ -166,7 +179,7 @@ public class DatasetBuilder {
      * We include the original package triggered by the API request, previous
      * versions of that package, and "parents" of the package if it was cloned.
      */
-    private List<String> getPackages(final Dataset dataset) throws SQLException {
+    private List<JsonElement> getPackages(final Dataset dataset) throws SQLException {
         ContentPackage datasetPackage = dataset.getContentPackage();
         List<ContentPackage> packagesToQuery = new ArrayList<>();
         packagesToQuery.add(datasetPackage);
@@ -183,12 +196,12 @@ public class DatasetBuilder {
         // Sort packages from newest to oldest
         packagesToQuery.sort((ContentPackage a, ContentPackage b) -> b.getDateCreated().compareTo(a.getDateCreated()));
 
-        List<String> packageGuids = new ArrayList<String>();
+        List<JsonElement> packageGuids = new ArrayList<>();
 
         for (ContentPackage contentPackage : packagesToQuery) {
             Map<String, String> variableReplacements = new HashMap<>();
             variableReplacements.put("packageId", toSqlString(contentPackage.getId()));
-            variableReplacements.put("packageGuid", toSqlString(contentPackage.getGuid()));
+            variableReplacements.put("packageVersion", toSqlString(contentPackage.getVersion()));
             String query = parseQuery(findPackagesQuery, variableReplacements);
 
             // DB queries run synchronously
@@ -196,9 +209,9 @@ public class DatasetBuilder {
             log.info("Received packages from db: " + results.toString());
 
             // Query returns package versions ordered from newest to oldest. Results are in
-            // the form [{ "guid": "234587878753827" }]
+            // the form [{ "guid": "234587878753827", "id": "psychology", "version": "1.2" }]
             for (JsonElement result : results) {
-                packageGuids.add(result.getAsJsonObject().get("guid").getAsString());
+                packageGuids.add(result);
             }
         }
 
@@ -248,29 +261,6 @@ public class DatasetBuilder {
         }
 
         return sectionGuids;
-    }
-
-    /**
-     * Finds the skill model id of the previous content package version, if it exists.
-     * Otherwise, returns the skill model id of the latest package version.
-     * @param packageGuids
-     * @return The skill model id string
-     */
-    private String getSkillModelId(final List<String> packageGuids) {
-        if (packageGuids.size() < 1) {
-            String message = "Error: no packages given to find a skill model for";
-            log.error(message);
-            throw new ResourceException(Response.Status.NOT_FOUND, "no id", message);
-        }
-        if (packageGuids.size() == 1) {
-            return skillModelIdFromPackage(findContentPackage(packageGuids.get(0)));
-        }
-        // Assumes the packages were sorted from newest to oldest by `getPackages`
-        return skillModelIdFromPackage(findContentPackage(packageGuids.get(1)));
-    }
-
-    private String skillModelIdFromPackage(final ContentPackage contentPackage) {
-        return contentPackage.getId() + "-" + contentPackage.getVersion();
     }
 
     private void postProcess(JsonArray results) {
@@ -482,6 +472,11 @@ public class DatasetBuilder {
             if (contentPackage == null) {
                 String message = "Error: package requested was not found " + packageGuid;
                 log.error(message);
+                try {
+                    throw new RuntimeException(message);
+                } catch (Exception e) {
+                    log.error(e.getMessage(), e);
+                }
                 throw new ResourceException(Response.Status.NOT_FOUND, packageGuid, message);
             }
         } catch (IllegalArgumentException e) {

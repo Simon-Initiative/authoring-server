@@ -1,10 +1,6 @@
-# Requires: 
-# :packageId
-# :packageGuid
-
-# Query finds package guids for all previous versions related to a package "family",
-# identified by the package id
-select distinct guid 
+# Query finds package guids for all previous versions of a package
+# identified by the package id and version
+select distinct guid, id, version
 from content.package 
-where id = :packageId 
+where id = :packageId and version <= :packageVersion
 order by date_created desc;
