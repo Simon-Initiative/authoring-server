@@ -21,7 +21,7 @@
         <dependency>
             <groupId>javax</groupId>
             <artifactId>javaee-api</artifactId>
-            <version>8.0</version>
+            <version>8.0.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -292,8 +292,8 @@
         </plugins>
     </build>
     <properties>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>11</maven.compiler.source>
+        <maven.compiler.target>11</maven.compiler.target>
         <failOnMissingWebXml>false</failOnMissingWebXml>
     </properties>
 
