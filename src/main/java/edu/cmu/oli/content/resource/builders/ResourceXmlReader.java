@@ -24,6 +24,9 @@ public class ResourceXmlReader {
         // Parse common resource markup
         Element rootElmnt = doc.getRootElement();
         String id = rootElmnt.getAttributeValue("id");
+        if(id == null) {
+            id = rootElmnt.getChildren().get(0).getAttributeValue("id");
+        }
         rsrc.setId(id);
         String version = rootElmnt.getAttributeValue("version");
         if (version != null && !version.isEmpty()) {
