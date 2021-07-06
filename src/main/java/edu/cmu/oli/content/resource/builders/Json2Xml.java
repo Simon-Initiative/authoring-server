@@ -119,7 +119,8 @@ public class Json2Xml {
                 ((Element) xmlParent).addContent(new CDATA(jsonTree.getAsString()));
             } else {
                 // Wraps with cdata any codeblock content not already wrapped in cdata
-                if (((Element)xmlParent).getName().equalsIgnoreCase("codeblock")) {
+                if (((Element)xmlParent).getName().equalsIgnoreCase("codeblock")
+                        || ((Element)xmlParent).getName().equalsIgnoreCase("code")) {
                     ((Element) xmlParent).addContent(new CDATA(jsonTree.getAsString()));
                 }else {
                     String s = StringEscapeUtils.escapeXml10(jsonTree.getAsString());
