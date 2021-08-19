@@ -24,6 +24,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -45,7 +46,7 @@ public class SVNManager {
     private static ISVNEventHandler myUpdateEventHandler;
     private static ISVNEventHandler myWCEventHandler;
 
-    private static Map<String, SVNClientManager> clientManagerMap = new HashMap<>();
+    private static Map<String, SVNClientManager> clientManagerMap = new ConcurrentHashMap<>();
 
     static {
 
@@ -325,7 +326,7 @@ public class SVNManager {
         }
     }
 
-    public List<File> listModifiedFiles(File path) throws SVNException {
+    public synchronized List<File> listModifiedFiles(File path) throws SVNException {
         SVNClientManager svnClientManager = clientManagerMap.get(path.getAbsolutePath());
         if(svnClientManager == null) {
             svnClientManager = SVNClientManager.newInstance();
@@ -342,7 +343,7 @@ public class SVNManager {
         return fileList;
     }
 
-    public List<File> listAddedFiles(File path) throws SVNException {
+    public synchronized List<File> listAddedFiles(File path) throws SVNException {
         SVNClientManager svnClientManager = clientManagerMap.get(path.getAbsolutePath());
         if(svnClientManager == null) {
             svnClientManager = SVNClientManager.newInstance();
