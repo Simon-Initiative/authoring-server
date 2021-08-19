@@ -42,16 +42,18 @@ public class SVNManager {
     @ConfigurationCache
     Instance<Configurations> configuration;
 
-    private SVNClientManager clientManager;
-    private ISVNEventHandler myCommitEventHandler;
-    private ISVNEventHandler myUpdateEventHandler;
-    private ISVNEventHandler myWCEventHandler;
+    private static SVNClientManager clientManager;
+    private static ISVNEventHandler myCommitEventHandler;
+    private static ISVNEventHandler myUpdateEventHandler;
+    private static ISVNEventHandler myWCEventHandler;
 
-    private  ISVNHostOptions delegate;
+    private static Map<String, SVNClientManager> clientManagerMap = new HashMap<>();
+
+    //private  ISVNHostOptions delegate;
 
 
-    @PostConstruct
-    private void init() {
+    //    @PostConstruct
+    static {
 
         setupLibrary();
 
@@ -110,7 +112,7 @@ public class SVNManager {
     }
 
 
-    private void setupLibrary() {
+    private static void setupLibrary() {
         /*
          * For using over http:// and https://
          */
@@ -268,7 +270,7 @@ public class SVNManager {
          */
         updateClient.setIgnoreExternals(false);
         DefaultSVNOptions options = (DefaultSVNOptions) updateClient.getOptions();
-        // Configure a ConflictResolverHandler   
+        // Configure a ConflictResolverHandler
         options.setConflictHandler(new ConflictResolverHandler());
 
         /*
@@ -330,7 +332,11 @@ public class SVNManager {
     }
 
     public List<File> listModifiedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager = SVNClientManager.newInstance();
+        SVNClientManager svnClientManager = clientManagerMap.get(path.getAbsolutePath());
+        if(svnClientManager == null) {
+            svnClientManager = SVNClientManager.newInstance();
+            clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+        }
         final List<File> fileList = new ArrayList<File>();
         svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
             SVNStatusType statusType = status.getContentsStatus();
@@ -343,7 +349,11 @@ public class SVNManager {
     }
 
     public List<File> listAddedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager = SVNClientManager.newInstance();
+        SVNClientManager svnClientManager = clientManagerMap.get(path.getAbsolutePath());
+        if(svnClientManager == null) {
+            svnClientManager = SVNClientManager.newInstance();
+            clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+        }
         final List<File> fileList = new ArrayList<>();
         svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
             SVNStatusType statusType = status.getContentsStatus();
