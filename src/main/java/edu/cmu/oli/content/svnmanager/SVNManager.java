@@ -326,11 +326,14 @@ public class SVNManager {
         }
     }
 
-    public synchronized List<File> listModifiedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager = clientManagerMap.get(path.getAbsolutePath());
-        if(svnClientManager == null) {
-            svnClientManager = SVNClientManager.newInstance();
-            clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+    public List<File> listModifiedFiles(File path) throws SVNException {
+        SVNClientManager svnClientManager;
+        synchronized (clientManagerMap) {
+            svnClientManager = clientManagerMap.get(path.getAbsolutePath());
+            if (svnClientManager == null) {
+                svnClientManager = SVNClientManager.newInstance();
+                clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+            }
         }
         final List<File> fileList = new ArrayList<File>();
         svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
@@ -343,11 +346,14 @@ public class SVNManager {
         return fileList;
     }
 
-    public synchronized List<File> listAddedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager = clientManagerMap.get(path.getAbsolutePath());
-        if(svnClientManager == null) {
-            svnClientManager = SVNClientManager.newInstance();
-            clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+    public List<File> listAddedFiles(File path) throws SVNException {
+        SVNClientManager svnClientManager;
+        synchronized (clientManagerMap) {
+            svnClientManager = clientManagerMap.get(path.getAbsolutePath());
+            if (svnClientManager == null) {
+                svnClientManager = SVNClientManager.newInstance();
+                clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+            }
         }
         final List<File> fileList = new ArrayList<>();
         svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
