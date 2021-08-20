@@ -8,7 +8,6 @@ import org.tmatesoft.svn.core.*;
 import org.tmatesoft.svn.core.auth.ISVNAuthenticationManager;
 import org.tmatesoft.svn.core.internal.io.dav.DAVRepositoryFactory;
 import org.tmatesoft.svn.core.internal.wc.DefaultSVNOptions;
-import org.tmatesoft.svn.core.internal.wc.ISVNHostOptions;
 import org.tmatesoft.svn.core.io.SVNRepository;
 import org.tmatesoft.svn.core.io.SVNRepositoryFactory;
 import org.tmatesoft.svn.core.wc.*;
@@ -17,7 +16,6 @@ import org.tmatesoft.svn.core.wc2.SvnCommit;
 import org.tmatesoft.svn.core.wc2.SvnOperationFactory;
 import org.tmatesoft.svn.core.wc2.SvnTarget;
 
-import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -26,6 +24,7 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -42,16 +41,14 @@ public class SVNManager {
     @ConfigurationCache
     Instance<Configurations> configuration;
 
-    private SVNClientManager clientManager;
-    private ISVNEventHandler myCommitEventHandler;
-    private ISVNEventHandler myUpdateEventHandler;
-    private ISVNEventHandler myWCEventHandler;
+    private static SVNClientManager clientManager;
+    private static ISVNEventHandler myCommitEventHandler;
+    private static ISVNEventHandler myUpdateEventHandler;
+    private static ISVNEventHandler myWCEventHandler;
 
-    private  ISVNHostOptions delegate;
+    private static Map<String, SVNClientManager> clientManagerMap = new ConcurrentHashMap<>();
 
-
-    @PostConstruct
-    private void init() {
+    static {
 
         setupLibrary();
 
@@ -110,7 +107,7 @@ public class SVNManager {
     }
 
 
-    private void setupLibrary() {
+    private static void setupLibrary() {
         /*
          * For using over http:// and https://
          */
@@ -268,7 +265,7 @@ public class SVNManager {
          */
         updateClient.setIgnoreExternals(false);
         DefaultSVNOptions options = (DefaultSVNOptions) updateClient.getOptions();
-        // Configure a ConflictResolverHandler   
+        // Configure a ConflictResolverHandler
         options.setConflictHandler(new ConflictResolverHandler());
 
         /*
@@ -330,7 +327,14 @@ public class SVNManager {
     }
 
     public List<File> listModifiedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager = SVNClientManager.newInstance();
+        SVNClientManager svnClientManager;
+        synchronized (clientManagerMap) {
+            svnClientManager = clientManagerMap.get(path.getAbsolutePath());
+            if (svnClientManager == null) {
+                svnClientManager = SVNClientManager.newInstance();
+                clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+            }
+        }
         final List<File> fileList = new ArrayList<File>();
         svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
             SVNStatusType statusType = status.getContentsStatus();
@@ -343,7 +347,14 @@ public class SVNManager {
     }
 
     public List<File> listAddedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager = SVNClientManager.newInstance();
+        SVNClientManager svnClientManager;
+        synchronized (clientManagerMap) {
+            svnClientManager = clientManagerMap.get(path.getAbsolutePath());
+            if (svnClientManager == null) {
+                svnClientManager = SVNClientManager.newInstance();
+                clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
+            }
+        }
         final List<File> fileList = new ArrayList<>();
         svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
             SVNStatusType statusType = status.getContentsStatus();
