@@ -42,10 +42,10 @@ public class SVNManager {
     @ConfigurationCache
     Instance<Configurations> configuration;
 
-    private  SVNClientManager clientManager;
-    private  ISVNEventHandler myCommitEventHandler;
-    private  ISVNEventHandler myUpdateEventHandler;
-    private  ISVNEventHandler myWCEventHandler;
+    private SVNClientManager clientManager;
+    private ISVNEventHandler myCommitEventHandler;
+    private ISVNEventHandler myUpdateEventHandler;
+    private ISVNEventHandler myWCEventHandler;
 
     @PostConstruct
     private void init() {
@@ -107,12 +107,11 @@ public class SVNManager {
     }
 
     @PreDestroy
-    private void destroy(){
-        log.info("destroying the client manager");
+    private void destroy() {
         clientManager.dispose();
     }
 
-    private  void setupLibrary() {
+    private void setupLibrary() {
         /*
          * For using over http:// and https://
          */
@@ -124,7 +123,7 @@ public class SVNManager {
     }
 
     public SVNCommitInfo doImport(File path, String dstURL, String commitMessage) throws SVNException {
-        return clientManager.getCommitClient().doImport(path, SVNURL.parseURIEncoded(dstURL), commitMessage, (SVNProperties) null, true, true, SVNDepth.fromRecurse(true));
+        return clientManager.getCommitClient().doImport(path, SVNURL.parseURIEncoded(dstURL), commitMessage, null, true, true, SVNDepth.fromRecurse(true));
     }
 
     public SVNCommitInfo copy(String sourceURL, String dstURL, String commitMessage) throws SVNException {
@@ -342,8 +341,7 @@ public class SVNManager {
                 }
             }, null);
             return fileList;
-        }finally {
-            log.info("destroying listModifiedFiles client manager");
+        } finally {
             svnClientManager.dispose();
         }
     }
@@ -352,17 +350,16 @@ public class SVNManager {
         SVNClientManager svnClientManager = SVNClientManager.newInstance();
         try {
 
-        final List<File> fileList = new ArrayList<>();
-        svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
-            SVNStatusType statusType = status.getContentsStatus();
-            if (statusType == SVNStatusType.STATUS_NONE) {
-                fileList.add(status.getFile());
-            }
-        }, null);
+            final List<File> fileList = new ArrayList<>();
+            svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
+                SVNStatusType statusType = status.getContentsStatus();
+                if (statusType == SVNStatusType.STATUS_NONE) {
+                    fileList.add(status.getFile());
+                }
+            }, null);
 
-        return fileList;
+            return fileList;
         } finally {
-            log.info("destroying listAddedFiles client manager");
             svnClientManager.dispose();
         }
     }
@@ -394,7 +391,7 @@ public class SVNManager {
          * InfoHandler displays information for each entry in the console (in the manner of
          * the native Subversion command line client)
          */
-        clientManager.getWCClient().doInfo(wcPath, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.getInfinityOrEmptyDepth(isRecursive), (Collection) null, handler);
+        clientManager.getWCClient().doInfo(wcPath, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.getInfinityOrEmptyDepth(isRecursive), null, handler);
     }
 
     /*
