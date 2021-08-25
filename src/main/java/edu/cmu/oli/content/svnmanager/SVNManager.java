@@ -16,6 +16,8 @@ import org.tmatesoft.svn.core.wc2.SvnCommit;
 import org.tmatesoft.svn.core.wc2.SvnOperationFactory;
 import org.tmatesoft.svn.core.wc2.SvnTarget;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.inject.Default;
 import javax.enterprise.inject.Instance;
 import javax.inject.Inject;
@@ -24,7 +26,6 @@ import java.io.File;
 import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -41,14 +42,13 @@ public class SVNManager {
     @ConfigurationCache
     Instance<Configurations> configuration;
 
-    private static SVNClientManager clientManager;
-    private static ISVNEventHandler myCommitEventHandler;
-    private static ISVNEventHandler myUpdateEventHandler;
-    private static ISVNEventHandler myWCEventHandler;
+    private SVNClientManager clientManager;
+    private ISVNEventHandler myCommitEventHandler;
+    private ISVNEventHandler myUpdateEventHandler;
+    private ISVNEventHandler myWCEventHandler;
 
-    private static Map<String, SVNClientManager> clientManagerMap = new ConcurrentHashMap<>();
-
-    static {
+    @PostConstruct
+    private void init() {
 
         setupLibrary();
 
@@ -106,13 +106,16 @@ public class SVNManager {
         clientManager.getWCClient().setEventHandler(myWCEventHandler);
     }
 
+    @PreDestroy
+    private void destroy() {
+        clientManager.dispose();
+    }
 
-    private static void setupLibrary() {
+    private void setupLibrary() {
         /*
          * For using over http:// and https://
          */
         DAVRepositoryFactory.setup();
-
     }
 
     public void createRepository(String svnURL) throws SVNException {
@@ -120,7 +123,7 @@ public class SVNManager {
     }
 
     public SVNCommitInfo doImport(File path, String dstURL, String commitMessage) throws SVNException {
-        return clientManager.getCommitClient().doImport(path, SVNURL.parseURIEncoded(dstURL), commitMessage, (SVNProperties) null, true, true, SVNDepth.fromRecurse(true));
+        return clientManager.getCommitClient().doImport(path, SVNURL.parseURIEncoded(dstURL), commitMessage, null, true, true, SVNDepth.fromRecurse(true));
     }
 
     public SVNCommitInfo copy(String sourceURL, String dstURL, String commitMessage) throws SVNException {
@@ -327,42 +330,38 @@ public class SVNManager {
     }
 
     public List<File> listModifiedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager;
-        synchronized (clientManagerMap) {
-            svnClientManager = clientManagerMap.get(path.getAbsolutePath());
-            if (svnClientManager == null) {
-                svnClientManager = SVNClientManager.newInstance();
-                clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
-            }
+        SVNClientManager svnClientManager = SVNClientManager.newInstance();
+        try {
+            final List<File> fileList = new ArrayList<File>();
+            svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
+                SVNStatusType statusType = status.getContentsStatus();
+                if (statusType != SVNStatusType.STATUS_NONE && statusType != SVNStatusType.STATUS_NORMAL
+                        && statusType != SVNStatusType.STATUS_IGNORED) {
+                    fileList.add(status.getFile());
+                }
+            }, null);
+            return fileList;
+        } finally {
+            svnClientManager.dispose();
         }
-        final List<File> fileList = new ArrayList<File>();
-        svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
-            SVNStatusType statusType = status.getContentsStatus();
-            if (statusType != SVNStatusType.STATUS_NONE && statusType != SVNStatusType.STATUS_NORMAL
-                    && statusType != SVNStatusType.STATUS_IGNORED) {
-                fileList.add(status.getFile());
-            }
-        }, null);
-        return fileList;
     }
 
     public List<File> listAddedFiles(File path) throws SVNException {
-        SVNClientManager svnClientManager;
-        synchronized (clientManagerMap) {
-            svnClientManager = clientManagerMap.get(path.getAbsolutePath());
-            if (svnClientManager == null) {
-                svnClientManager = SVNClientManager.newInstance();
-                clientManagerMap.put(path.getAbsolutePath(), svnClientManager);
-            }
+        SVNClientManager svnClientManager = SVNClientManager.newInstance();
+        try {
+
+            final List<File> fileList = new ArrayList<>();
+            svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
+                SVNStatusType statusType = status.getContentsStatus();
+                if (statusType == SVNStatusType.STATUS_NONE) {
+                    fileList.add(status.getFile());
+                }
+            }, null);
+
+            return fileList;
+        } finally {
+            svnClientManager.dispose();
         }
-        final List<File> fileList = new ArrayList<>();
-        svnClientManager.getStatusClient().doStatus(path, SVNRevision.HEAD, SVNDepth.INFINITY, false, false, false, false, status -> {
-            SVNStatusType statusType = status.getContentsStatus();
-            if (statusType == SVNStatusType.STATUS_NONE) {
-                fileList.add(status.getFile());
-            }
-        }, null);
-        return fileList;
     }
 
     /*
@@ -392,7 +391,7 @@ public class SVNManager {
          * InfoHandler displays information for each entry in the console (in the manner of
          * the native Subversion command line client)
          */
-        clientManager.getWCClient().doInfo(wcPath, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.getInfinityOrEmptyDepth(isRecursive), (Collection) null, handler);
+        clientManager.getWCClient().doInfo(wcPath, SVNRevision.UNDEFINED, SVNRevision.WORKING, SVNDepth.getInfinityOrEmptyDepth(isRecursive), null, handler);
     }
 
     /*
