@@ -22,10 +22,13 @@ import org.jdom2.DocType;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
+import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateful;
@@ -457,6 +460,30 @@ public class XmlToContentPackage {
                 } catch (Exception e) {}
 
             }
+        }
+        // End of hack
+
+        // Hack to move objective references from the body tag to the head tag
+        if(rsrc.getType().equalsIgnoreCase("x-oli-workbook_page")) {
+            SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);;
+            builder.setExpandEntities(false);
+            try {
+                Document document = builder.build(new StringReader(fileString.trim()));
+                String query = "/workbook_page/body/objref";
+                XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
+                List<Element> kids = xexpression.evaluate(document);
+                if(!kids.isEmpty()) {
+                    Element header = document.getRootElement().getChild("head");
+                    for(Element kid: kids){
+                        header.addContent(kid.detach());
+                    }
+                    Format format = Format.getPrettyFormat();
+                    format.setIndent("\t");
+                    format.setTextMode(Format.TextMode.PRESERVE);
+                    fileString = new XMLOutputter(format).outputString(document);
+                    Files.write(file, fileString.getBytes());
+                }
+            } catch (Exception e) {}
         }
         // End of hack
 
