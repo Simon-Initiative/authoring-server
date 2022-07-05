@@ -1,10 +1,12 @@
 package edu.cmu.oli.content.boundary;
 
 import edu.cmu.oli.content.analytics.DatasetBuilder;
+import edu.cmu.oli.content.contentfiles.readers.A2ToJsonTest;
 import org.jdom2.JDOMException;
 import org.junit.Test;
 
 import java.io.IOException;
+import java.net.URL;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.text.DateFormat;
