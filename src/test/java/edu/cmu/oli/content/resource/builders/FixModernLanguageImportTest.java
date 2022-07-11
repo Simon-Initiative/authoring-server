@@ -40,6 +40,7 @@ public class FixModernLanguageImportTest {
             "<assessment xmlns:cmd=\"http://oli.web.cmu.edu/content/metadata/2.1/\"\n" +
             "    id=\"all_a2aaf4985d67bb40a6834d60f8baae118e\" recommended_attempts=\"3\" max_attempts=\"3\">\n" +
             "    <title>all_a2</title>\n" +
+            "    <introduction><p>Some introductory content</p> <p>More introductory content</p></introduction>\n" +
             "    <page id=\"fc7875e688b842ef9e362313459e68a2\">\n" +
             "        <title>Page 1</title>\n" +
             "        <content available=\"always\">\n" +
@@ -227,6 +228,18 @@ public class FixModernLanguageImportTest {
                 List<Element> kids = xexpression.evaluate(document);
                 for (Element el : kids) {
                     if (el.getName().equalsIgnoreCase("introduction")) {
+                        Element firstPage = rootElement.getChild("page");
+                        if (firstPage != null) {
+                            Element firstPageContent = firstPage.getChild("content");
+                            if (firstPageContent == null) {
+                                firstPageContent = new Element("content");
+                                firstPage.addContent(firstPage.indexOf(firstPage.getChild("title")) + 1, firstPageContent);
+                            }
+                            List<Element> contents = el.getChildren();
+                            for (Element content : contents) {
+                                firstPageContent.addContent(contents.indexOf(content), content.clone());
+                            }
+                        }
                         el.detach();
                     }
 
@@ -267,10 +280,13 @@ public class FixModernLanguageImportTest {
                 Format format = Format.getPrettyFormat();
                 format.setIndent("\t");
                 format.setTextMode(Format.TextMode.PRESERVE);
+                System.out.println("What is up ----- \n" + new XMLOutputter(format).outputString(document));
                 query = "//question";
                 xexpression = XPathFactory.instance().compile(query, Filters.element());
                 assertEquals(xexpression.evaluate(document).size(), 8);
             }
-        } catch (Exception e) {}
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
