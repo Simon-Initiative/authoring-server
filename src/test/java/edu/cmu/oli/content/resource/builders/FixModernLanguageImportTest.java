@@ -277,9 +277,6 @@ public class FixModernLanguageImportTest {
                     }
                 }
             }
-            Format format = Format.getPrettyFormat();
-            format.setIndent("\t");
-            format.setTextMode(Format.TextMode.PRESERVE);
             query = "//question";
             xexpression = XPathFactory.instance().compile(query, Filters.element());
             assertEquals(xexpression.evaluate(document).size(), 8);
