@@ -509,6 +509,19 @@ public class XmlToContentPackage {
                     List<Element> kids = xexpression.evaluate(document);
                     for (Element el : kids) {
                         if (el.getName().equalsIgnoreCase("introduction")) {
+                            // Preserve the introductory material as part of first page content
+                            Element firstPage = rootElement.getChild("page");
+                            if(firstPage != null) {
+                                Element firstPageContent = firstPage.getChild("content");
+                                if (firstPageContent == null) {
+                                    firstPageContent = new Element("content");
+                                    firstPage.addContent(firstPage.indexOf(firstPage.getChild("title")) + 1, firstPageContent);
+                                }
+                                List<Element> contents = el.getChildren();
+                                for (Element content : contents) {
+                                    firstPageContent.addContent(contents.indexOf(content), content.clone());
+                                }
+                            }
                             el.detach();
                         }
 
