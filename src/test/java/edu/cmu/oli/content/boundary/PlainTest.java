@@ -37,11 +37,11 @@ public class PlainTest {
         String encryptedString = convertByteArrayToHexString(messageDigest.digest());
         System.out.println("After sorting ints: " + encryptedString);
 
-//        System.out.println("Time zones in GMT:");
-//        List<String> gmt = getTimeZoneList(OffsetBase.GMT);
-//        for (String timeZone : gmt) {
-//            System.out.println(timeZone);
-//        }
+        System.out.println("Time zones in GMT:");
+        List<String> gmt = getTimeZoneList(OffsetBase.GMT);
+        for (String timeZone : gmt) {
+            System.out.println(timeZone);
+        }
     }
 
     private static String convertByteArrayToHexString(byte[] arrayBytes) {

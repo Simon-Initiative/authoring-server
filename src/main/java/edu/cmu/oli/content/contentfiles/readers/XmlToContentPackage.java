@@ -484,7 +484,7 @@ public class XmlToContentPackage {
         }
         // End of hack
 
-        // This is a hack to fix pool doctype definition error
+        // This is a hack to fix A2's used as inlines assessments problem. It converts the A2's into inlines
         if(rsrc.getType().equalsIgnoreCase("x-oli-inline-assessment")) {
             SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);;
             builder.setExpandEntities(false);
