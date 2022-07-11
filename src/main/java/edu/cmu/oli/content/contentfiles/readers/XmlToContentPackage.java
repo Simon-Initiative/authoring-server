@@ -18,14 +18,14 @@ import edu.cmu.oli.content.resource.validators.ResourceValidator;
 import edu.cmu.oli.content.security.AppSecurityController;
 import edu.cmu.oli.content.security.Scopes;
 import edu.cmu.oli.content.security.Secure;
-import org.jdom2.DocType;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
+import org.jdom2.*;
+import org.jdom2.filter.Filters;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.input.sax.XMLReaders;
 import org.jdom2.output.Format;
 import org.jdom2.output.XMLOutputter;
+import org.jdom2.xpath.XPathExpression;
+import org.jdom2.xpath.XPathFactory;
 import org.slf4j.Logger;
 
 import javax.ejb.Stateful;
@@ -457,6 +457,102 @@ public class XmlToContentPackage {
                 } catch (Exception e) {}
 
             }
+        }
+        // End of hack
+
+        // Hack to move objective references from the body tag to the head tag
+        if(rsrc.getType().equalsIgnoreCase("x-oli-workbook_page")) {
+            SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);;
+            builder.setExpandEntities(false);
+            try {
+                Document document = builder.build(new StringReader(fileString.trim()));
+                String query = "/workbook_page/body/objref";
+                XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
+                List<Element> kids = xexpression.evaluate(document);
+                if(!kids.isEmpty()) {
+                    Element header = document.getRootElement().getChild("head");
+                    for(Element kid: kids){
+                        header.addContent(kid.detach());
+                    }
+                    Format format = Format.getPrettyFormat();
+                    format.setIndent("\t");
+                    format.setTextMode(Format.TextMode.PRESERVE);
+                    fileString = new XMLOutputter(format).outputString(document);
+                    Files.write(file, fileString.getBytes());
+                }
+            } catch (Exception e) {}
+        }
+        // End of hack
+
+        // This is a hack to fix A2's used as inlines assessments problem. It converts the A2's into inlines
+        if(rsrc.getType().equalsIgnoreCase("x-oli-inline-assessment")) {
+            SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);;
+            builder.setExpandEntities(false);
+            try {
+                Document document = builder.build(new StringReader(fileString.trim()));
+                DocType docType = document.getDocType();
+                if(docType.getSystemID().contains("oli_assessment_")) {
+                    Assessment2Transform a2Transform = new Assessment2Transform();
+                    a2Transform.transformToUnified(document.getRootElement());
+                    docType = new DocType("assessment",
+                            "-//Carnegie Mellon University//DTD Inline Assessment MathML 1.4//EN",
+                            "http://oli.cmu.edu/dtd/oli_inline_assessment_mathml_1_4.dtd");
+                    document.setDocType(docType);
+                    Element rootElement = document.getRootElement();
+                    rootElement.removeAttribute("recommended_attempts");
+                    rootElement.removeAttribute("max_attempts");
+                    XPathExpression<Element> questionTypes = XPathFactory.instance().compile(
+                            "//multiple_choice | //text | //fill_in_the_blank | //numeric | //essay | //short_answer | //image_hotspot | //ordering",
+                            Filters.element());
+                    String query = "//question | //introduction";
+                    XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
+                    List<Element> kids = xexpression.evaluate(document);
+                    for (Element el : kids) {
+                        if (el.getName().equalsIgnoreCase("introduction")) {
+                            el.detach();
+                        }
+
+                        if (el.getName().equalsIgnoreCase("question")) {
+                            List<Element> qt = questionTypes.evaluate(el);
+                            qt.forEach(qel -> {
+                                if (qel.getName().equalsIgnoreCase("essay")) {
+                                    qel.setName("short_answer");
+                                }
+                            });
+                            List<String> ats = el.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList());
+
+                            ats.forEach(at -> {
+                                if(!at.equalsIgnoreCase("id")){
+                                    Attribute atr = el.getAttribute(at);
+                                    qt.forEach(e -> {
+                                        if(e.getName().equalsIgnoreCase("text")) {
+                                            if (!at.equalsIgnoreCase("grading")) {
+                                                e.setAttribute(atr.getName(), atr.getValue());
+                                            }
+                                        }
+                                    });
+                                    atr.detach();
+                                }
+                            });
+
+                            Attribute cs = el.getAttribute("case_sensitive");
+                            if(cs != null) {
+                                cs.detach();
+                                qt.forEach(e -> {
+                                    if(e.getName().equalsIgnoreCase("text")) {
+                                        e.setAttribute(cs.getName(), cs.getValue());
+                                    }
+                                });
+                            }
+                        }
+                    }
+                    Format format = Format.getPrettyFormat();
+                    format.setIndent("\t");
+                    format.setTextMode(Format.TextMode.PRESERVE);
+                    fileString = new XMLOutputter(format).outputString(document);
+                    Files.write(file, fileString.getBytes());
+                }
+            } catch (Exception e) {}
         }
         // End of hack
 
