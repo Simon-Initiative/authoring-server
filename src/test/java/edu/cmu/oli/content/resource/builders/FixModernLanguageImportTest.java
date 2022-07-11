@@ -184,6 +184,7 @@ public class FixModernLanguageImportTest {
             "        </fill_in_the_blank>\n" +
             "    </page>\n" +
             "</assessment>\n";
+
     @Test
     public void moveObjrefToHeader() throws JDOMException, IOException {
         SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);
@@ -205,88 +206,83 @@ public class FixModernLanguageImportTest {
 
     @Test
     public void transformA2ToInline() throws JDOMException, IOException {
-        SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);;
+        SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);
         builder.setExpandEntities(false);
-        try {
-            Document document = builder.build(new StringReader(a2ToIn.trim()));
-            DocType docType = document.getDocType();
-            if(docType.getSystemID().contains("oli_assessment_")) {
-                Assessment2Transform a2Transform = new Assessment2Transform();
-                a2Transform.transformToUnified(document.getRootElement());
-                docType = new DocType("assessment",
-                        "-//Carnegie Mellon University//DTD Inline Assessment MathML 1.4//EN",
-                        "http://oli.cmu.edu/dtd/oli_inline_assessment_mathml_1_4.dtd");
-                document.setDocType(docType);
-                Element rootElement = document.getRootElement();
-                rootElement.removeAttribute("recommended_attempts");
-                rootElement.removeAttribute("max_attempts");
-                XPathExpression<Element> questionTypes = XPathFactory.instance().compile(
-                        "//multiple_choice | //text | //fill_in_the_blank | //numeric | //essay | //short_answer | //image_hotspot | //ordering",
-                        Filters.element());
-                String query = "//question | //introduction";
-                XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
-                List<Element> kids = xexpression.evaluate(document);
-                for (Element el : kids) {
-                    if (el.getName().equalsIgnoreCase("introduction")) {
-                        Element firstPage = rootElement.getChild("page");
-                        if (firstPage != null) {
-                            Element firstPageContent = firstPage.getChild("content");
-                            if (firstPageContent == null) {
-                                firstPageContent = new Element("content");
-                                firstPage.addContent(firstPage.indexOf(firstPage.getChild("title")) + 1, firstPageContent);
-                            }
-                            List<Element> contents = el.getChildren();
-                            for (Element content : contents) {
-                                firstPageContent.addContent(contents.indexOf(content), content.clone());
-                            }
+        Document document = builder.build(new StringReader(a2ToIn.trim()));
+        DocType docType = document.getDocType();
+        if (docType.getSystemID().contains("oli_assessment_")) {
+            Assessment2Transform a2Transform = new Assessment2Transform();
+            a2Transform.transformToUnified(document.getRootElement());
+            docType = new DocType("assessment",
+                    "-//Carnegie Mellon University//DTD Inline Assessment MathML 1.4//EN",
+                    "http://oli.cmu.edu/dtd/oli_inline_assessment_mathml_1_4.dtd");
+            document.setDocType(docType);
+            Element rootElement = document.getRootElement();
+            rootElement.removeAttribute("recommended_attempts");
+            rootElement.removeAttribute("max_attempts");
+            XPathExpression<Element> questionTypes = XPathFactory.instance().compile(
+                    "//multiple_choice | //text | //fill_in_the_blank | //numeric | //essay | //short_answer | //image_hotspot | //ordering",
+                    Filters.element());
+            String query = "//question | //introduction";
+            XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
+            List<Element> kids = xexpression.evaluate(document);
+            for (Element el : kids) {
+                if (el.getName().equalsIgnoreCase("introduction")) {
+                    Element firstPage = rootElement.getChild("page");
+                    if (firstPage != null) {
+                        Element firstPageContent = firstPage.getChild("content");
+                        if (firstPageContent == null) {
+                            firstPageContent = new Element("content");
+                            firstPage.addContent(firstPage.indexOf(firstPage.getChild("title")) + 1, firstPageContent);
                         }
-                        el.detach();
+                        List<Element> contents = el.getChildren();
+                        for (Element content : contents) {
+                            firstPageContent.addContent(contents.indexOf(content), content.clone());
+                        }
                     }
+                    el.detach();
+                }
 
-                    if (el.getName().equalsIgnoreCase("question")) {
-                        List<Element> qt = questionTypes.evaluate(el);
-                        qt.forEach(qel -> {
-                            if (qel.getName().equalsIgnoreCase("essay")) {
-                                qel.setName("short_answer");
-                            }
-                        });
-                        List<String> ats = el.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList());
+                if (el.getName().equalsIgnoreCase("question")) {
+                    List<Element> qt = questionTypes.evaluate(el);
+                    qt.forEach(qel -> {
+                        if (qel.getName().equalsIgnoreCase("essay")) {
+                            qel.setName("short_answer");
+                        }
+                    });
+                    List<String> ats = el.getAttributes().stream().map(Attribute::getName).collect(Collectors.toList());
 
-                        ats.forEach(at -> {
-                            if(!at.equalsIgnoreCase("id")){
-                                Attribute atr = el.getAttribute(at);
-                                qt.forEach(e -> {
-                                    if(e.getName().equalsIgnoreCase("text")) {
-                                        if (!at.equalsIgnoreCase("grading")) {
-                                            e.setAttribute(atr.getName(), atr.getValue());
-                                        }
-                                    }
-                                });
-                                atr.detach();
-                            }
-                        });
-
-                        Attribute cs = el.getAttribute("case_sensitive");
-                        if(cs != null) {
-                            cs.detach();
+                    ats.forEach(at -> {
+                        if (!at.equalsIgnoreCase("id")) {
+                            Attribute atr = el.getAttribute(at);
                             qt.forEach(e -> {
-                                if(e.getName().equalsIgnoreCase("text")) {
-                                    e.setAttribute(cs.getName(), cs.getValue());
+                                if (e.getName().equalsIgnoreCase("text")) {
+                                    if (!at.equalsIgnoreCase("grading")) {
+                                        e.setAttribute(atr.getName(), atr.getValue());
+                                    }
                                 }
                             });
+                            atr.detach();
                         }
+                    });
+
+                    Attribute cs = el.getAttribute("case_sensitive");
+                    if (cs != null) {
+                        cs.detach();
+                        qt.forEach(e -> {
+                            if (e.getName().equalsIgnoreCase("text")) {
+                                e.setAttribute(cs.getName(), cs.getValue());
+                            }
+                        });
                     }
                 }
-                Format format = Format.getPrettyFormat();
-                format.setIndent("\t");
-                format.setTextMode(Format.TextMode.PRESERVE);
-                System.out.println("What is up ----- \n" + new XMLOutputter(format).outputString(document));
-                query = "//question";
-                xexpression = XPathFactory.instance().compile(query, Filters.element());
-                assertEquals(xexpression.evaluate(document).size(), 8);
             }
-        } catch (Exception e) {
-            e.printStackTrace();
+            Format format = Format.getPrettyFormat();
+            format.setIndent("\t");
+            format.setTextMode(Format.TextMode.PRESERVE);
+            query = "//question";
+            xexpression = XPathFactory.instance().compile(query, Filters.element());
+            assertEquals(xexpression.evaluate(document).size(), 8);
         }
     }
 }
