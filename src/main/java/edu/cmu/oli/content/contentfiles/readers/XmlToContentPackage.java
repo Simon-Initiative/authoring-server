@@ -436,6 +436,32 @@ public class XmlToContentPackage {
         JsonObject resourceTypeDef = this.config.get().getResourceTypeById(rsrc.getType());
         boolean jsonCapable = resourceTypeDef.get("jsonCapable").getAsBoolean();
 
+        // Bug-fix: editor dropping media elements wrapped in p tags. This is a hack to move media elements out of p tags.
+        SAXBuilder build = new SAXBuilder(XMLReaders.NONVALIDATING);;
+        build.setExpandEntities(false);
+        try {
+            Document document = build.build(new StringReader(fileString.trim()));
+            String query = "//video | //audio";
+            XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
+            List<Element> kids = xexpression.evaluate(document);
+            if(!kids.isEmpty()) {
+                for(Element kid: kids){
+                    Element parent = (Element) kid.getParent();
+                    if((parent).getName().equalsIgnoreCase("p")){
+                        kid.detach();
+                        Element topParent = (Element) parent.getParent();
+                        topParent.addContent(topParent.indexOf(parent) + 1, kid);
+                    }
+                }
+                Format format = Format.getPrettyFormat();
+                format.setIndent("\t");
+                format.setTextMode(Format.TextMode.PRESERVE);
+                fileString = new XMLOutputter(format).outputString(document);
+                Files.write(file, fileString.getBytes());
+            }
+        } catch (Exception e) {}
+        // End of hack
+
         // This is a hack to fix pool doctype definition error
         if(rsrc.getType().equalsIgnoreCase("x-oli-assessment2-pool")) {
             if (resourceTypeDef.has("PUBLIC_ID") && resourceTypeDef.has("SYSTEM_ID")) {
