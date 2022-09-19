@@ -31,7 +31,8 @@ public class FixModernLanguageImportTest {
             "        <objref idref=\"RecogSpoken_COBJ\"/>\n" +
             "        <objref  idref=\"F1_00_GreetingsFormal_LOBJ\"/>\n" +
             "        <objref idref=\"F1L1S2_1_OBJ\"/>\n" +
-            "        <p>page content</p>\n" +
+            "        <p><audio src=\"../webcontent/F1L2s455.mp3\" type=\"audio/mp3\" controls=\"false\"/> page content</p>\n" +
+            "        <p><video width=\"sd\" height=\"\"></video></p>\n" +
             "    </body>\n" +
             "</workbook_page>\n";
 
@@ -202,6 +203,28 @@ public class FixModernLanguageImportTest {
         query = "/workbook_page/head/objref";
         xexpression = XPathFactory.instance().compile(query, Filters.element());
         assertEquals(xexpression.evaluate(document).size(), 3);
+    }
+
+    @Test
+    public void moveMediaToBlockLevel() throws JDOMException, IOException {
+        SAXBuilder builder = new SAXBuilder(XMLReaders.NONVALIDATING);;
+        builder.setExpandEntities(false);
+        Document document = builder.build(new StringReader(fileString.trim()));
+        assertEquals(document.getRootElement().getChild("body").getContentSize(), 11);
+        String query = "//video | //audio";
+        XPathExpression<Element> xexpression = XPathFactory.instance().compile(query, Filters.element());
+        List<Element> kids = xexpression.evaluate(document);
+        if (!kids.isEmpty()) {
+            for (Element kid: kids) {
+                Element parent = (Element) kid.getParent();
+                if((parent).getName().equalsIgnoreCase("p")){
+                    kid.detach();
+                    Element topParent = (Element) parent.getParent();
+                    topParent.addContent(topParent.indexOf(parent) + 1, kid);
+                }
+            }
+        }
+        assertEquals(document.getRootElement().getChild("body").getContentSize(), 13);
     }
 
     @Test
